@@ -53,9 +53,8 @@ const saveFile = async (
   pto.name = pto.name.replace(/[\W_]+/gi, "-");
   to = format(pto);
 
-  if (await existsAsync(dirname(to))) {
-    dirAsync(dirname(to));
-  }
+  const fullPath = dir(`${g.datadir}/files/${to}`);
+  await dirAsync(dirname(fullPath));
 
   while (await Bun.file(dir(`${g.datadir}/files/${to}`)).exists()) {
     const p = parse(to);
