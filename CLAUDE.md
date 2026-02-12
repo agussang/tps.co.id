@@ -134,31 +134,49 @@ The backend uses Ubuntu base with pm2-runtime for production. See `tps-core/tps/
 - **Upload files**: `/opt/tps-data/uploads/` (host) → `/data/files/` (container)
 - **Port**: 3300
 
-### Manual Deploy to Server
+### Deploy Workflow
 
-Source code is NOT volume-mounted — it's baked into the Docker image. To hotfix:
+Source code di-mount sebagai volume dari host ke container. Deploy cukup rsync + restart.
 
 ```bash
-# 1. SCP files to host
-scp <local-file> root@172.19.154.93:/opt/tps-app/<path>
+# Full deploy (sync + restart)
+./deploy.sh
 
-# 2. Copy into running container
-ssh root@172.19.154.93 "docker cp /opt/tps-app/<path> tps-app:/app/<path>"
+# Sync only + clear cache (tanpa restart, untuk perubahan ringan)
+./deploy.sh --sync-only
 
-# 3. Restart container
-ssh root@172.19.154.93 "docker restart tps-app"
-
-# 4. Verify health
-ssh root@172.19.154.93 "docker ps --filter name=tps-app --format '{{.Status}}'"
+# Restart container only
+./deploy.sh --restart
 ```
+
+**Apa yang dilakukan `deploy.sh`:**
+1. `rsync` 4 direktori source code ke server
+2. `docker restart tps-app`
+3. Health check + smoke test homepage
+
+**PENTING:**
+- Server tidak punya akses internet/GitHub — deploy hanya bisa dari local via SSH
+- `node_modules` tetap dari Docker image, tidak perlu install di host
+- Untuk update dependencies, perlu `docker compose build` + `docker compose up -d`
 
 ### Docker Volumes (docker-compose.yml)
 
 ```yaml
 volumes:
-  - /opt/tps-data/uploads:/data/files        # File uploads
-  - /opt/tps-data/logs:/app/logs             # Application logs
-  - /opt/tps-app/app/db/.env:/app/app/db/.env:ro  # DB connection (read-only)
+  # Source code (synced via deploy.sh, langsung dipakai container)
+  - /opt/tps-app/pkgs:/app/pkgs                    # Server framework
+  - /opt/tps-app/app/srv:/app/app/srv               # SSR API & components
+  - /opt/tps-app/app/db:/app/app/db                 # Prisma schema & config
+  - /opt/tps-app/app/web/deploy:/app/app/web/deploy # Prasi bundles
+  # Data
+  - /opt/tps-data/uploads:/data/files               # File uploads
+  - /opt/tps-data/logs:/app/logs                    # Application logs
+```
+
+### Rebuild Docker Image (jika update dependencies)
+
+```bash
+ssh root@172.19.154.93 "cd /opt/tps-app && docker compose build --no-cache && docker compose up -d"
 ```
 
 ## Prasi Bundle System
