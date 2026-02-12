@@ -1,6 +1,7 @@
 /**
  * ImageGallery Component
- * Responsive image grid dengan lightbox
+ * Responsive image grid with lightbox
+ * IMPORTANT: Uses ONLY inline styles (no Tailwind) to avoid Prasi CSS conflicts
  */
 
 import { escapeHtml, img } from '../html';
@@ -32,73 +33,66 @@ export function ImageGallery({
 }: ImageGalleryProps): string {
   if (!images || images.length === 0) return '';
 
-  const columnClasses: Record<number, string> = {
-    2: 'grid-cols-1 md:grid-cols-2',
-    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
-  };
-
-  const gapClasses: Record<string, string> = {
-    small: 'gap-2',
-    medium: 'gap-4',
-    large: 'gap-6',
-  };
-
-  const aspectClasses: Record<string, string> = {
-    square: 'aspect-square',
-    video: 'aspect-video',
-    portrait: 'aspect-[3/4]',
+  const bgColors: Record<string, string> = { white: '#ffffff', gray: '#f9fafb' };
+  const gaps: Record<string, string> = { small: '0.5rem', medium: '1rem', large: '1.5rem' };
+  const aspectPaddings: Record<string, string> = {
+    square: '100%',
+    video: '56.25%',
+    portrait: '133.33%',
     auto: '',
   };
 
-  const bgClasses: Record<string, string> = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-  };
-
   const galleryId = `gallery-${Math.random().toString(36).substr(2, 9)}`;
+  const imagesJson = JSON.stringify(images.map(i => ({ src: img(i.image), caption: i.caption || '' })));
 
   return `
-    <section class="gallery-section py-12 lg:py-20 ${bgClasses[background]} section-animate">
-      <div class="max-w-[1100px] mx-auto px-4">
+    <section style="padding: 3rem 1rem; background: ${bgColors[background]};">
+      <div style="max-width: 1100px; margin: 0 auto;">
         ${title || subtitle ? `
-          <div class="text-center mb-10">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
             ${subtitle ? `
-              <span class="inline-block px-3 py-1 mb-3 text-sm font-medium text-[#0475BC] bg-[#0475BC]/10 rounded-full">
+              <span style="display: inline-block; padding: 0.25rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 500; color: #0475BC; background: rgba(4,117,188,0.1); border-radius: 9999px;">
                 ${escapeHtml(subtitle)}
               </span>
             ` : ''}
             ${title ? `
-              <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+              <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0;">
                 ${escapeHtml(title)}
               </h2>
             ` : ''}
           </div>
         ` : ''}
 
-        <div class="grid ${columnClasses[columns]} ${gapClasses[gap]}">
+        <div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: ${gaps[gap]};">
           ${images.map((item, index) => `
-            <div class="gallery-item group relative overflow-hidden rounded-lg cursor-pointer"
-                 onclick="openLightbox('${galleryId}', ${index})">
-              <div class="${aspectClasses[aspectRatio]} ${aspectRatio === 'auto' ? '' : 'relative'}">
+            <div
+              style="position: relative; overflow: hidden; border-radius: 0.5rem; cursor: pointer;"
+              onclick="window.__openLightbox && window.__openLightbox('${galleryId}', ${index})"
+            >
+              ${aspectRatio !== 'auto' ? `
+                <div style="position: relative; padding-top: ${aspectPaddings[aspectRatio]};">
+                  <img
+                    src="${img(item.image)}"
+                    alt="${escapeHtml(item.alt || item.caption || `Image ${index + 1}`)}"
+                    style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
+                    loading="lazy"
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                  />
+                </div>
+              ` : `
                 <img
                   src="${img(item.image)}"
                   alt="${escapeHtml(item.alt || item.caption || `Image ${index + 1}`)}"
-                  class="${aspectRatio === 'auto' ? 'w-full h-auto' : 'absolute inset-0 w-full h-full object-cover'} transition-transform duration-300 group-hover:scale-105"
+                  style="width: 100%; height: auto; transition: transform 0.3s;"
                   loading="lazy"
+                  onmouseover="this.style.transform='scale(1.05)'"
+                  onmouseout="this.style.transform='scale(1)'"
                 />
-              </div>
-
-              <!-- Overlay on hover -->
-              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                <svg class="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                </svg>
-              </div>
-
+              `}
               ${item.caption ? `
-                <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                  <p class="text-sm text-white">${escapeHtml(item.caption)}</p>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.75rem; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
+                  <p style="font-size: 0.875rem; color: #fff; margin: 0;">${escapeHtml(item.caption)}</p>
                 </div>
               ` : ''}
             </div>
@@ -107,85 +101,76 @@ export function ImageGallery({
       </div>
 
       <!-- Lightbox Modal -->
-      <div id="${galleryId}-lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90" onclick="closeLightbox('${galleryId}')">
-        <button class="absolute top-4 right-4 text-white hover:text-gray-300 z-10" onclick="closeLightbox('${galleryId}')">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div id="${galleryId}-lightbox" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;" onclick="window.__closeLightbox && window.__closeLightbox('${galleryId}')">
+        <button style="position: absolute; top: 1rem; right: 1rem; color: #fff; background: none; border: none; cursor: pointer; z-index: 10; padding: 0.5rem;" onclick="window.__closeLightbox && window.__closeLightbox('${galleryId}')">
+          <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
 
-        <button class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10 p-2" onclick="event.stopPropagation(); prevImage('${galleryId}')">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #fff; background: none; border: none; cursor: pointer; z-index: 10; padding: 0.5rem;" onclick="event.stopPropagation(); window.__prevImage && window.__prevImage('${galleryId}')">
+          <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
 
-        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10 p-2" onclick="event.stopPropagation(); nextImage('${galleryId}')">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #fff; background: none; border: none; cursor: pointer; z-index: 10; padding: 0.5rem;" onclick="event.stopPropagation(); window.__nextImage && window.__nextImage('${galleryId}')">
+          <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
 
-        <div class="max-w-5xl max-h-[90vh] p-4" onclick="event.stopPropagation()">
-          <img id="${galleryId}-lightbox-img" src="" alt="" class="max-w-full max-h-[80vh] object-contain mx-auto" />
-          <p id="${galleryId}-lightbox-caption" class="text-center text-white mt-4"></p>
+        <div style="max-width: 64rem; max-height: 90vh; padding: 1rem;" onclick="event.stopPropagation()">
+          <img id="${galleryId}-lightbox-img" src="" alt="" style="max-width: 100%; max-height: 80vh; object-fit: contain; margin: 0 auto; display: block;" />
+          <p id="${galleryId}-lightbox-caption" style="text-align: center; color: #fff; margin-top: 1rem;"></p>
         </div>
       </div>
 
       <script>
         (function() {
-          const galleryId = '${galleryId}';
-          const images = ${JSON.stringify(images.map(i => ({ src: img(i.image), caption: i.caption || '' })))};
-          let currentIndex = 0;
+          var gid = '${galleryId}';
+          var images = ${imagesJson};
+          var currentIndex = 0;
 
-          window.openLightbox = function(id, index) {
-            if (id !== galleryId) return;
+          window.__openLightbox = function(id, index) {
+            if (id !== gid) return;
             currentIndex = index;
-            const lightbox = document.getElementById(id + '-lightbox');
-            const imgEl = document.getElementById(id + '-lightbox-img');
-            const captionEl = document.getElementById(id + '-lightbox-caption');
-
+            var lb = document.getElementById(id + '-lightbox');
+            var imgEl = document.getElementById(id + '-lightbox-img');
+            var capEl = document.getElementById(id + '-lightbox-caption');
             imgEl.src = images[index].src;
-            captionEl.textContent = images[index].caption;
-            lightbox.classList.remove('hidden');
-            lightbox.classList.add('flex');
+            capEl.textContent = images[index].caption;
+            lb.style.display = 'flex';
             document.body.style.overflow = 'hidden';
           };
 
-          window.closeLightbox = function(id) {
-            if (id !== galleryId) return;
-            const lightbox = document.getElementById(id + '-lightbox');
-            lightbox.classList.add('hidden');
-            lightbox.classList.remove('flex');
+          window.__closeLightbox = function(id) {
+            if (id !== gid) return;
+            var lb = document.getElementById(id + '-lightbox');
+            lb.style.display = 'none';
             document.body.style.overflow = '';
           };
 
-          window.prevImage = function(id) {
-            if (id !== galleryId) return;
+          window.__prevImage = function(id) {
+            if (id !== gid) return;
             currentIndex = (currentIndex - 1 + images.length) % images.length;
-            const imgEl = document.getElementById(id + '-lightbox-img');
-            const captionEl = document.getElementById(id + '-lightbox-caption');
-            imgEl.src = images[currentIndex].src;
-            captionEl.textContent = images[currentIndex].caption;
+            document.getElementById(id + '-lightbox-img').src = images[currentIndex].src;
+            document.getElementById(id + '-lightbox-caption').textContent = images[currentIndex].caption;
           };
 
-          window.nextImage = function(id) {
-            if (id !== galleryId) return;
+          window.__nextImage = function(id) {
+            if (id !== gid) return;
             currentIndex = (currentIndex + 1) % images.length;
-            const imgEl = document.getElementById(id + '-lightbox-img');
-            const captionEl = document.getElementById(id + '-lightbox-caption');
-            imgEl.src = images[currentIndex].src;
-            captionEl.textContent = images[currentIndex].caption;
+            document.getElementById(id + '-lightbox-img').src = images[currentIndex].src;
+            document.getElementById(id + '-lightbox-caption').textContent = images[currentIndex].caption;
           };
 
-          // Keyboard navigation
           document.addEventListener('keydown', function(e) {
-            const lightbox = document.getElementById(galleryId + '-lightbox');
-            if (lightbox.classList.contains('hidden')) return;
-
-            if (e.key === 'Escape') closeLightbox(galleryId);
-            if (e.key === 'ArrowLeft') prevImage(galleryId);
-            if (e.key === 'ArrowRight') nextImage(galleryId);
+            var lb = document.getElementById(gid + '-lightbox');
+            if (lb.style.display === 'none') return;
+            if (e.key === 'Escape') window.__closeLightbox(gid);
+            if (e.key === 'ArrowLeft') window.__prevImage(gid);
+            if (e.key === 'ArrowRight') window.__nextImage(gid);
           });
         })();
       </script>

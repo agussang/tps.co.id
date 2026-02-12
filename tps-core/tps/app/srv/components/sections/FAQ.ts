@@ -1,6 +1,7 @@
 /**
  * FAQ Component
  * Accordion FAQ section
+ * IMPORTANT: Uses ONLY inline styles (no Tailwind) to avoid Prasi CSS conflicts
  */
 
 import { escapeHtml } from '../html';
@@ -27,14 +28,9 @@ export function FAQ({
 }: FAQProps): string {
   if (!items || items.length === 0) return '';
 
-  const bgClasses: Record<string, string> = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-  };
-
+  const bgColors: Record<string, string> = { white: '#ffffff', gray: '#f9fafb' };
   const faqId = `faq-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Split items into columns if columns = 2
   const midpoint = Math.ceil(items.length / 2);
   const col1Items = columns === 2 ? items.slice(0, midpoint) : items;
   const col2Items = columns === 2 ? items.slice(midpoint) : [];
@@ -42,23 +38,21 @@ export function FAQ({
   const renderFAQItem = (item: FAQItem, index: number, colOffset: number = 0) => {
     const itemId = `${faqId}-${colOffset + index}`;
     return `
-      <div class="faq-item border-b border-gray-200">
+      <div style="border-bottom: 1px solid #e5e7eb;">
         <button
           type="button"
-          class="faq-toggle w-full py-5 flex items-center justify-between text-left"
-          onclick="toggleFAQ('${itemId}')"
-          aria-expanded="false"
-          aria-controls="${itemId}-content"
+          style="width: 100%; padding: 1.25rem 0; display: flex; align-items: center; justify-content: space-between; text-align: left; background: none; border: none; cursor: pointer;"
+          onclick="window.__toggleFAQ && window.__toggleFAQ('${itemId}')"
         >
-          <span class="text-[16px] font-semibold text-gray-900 pr-4">
+          <span style="font-size: 1rem; font-weight: 600; color: #111827; padding-right: 1rem;">
             ${escapeHtml(item.question)}
           </span>
-          <svg id="${itemId}-icon" class="w-5 h-5 text-[#0475BC] flex-shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg id="${itemId}-icon" style="width: 1.25rem; height: 1.25rem; color: #0475BC; flex-shrink: 0; transition: transform 0.2s;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
-        <div id="${itemId}-content" class="faq-content hidden pb-5">
-          <div class="text-[15px] text-gray-600 leading-relaxed prose max-w-none">
+        <div id="${itemId}-content" style="display: none; padding-bottom: 1.25rem;">
+          <div style="font-size: 0.9375rem; color: #4b5563; line-height: 1.75;">
             ${item.answer}
           </div>
         </div>
@@ -66,53 +60,46 @@ export function FAQ({
     `;
   };
 
+  const columnStyle = columns === 2
+    ? 'display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.5rem;'
+    : 'max-width: 48rem; margin: 0 auto;';
+
   return `
-    <section class="faq-section py-12 lg:py-20 ${bgClasses[background]} section-animate">
-      <div class="max-w-[1100px] mx-auto px-4">
+    <section style="padding: 3rem 1rem; background: ${bgColors[background]};">
+      <div style="max-width: 1100px; margin: 0 auto;">
         ${title || subtitle ? `
-          <div class="text-center mb-10">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
             ${subtitle ? `
-              <span class="inline-block px-3 py-1 mb-3 text-sm font-medium text-[#0475BC] bg-[#0475BC]/10 rounded-full">
+              <span style="display: inline-block; padding: 0.25rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 500; color: #0475BC; background: rgba(4,117,188,0.1); border-radius: 9999px;">
                 ${escapeHtml(subtitle)}
               </span>
             ` : ''}
             ${title ? `
-              <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+              <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0;">
                 ${escapeHtml(title)}
               </h2>
             ` : ''}
           </div>
         ` : ''}
 
-        <div class="${columns === 2 ? 'grid grid-cols-1 lg:grid-cols-2 gap-x-10' : 'max-w-3xl mx-auto'}">
+        <div style="${columnStyle}">
           ${columns === 2 ? `
-            <div class="faq-column">
-              ${col1Items.map((item, idx) => renderFAQItem(item, idx, 0)).join('')}
-            </div>
-            <div class="faq-column">
-              ${col2Items.map((item, idx) => renderFAQItem(item, idx, midpoint)).join('')}
-            </div>
+            <div>${col1Items.map((item, idx) => renderFAQItem(item, idx, 0)).join('')}</div>
+            <div>${col2Items.map((item, idx) => renderFAQItem(item, idx, midpoint)).join('')}</div>
           ` : `
-            <div class="faq-list">
-              ${col1Items.map((item, idx) => renderFAQItem(item, idx)).join('')}
-            </div>
+            <div>${col1Items.map((item, idx) => renderFAQItem(item, idx)).join('')}</div>
           `}
         </div>
       </div>
 
       <script>
-        window.toggleFAQ = function(id) {
-          const content = document.getElementById(id + '-content');
-          const icon = document.getElementById(id + '-icon');
-          const isOpen = !content.classList.contains('hidden');
-
-          if (isOpen) {
-            content.classList.add('hidden');
-            icon.classList.remove('rotate-180');
-          } else {
-            content.classList.remove('hidden');
-            icon.classList.add('rotate-180');
-          }
+        window.__toggleFAQ = function(id) {
+          var content = document.getElementById(id + '-content');
+          var icon = document.getElementById(id + '-icon');
+          if (!content || !icon) return;
+          var isOpen = content.style.display !== 'none';
+          content.style.display = isOpen ? 'none' : 'block';
+          icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         };
       </script>
     </section>

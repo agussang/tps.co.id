@@ -304,6 +304,17 @@ function generateHTML(
         var target = candidates[0].el;
         console.log('[DYNAMIC_PAGE] Replacing body section');
         target.innerHTML = '<div class="__dynamic_page_content__">' + window.__PAGE_CONTENT__ + '</div>';
+
+        // Execute embedded scripts (innerHTML doesn't auto-execute <script> tags)
+        var scripts = target.querySelectorAll('script');
+        for (var s = 0; s < scripts.length; s++) {
+          try {
+            var newScript = document.createElement('script');
+            newScript.textContent = scripts[s].textContent;
+            document.body.appendChild(newScript);
+          } catch(e) { console.error('[DYNAMIC_PAGE] Script exec error:', e); }
+        }
+
         return true;
       }
     }

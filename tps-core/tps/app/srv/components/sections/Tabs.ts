@@ -1,13 +1,14 @@
 /**
  * Tabs Component
  * Tab content with multiple panels
+ * IMPORTANT: Uses ONLY inline styles (no Tailwind) to avoid Prasi CSS conflicts
  */
 
 import { escapeHtml } from '../html';
 
 export interface TabItem {
   label: string;
-  content: string; // HTML content
+  content: string;
   icon?: string;
 }
 
@@ -30,55 +31,43 @@ export function Tabs({
 }: TabsProps): string {
   if (!tabs || tabs.length === 0) return '';
 
-  const bgClasses: Record<string, string> = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-  };
-
+  const bgColors: Record<string, string> = { white: '#ffffff', gray: '#f9fafb' };
   const tabId = `tabs-${Math.random().toString(36).substr(2, 9)}`;
 
-  const getTabButtonClass = (isActive: boolean) => {
+  const getButtonStyle = (isActive: boolean) => {
+    const base = 'padding: 0.75rem 1.25rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s;';
     switch (style) {
       case 'pills':
         return isActive
-          ? 'px-5 py-2.5 text-sm font-medium text-white bg-[#0475BC] rounded-full transition-colors'
-          : 'px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-[#0475BC] rounded-full transition-colors';
+          ? `${base} color: #fff; background: #0475BC; border-radius: 9999px;`
+          : `${base} color: #4b5563; background: transparent; border-radius: 9999px;`;
       case 'boxed':
         return isActive
-          ? 'px-5 py-3 text-sm font-medium text-[#0475BC] bg-white border border-gray-200 border-b-white rounded-t-lg -mb-px transition-colors'
-          : 'px-5 py-3 text-sm font-medium text-gray-600 hover:text-[#0475BC] rounded-t-lg transition-colors';
-      case 'underline':
-      default:
+          ? `${base} color: #0475BC; background: #fff; border: 1px solid #e5e7eb; border-bottom-color: #fff; border-radius: 0.5rem 0.5rem 0 0; margin-bottom: -1px;`
+          : `${base} color: #4b5563; background: transparent; border: 1px solid transparent; border-radius: 0.5rem 0.5rem 0 0;`;
+      default: // underline
         return isActive
-          ? 'px-4 py-3 text-sm font-medium text-[#0475BC] border-b-2 border-[#0475BC] transition-colors'
-          : 'px-4 py-3 text-sm font-medium text-gray-600 hover:text-[#0475BC] border-b-2 border-transparent transition-colors';
+          ? `${base} color: #0475BC; background: transparent; border-bottom: 2px solid #0475BC;`
+          : `${base} color: #4b5563; background: transparent; border-bottom: 2px solid transparent;`;
     }
   };
 
-  const getTabContainerClass = () => {
-    switch (style) {
-      case 'pills':
-        return 'flex flex-wrap gap-2 p-1 bg-gray-100 rounded-full w-fit';
-      case 'boxed':
-        return 'flex flex-wrap border-b border-gray-200';
-      case 'underline':
-      default:
-        return 'flex flex-wrap border-b border-gray-200';
-    }
-  };
+  const containerStyle = style === 'pills'
+    ? 'display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.25rem; background: #f3f4f6; border-radius: 9999px; width: fit-content; margin-bottom: 1.5rem;'
+    : 'display: flex; flex-wrap: wrap; border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem;';
 
   return `
-    <section class="tabs-section py-12 lg:py-20 ${bgClasses[background]} section-animate">
-      <div class="max-w-[1100px] mx-auto px-4">
+    <section style="padding: 3rem 1rem; background: ${bgColors[background]};">
+      <div style="max-width: 1100px; margin: 0 auto;">
         ${title || subtitle ? `
-          <div class="text-center mb-10">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
             ${subtitle ? `
-              <span class="inline-block px-3 py-1 mb-3 text-sm font-medium text-[#0475BC] bg-[#0475BC]/10 rounded-full">
+              <span style="display: inline-block; padding: 0.25rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 500; color: #0475BC; background: rgba(4,117,188,0.1); border-radius: 9999px;">
                 ${escapeHtml(subtitle)}
               </span>
             ` : ''}
             ${title ? `
-              <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+              <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0;">
                 ${escapeHtml(title)}
               </h2>
             ` : ''}
@@ -86,34 +75,29 @@ export function Tabs({
         ` : ''}
 
         <!-- Tab Buttons -->
-        <div class="${getTabContainerClass()} mb-6">
+        <div style="${containerStyle}">
           ${tabs.map((tab, index) => `
             <button
               type="button"
-              class="tab-btn ${getTabButtonClass(index === defaultTab)}"
+              id="${tabId}-btn-${index}"
+              style="${getButtonStyle(index === defaultTab)}"
               data-tab-id="${tabId}"
               data-tab-index="${index}"
-              onclick="switchTab('${tabId}', ${index})"
+              onclick="window.__switchTab && window.__switchTab('${tabId}', ${index}, '${style}')"
             >
-              ${tab.icon ? `
-                <span class="inline-flex items-center gap-2">
-                  <img src="${escapeHtml(tab.icon)}" alt="" class="w-4 h-4" />
-                  ${escapeHtml(tab.label)}
-                </span>
-              ` : escapeHtml(tab.label)}
+              ${escapeHtml(tab.label)}
             </button>
           `).join('')}
         </div>
 
         <!-- Tab Panels -->
-        <div class="tab-panels">
+        <div>
           ${tabs.map((tab, index) => `
             <div
               id="${tabId}-panel-${index}"
-              class="tab-panel ${index === defaultTab ? '' : 'hidden'}"
-              role="tabpanel"
+              style="display: ${index === defaultTab ? 'block' : 'none'};"
             >
-              <div class="prose max-w-none">
+              <div style="color: #374151; font-size: 1rem; line-height: 1.75;">
                 ${tab.content}
               </div>
             </div>
@@ -122,46 +106,34 @@ export function Tabs({
       </div>
 
       <script>
-        window.switchTab = function(tabId, index) {
+        window.__switchTab = function(tabId, index, tabStyle) {
           // Update buttons
-          const buttons = document.querySelectorAll('[data-tab-id="' + tabId + '"]');
-          buttons.forEach(btn => {
-            const btnIndex = parseInt(btn.dataset.tabIndex);
-            const style = '${style}';
+          var i = 0;
+          while (true) {
+            var btn = document.getElementById(tabId + '-btn-' + i);
+            var panel = document.getElementById(tabId + '-panel-' + i);
+            if (!btn || !panel) break;
 
-            // Remove all style classes first
-            btn.classList.remove(
-              'text-white', 'bg-[#0475BC]', 'text-[#0475BC]', 'border-[#0475BC]',
-              'bg-white', 'border-b-white', '-mb-px', 'border-b-2'
-            );
+            var isActive = (i === index);
+            panel.style.display = isActive ? 'block' : 'none';
 
-            if (btnIndex === index) {
-              // Active state
-              if (style === 'pills') {
-                btn.classList.add('text-white', 'bg-[#0475BC]');
-              } else if (style === 'boxed') {
-                btn.classList.add('text-[#0475BC]', 'bg-white', 'border-b-white', '-mb-px');
-              } else {
-                btn.classList.add('text-[#0475BC]', 'border-b-2', 'border-[#0475BC]');
-              }
+            // Reset button styles
+            var base = 'padding: 0.75rem 1.25rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s;';
+            if (tabStyle === 'pills') {
+              btn.style.cssText = isActive
+                ? base + ' color: #fff; background: #0475BC; border-radius: 9999px;'
+                : base + ' color: #4b5563; background: transparent; border-radius: 9999px;';
+            } else if (tabStyle === 'boxed') {
+              btn.style.cssText = isActive
+                ? base + ' color: #0475BC; background: #fff; border: 1px solid #e5e7eb; border-bottom-color: #fff; border-radius: 0.5rem 0.5rem 0 0; margin-bottom: -1px;'
+                : base + ' color: #4b5563; background: transparent; border: 1px solid transparent; border-radius: 0.5rem 0.5rem 0 0;';
             } else {
-              // Inactive state
-              btn.classList.add('text-gray-600');
-              if (style === 'underline') {
-                btn.classList.add('border-b-2', 'border-transparent');
-              }
+              btn.style.cssText = isActive
+                ? base + ' color: #0475BC; background: transparent; border-bottom: 2px solid #0475BC;'
+                : base + ' color: #4b5563; background: transparent; border-bottom: 2px solid transparent;';
             }
-          });
-
-          // Update panels
-          const panels = document.querySelectorAll('[id^="' + tabId + '-panel-"]');
-          panels.forEach((panel, i) => {
-            if (i === index) {
-              panel.classList.remove('hidden');
-            } else {
-              panel.classList.add('hidden');
-            }
-          });
+            i++;
+          }
         };
       </script>
     </section>

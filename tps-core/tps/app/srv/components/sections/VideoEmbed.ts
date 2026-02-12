@@ -1,6 +1,7 @@
 /**
  * VideoEmbed Component
  * Responsive video embed for YouTube/Vimeo
+ * IMPORTANT: Uses ONLY inline styles (no Tailwind) to avoid Prasi CSS conflicts
  */
 
 import { escapeHtml, img } from '../html';
@@ -9,24 +10,18 @@ export interface VideoEmbedProps {
   title?: string;
   subtitle?: string;
   description?: string;
-  videoUrl: string; // YouTube or Vimeo URL
+  videoUrl: string;
   thumbnail?: string;
   background?: 'white' | 'gray' | 'dark';
   aspectRatio?: '16:9' | '4:3' | '21:9';
 }
 
 function parseVideoUrl(url: string): { type: 'youtube' | 'vimeo' | 'unknown'; id: string } {
-  // YouTube
   const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (ytMatch) {
-    return { type: 'youtube', id: ytMatch[1] };
-  }
+  if (ytMatch) return { type: 'youtube', id: ytMatch[1] };
 
-  // Vimeo
   const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
-  if (vimeoMatch) {
-    return { type: 'vimeo', id: vimeoMatch[1] };
-  }
+  if (vimeoMatch) return { type: 'vimeo', id: vimeoMatch[1] };
 
   return { type: 'unknown', id: '' };
 }
@@ -44,37 +39,39 @@ export function VideoEmbed({
 
   const video = parseVideoUrl(videoUrl);
 
-  const bgClasses: Record<string, string> = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-    dark: 'bg-gray-900',
+  const bgColors: Record<string, string> = {
+    white: '#ffffff',
+    gray: '#f9fafb',
+    dark: '#111827',
+  };
+  const textColors: Record<string, string> = {
+    white: '#111827',
+    gray: '#111827',
+    dark: '#ffffff',
+  };
+  const subtextColors: Record<string, string> = {
+    white: '#4b5563',
+    gray: '#4b5563',
+    dark: '#d1d5db',
   };
 
-  const textColor = background === 'dark' ? 'text-white' : 'text-gray-900';
-  const subtextColor = background === 'dark' ? 'text-gray-300' : 'text-gray-600';
-
-  const aspectClasses: Record<string, string> = {
-    '16:9': 'aspect-video',
-    '4:3': 'aspect-[4/3]',
-    '21:9': 'aspect-[21/9]',
+  const paddings: Record<string, string> = {
+    '16:9': 'padding-top: 56.25%;',
+    '4:3': 'padding-top: 75%;',
+    '21:9': 'padding-top: 42.86%;',
   };
 
   const getEmbedUrl = () => {
     switch (video.type) {
-      case 'youtube':
-        return `https://www.youtube.com/embed/${video.id}?rel=0&modestbranding=1`;
-      case 'vimeo':
-        return `https://player.vimeo.com/video/${video.id}`;
-      default:
-        return '';
+      case 'youtube': return `https://www.youtube.com/embed/${video.id}?rel=0&modestbranding=1`;
+      case 'vimeo': return `https://player.vimeo.com/video/${video.id}`;
+      default: return '';
     }
   };
 
   const getThumbnail = () => {
     if (thumbnail) return img(thumbnail);
-    if (video.type === 'youtube') {
-      return `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
-    }
+    if (video.type === 'youtube') return `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
     return '';
   };
 
@@ -84,49 +81,49 @@ export function VideoEmbed({
 
   if (!embedUrl) {
     return `
-      <section class="video-section py-12 lg:py-20 ${bgClasses[background]} section-animate">
-        <div class="max-w-[1100px] mx-auto px-4 text-center">
-          <p class="text-red-500">Video URL tidak valid</p>
+      <section style="padding: 3rem 1rem; background: ${bgColors[background]};">
+        <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
+          <p style="color: #ef4444;">Video URL tidak valid</p>
         </div>
       </section>
     `;
   }
 
   return `
-    <section class="video-section py-12 lg:py-20 ${bgClasses[background]} section-animate">
-      <div class="max-w-[1100px] mx-auto px-4">
+    <section style="padding: 3rem 1rem; background: ${bgColors[background]};">
+      <div style="max-width: 1100px; margin: 0 auto;">
         ${title || subtitle ? `
-          <div class="text-center mb-10">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
             ${subtitle ? `
-              <span class="inline-block px-3 py-1 mb-3 text-sm font-medium text-[#0475BC] ${background === 'dark' ? 'bg-white/10' : 'bg-[#0475BC]/10'} rounded-full">
+              <span style="display: inline-block; padding: 0.25rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 500; color: #0475BC; background: rgba(4,117,188,0.1); border-radius: 9999px;">
                 ${escapeHtml(subtitle)}
               </span>
             ` : ''}
             ${title ? `
-              <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold ${textColor}">
+              <h2 style="font-size: 1.75rem; font-weight: 700; color: ${textColors[background]}; margin: 0;">
                 ${escapeHtml(title)}
               </h2>
             ` : ''}
             ${description ? `
-              <p class="mt-4 text-lg ${subtextColor} max-w-2xl mx-auto">
+              <p style="margin-top: 1rem; font-size: 1.125rem; color: ${subtextColors[background]}; max-width: 42rem; margin-left: auto; margin-right: auto;">
                 ${escapeHtml(description)}
               </p>
             ` : ''}
           </div>
         ` : ''}
 
-        <div class="max-w-4xl mx-auto">
-          <div id="${videoId}" class="relative ${aspectClasses[aspectRatio]} rounded-xl overflow-hidden shadow-xl">
+        <div style="max-width: 56rem; margin: 0 auto;">
+          <div id="${videoId}" style="position: relative; ${paddings[aspectRatio]} border-radius: 0.75rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
             <!-- Thumbnail with play button -->
-            <div id="${videoId}-thumbnail" class="absolute inset-0 cursor-pointer group" onclick="playVideo('${videoId}')">
+            <div id="${videoId}-thumbnail" style="position: absolute; inset: 0; cursor: pointer;" onclick="window.__playVideo && window.__playVideo('${videoId}')">
               ${thumbnailUrl ? `
-                <img src="${thumbnailUrl}" alt="${escapeHtml(title || 'Video')}" class="w-full h-full object-cover" />
+                <img src="${thumbnailUrl}" alt="${escapeHtml(title || 'Video')}" style="width: 100%; height: 100%; object-fit: cover;" />
               ` : `
-                <div class="w-full h-full bg-gray-800"></div>
+                <div style="width: 100%; height: 100%; background: #1f2937;"></div>
               `}
-              <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <div class="w-20 h-20 flex items-center justify-center rounded-full bg-white/90 group-hover:bg-white transition-colors shadow-lg">
-                  <svg class="w-8 h-8 text-[#0475BC] ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+                <div style="width: 5rem; height: 5rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.9); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                  <svg style="width: 2rem; height: 2rem; color: #0475BC; margin-left: 4px;" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
                 </div>
@@ -136,10 +133,9 @@ export function VideoEmbed({
             <!-- Iframe (hidden until play) -->
             <iframe
               id="${videoId}-iframe"
-              class="absolute inset-0 w-full h-full hidden"
+              style="position: absolute; inset: 0; width: 100%; height: 100%; display: none; border: none;"
               src=""
               data-src="${embedUrl}"
-              frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen
             ></iframe>
@@ -148,14 +144,13 @@ export function VideoEmbed({
       </div>
 
       <script>
-        window.playVideo = function(id) {
-          const thumbnail = document.getElementById(id + '-thumbnail');
-          const iframe = document.getElementById(id + '-iframe');
-
+        window.__playVideo = function(id) {
+          var thumbnail = document.getElementById(id + '-thumbnail');
+          var iframe = document.getElementById(id + '-iframe');
           if (thumbnail && iframe) {
-            thumbnail.classList.add('hidden');
+            thumbnail.style.display = 'none';
             iframe.src = iframe.dataset.src + '&autoplay=1';
-            iframe.classList.remove('hidden');
+            iframe.style.display = 'block';
           }
         };
       </script>
