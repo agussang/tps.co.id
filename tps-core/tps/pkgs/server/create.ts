@@ -443,8 +443,10 @@ export const createServer = async () => {
       }
 
       // Redirect /file/* to /_file/* (Prasi legacy pages use /file/ URL pattern)
+      // Prasi encodes spaces as ~ in file URLs, convert back to %20
       if (url.pathname.startsWith("/file/")) {
-        const newPath = "/_file/" + url.pathname.substring(6);
+        const filePath = url.pathname.substring(6).replace(/~/g, "%20");
+        const newPath = "/_file/" + filePath;
         return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
       }
 
