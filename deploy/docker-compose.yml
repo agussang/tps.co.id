@@ -12,9 +12,14 @@ services:
       - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
       - PORT=3300
     volumes:
+      # Source code mounts (synced via deploy.sh)
+      - /opt/tps-app/pkgs:/app/pkgs
+      - /opt/tps-app/app/srv:/app/app/srv
+      - /opt/tps-app/app/db:/app/app/db
+      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
+      # Data mounts
       - /opt/tps-data/uploads:/data/files
       - /opt/tps-data/logs:/app/logs
-      - /opt/tps-app/app/db/.env:/app/app/db/.env:ro
     networks:
       - tps-network
     healthcheck:

@@ -1,9 +1,13 @@
 #!/bin/bash
-# Deploy script: sync code from local to server (172.19.154.93)
-# Usage: ./deploy.sh [--restart]
+# Deploy TPS to production server (172.19.154.93)
 #
-# This script syncs the tps-core/tps source code to the server
-# and optionally restarts the Docker container.
+# With volume mounts, source code on host is directly used by container.
+# No more docker cp needed — just rsync + restart.
+#
+# Usage:
+#   ./deploy.sh              # Sync + restart
+#   ./deploy.sh --sync-only  # Sync only (no restart, clear cache instead)
+#   ./deploy.sh --restart    # Restart container only (no sync)
 
 set -e
 
@@ -12,42 +16,78 @@ REMOTE_APP="/opt/tps-app"
 CONTAINER="tps-app"
 LOCAL_SRC="tps-core/tps"
 
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+log()  { echo -e "${GREEN}[DEPLOY]${NC} $1"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+err()  { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
+
 echo "=== TPS Deploy ==="
-echo "From: $LOCAL_SRC"
-echo "To:   $SERVER:$REMOTE_APP"
+echo "Source: $LOCAL_SRC → $SERVER:$REMOTE_APP"
 echo ""
 
-# Sync source code (exclude node_modules, data, etc.)
-echo "[1/3] Syncing source code..."
-rsync -avz --delete \
-  --exclude 'node_modules/' \
-  --exclude '.git/' \
-  --exclude 'data/' \
-  --exclude 'bun.lockb' \
-  --exclude '.env' \
-  --exclude 'app/db/.env' \
-  --exclude 'app/web/deploy/*.gz' \
-  --exclude 'app/web/deploy/*.zip' \
-  --exclude 'app/web/server/' \
-  --exclude '*.tmp.*' \
-  "$LOCAL_SRC/" "$SERVER:$REMOTE_APP/"
-
-echo ""
-echo "[2/3] Copying into Docker container..."
-ssh "$SERVER" "docker cp $REMOTE_APP/app/srv/. $CONTAINER:/app/app/srv/"
-ssh "$SERVER" "docker cp $REMOTE_APP/pkgs/. $CONTAINER:/app/pkgs/"
-
+# Restart only
 if [ "$1" = "--restart" ]; then
+  log "Restarting container..."
+  ssh $SERVER "docker restart $CONTAINER"
+  sleep 12
+  STATUS=$(ssh $SERVER "docker ps --filter name=$CONTAINER --format '{{.Status}}'")
+  log "Status: $STATUS"
+  exit 0
+fi
+
+# Sync source code (volume-mounted directories)
+log "Syncing pkgs/ (server framework)..."
+rsync -az --delete \
+  --exclude='node_modules' \
+  "$LOCAL_SRC/pkgs/" "$SERVER:$REMOTE_APP/pkgs/"
+
+log "Syncing app/srv/ (SSR API & components)..."
+rsync -az --delete \
+  "$LOCAL_SRC/app/srv/" "$SERVER:$REMOTE_APP/app/srv/"
+
+log "Syncing app/db/ (Prisma schema)..."
+rsync -az \
+  --exclude='node_modules' \
+  --exclude='.env' \
+  "$LOCAL_SRC/app/db/" "$SERVER:$REMOTE_APP/app/db/"
+
+log "Syncing app/web/deploy/ (Prasi bundles)..."
+rsync -az \
+  "$LOCAL_SRC/app/web/deploy/" "$SERVER:$REMOTE_APP/app/web/deploy/"
+
+log "Sync complete!"
+
+# Sync only — clear cache instead of restart
+if [ "$1" = "--sync-only" ]; then
+  warn "Sync only mode — clearing cache..."
+  ssh $SERVER "curl -s http://localhost:3300/clear-cache/ || true"
   echo ""
-  echo "[3/3] Restarting container..."
-  ssh "$SERVER" "docker restart $CONTAINER"
-  sleep 3
-  ssh "$SERVER" "docker logs $CONTAINER --tail 5"
+  log "Done! Changes applied via volume mount (no restart needed for most changes)."
+  exit 0
+fi
+
+# Restart container
+echo ""
+log "Restarting container..."
+ssh $SERVER "docker restart $CONTAINER"
+
+log "Waiting for health check..."
+sleep 12
+
+STATUS=$(ssh $SERVER "docker ps --filter name=$CONTAINER --format '{{.Status}}'")
+log "Status: $STATUS"
+
+# Smoke test
+HTTP_CODE=$(ssh $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:3300/")
+if [ "$HTTP_CODE" = "200" ]; then
+  log "Homepage: OK (HTTP $HTTP_CODE)"
 else
-  echo ""
-  echo "[3/3] Clearing cache (no restart)..."
-  curl -s "http://172.19.154.93:3300/clear-cache/" && echo ""
+  err "Homepage: FAILED (HTTP $HTTP_CODE)"
 fi
 
 echo ""
-echo "=== Deploy complete ==="
+log "Deploy complete!"
