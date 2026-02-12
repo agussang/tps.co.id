@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Refactoring - TPS Standalone Frontend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+    code { font-family: 'Fira Code', monospace; font-size: 0.875rem; }
+    .prose h2 { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Header -->
+  <header class="bg-[#0475BC] text-white py-8 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-6">
+      <h1 class="text-3xl font-bold">Laporan Refactoring</h1>
+      <p class="text-blue-100 mt-2">TPS Website - Standalone Frontend (Tanpa Prasi CMS)</p>
+      <p class="text-blue-200 text-sm mt-1">Tanggal: 23 Desember 2025</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="bg-white border-b sticky top-[104px] z-40">
+    <div class="max-w-5xl mx-auto px-6 py-3">
+      <div class="flex flex-wrap gap-4 text-sm">
+        <a href="#tujuan" class="text-[#0475BC] hover:underline">Tujuan</a>
+        <a href="#tahapan" class="text-[#0475BC] hover:underline">Tahapan</a>
+        <a href="#arsitektur" class="text-[#0475BC] hover:underline">Arsitektur</a>
+        <a href="#komponen" class="text-[#0475BC] hover:underline">Komponen</a>
+        <a href="#styling" class="text-[#0475BC] hover:underline">Styling</a>
+        <a href="#hasil" class="text-[#0475BC] hover:underline">Hasil</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="max-w-5xl mx-auto px-6 py-12 prose prose-lg max-w-none">
+
+    <!-- Section: Tujuan -->
+    <section id="tujuan" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">1. Tujuan Refactoring</h2>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border">
+        <p class="text-gray-600 mb-4">
+          Membuat aplikasi TPS website berjalan <strong>mandiri (standalone)</strong> tanpa koneksi ke CMS Prasi eksternal
+          (<code class="bg-gray-100 px-2 py-1 rounded">prasi.avolut.com</code>).
+        </p>
+
+        <h3 class="font-semibold text-lg mb-3">Masalah Sebelumnya:</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
+          <li>Frontend bergantung pada Prasi renderer (React bundle dari external)</li>
+          <li>Data jadwal kapal di-fetch melalui halaman yang sudah di-render</li>
+          <li>Instagram data di-fetch dari external source</li>
+          <li>Deployment download dari <code class="bg-gray-100 px-1 rounded">prasi.avolut.com/prod-zip</code></li>
+        </ul>
+
+        <h3 class="font-semibold text-lg mt-6 mb-3">Target:</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
+          <li>100% independen dari Prasi CMS external</li>
+          <li>Data langsung dari database lokal dan WSDL internal</li>
+          <li>Custom SSR components yang maintainable</li>
+          <li>Performa lebih cepat (no React hydration overhead)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section: Tahapan -->
+    <section id="tahapan" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">2. Tahapan Implementasi</h2>
+
+      <!-- Tahap 1 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-10 h-10 bg-blue-100 text-[#0475BC] rounded-full flex items-center justify-center font-bold">1</span>
+          <h3 class="text-xl font-semibold">Route /new dengan Prasi Renderer</h3>
+        </div>
+
+        <p class="text-gray-600 mb-4">
+          Membuat route baru <code class="bg-gray-100 px-2 py-1 rounded">/new</code> yang menggunakan Prasi renderer
+          tetapi dengan data dari database lokal.
+        </p>
+
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500 mb-2">File: <code>app/srv/api/_frontend.ts</code></p>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Query content dari PostgreSQL (banner, profile, services, dll)</li>
+            <li>Render menggunakan Prasi bundled components</li>
+            <li>Data dikirim via <code>window.___content</code></li>
+          </ul>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Selesai</span>
+          <span class="text-gray-400 text-sm">Data lokal, renderer masih Prasi</span>
+        </div>
+      </div>
+
+      <!-- Tahap 2 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-10 h-10 bg-blue-100 text-[#0475BC] rounded-full flex items-center justify-center font-bold">2</span>
+          <h3 class="text-xl font-semibold">Data Layer Independen</h3>
+        </div>
+
+        <p class="text-gray-600 mb-4">
+          Menghapus dependency external untuk data jadwal kapal dan Instagram.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-medium text-gray-700 mb-2">Jadwal Kapal (WSDL)</p>
+            <p class="text-sm text-gray-500 mb-2">File: <code>app/srv/utils/jadwal-kapal.ts</code></p>
+            <pre class="text-xs"><code>URL: http://www.tps.co.id:9090/WSCBS/Vessel
+Username: wsvessel
+Password: wsvessel123</code></pre>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-medium text-gray-700 mb-2">Instagram Data (Local)</p>
+            <p class="text-sm text-gray-500 mb-2">File: <code>app/srv/data/ig.json</code></p>
+            <p class="text-sm text-gray-600">Data Instagram di-cache lokal, tidak fetch dari external API.</p>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Selesai</span>
+          <span class="text-gray-400 text-sm">Semua data dari sumber internal</span>
+        </div>
+      </div>
+
+      <!-- Tahap 3 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-10 h-10 bg-blue-100 text-[#0475BC] rounded-full flex items-center justify-center font-bold">3</span>
+          <h3 class="text-xl font-semibold">Custom SSR Components</h3>
+        </div>
+
+        <p class="text-gray-600 mb-4">
+          Membuat komponen SSR menggunakan template literals (tanpa React runtime).
+          Route baru: <code class="bg-gray-100 px-2 py-1 rounded">/custom</code>
+        </p>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <p class="text-sm text-gray-500 mb-2">Komponen yang dibuat:</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+            <span class="bg-white px-3 py-2 rounded border">Header.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">HeroBanner.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Services.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Profile.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Throughput.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">VesselSchedule.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">News.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Customers.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Instagram.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">Footer.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">HomePage.ts</span>
+            <span class="bg-white px-3 py-2 rounded border">html.ts</span>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Selesai</span>
+          <span class="text-gray-400 text-sm">Full SSR tanpa Prasi renderer</span>
+        </div>
+      </div>
+
+      <!-- Tahap 4 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-10 h-10 bg-blue-100 text-[#0475BC] rounded-full flex items-center justify-center font-bold">4</span>
+          <h3 class="text-xl font-semibold">Styling Match dengan Prasi</h3>
+        </div>
+
+        <p class="text-gray-600 mb-4">
+          Menyesuaikan desain Header dan Footer agar sesuai dengan tampilan TPS asli.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-medium text-gray-700 mb-2">Header</p>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>Desktop: 2-tier (white upper + blue menu)</li>
+              <li>Upper height: 85px</li>
+              <li>Container max-width: 1100px</li>
+              <li>Blue color: #0475BC</li>
+            </ul>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-medium text-gray-700 mb-2">Footer</p>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>Background: #0475BC</li>
+              <li>Box shadow: inset 0 4px 4px rgba(0,0,0,.25)</li>
+              <li>Padding: 50px top, 30px bottom</li>
+              <li>2 columns: Sitemap + Kontak</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Selesai</span>
+          <span class="text-gray-400 text-sm">Desain sesuai TPS theme</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Arsitektur -->
+    <section id="arsitektur" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">3. Arsitektur</h2>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border mb-6">
+        <h3 class="font-semibold text-lg mb-4">Perbandingan /new vs /custom</h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="text-left p-3 font-semibold">Aspek</th>
+                <th class="text-left p-3 font-semibold">/new (Legacy)</th>
+                <th class="text-left p-3 font-semibold">/custom (Standalone)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr>
+                <td class="p-3 font-medium">Rendering</td>
+                <td class="p-3">Client-side (React hydration)</td>
+                <td class="p-3 text-green-600">Server-side (SSR)</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium">Renderer</td>
+                <td class="p-3">Prasi bundled components</td>
+                <td class="p-3 text-green-600">Custom SSR components</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium">HTML Output</td>
+                <td class="p-3">~42 baris (skeleton)</td>
+                <td class="p-3 text-green-600">~1500 baris (full HTML)</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium">JS Bundle</td>
+                <td class="p-3">Prasi React bundle (~200KB+)</td>
+                <td class="p-3 text-green-600">Tailwind CDN + minimal JS</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium">SEO</td>
+                <td class="p-3">Requires JS</td>
+                <td class="p-3 text-green-600">Full SEO support</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium">Dependencies</td>
+                <td class="p-3">Prasi bundle (app/web/deploy/)</td>
+                <td class="p-3 text-green-600">None (standalone)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border">
+        <h3 class="font-semibold text-lg mb-4">Flow Diagram</h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <p class="font-medium text-gray-700 mb-3">/new (Legacy - Prasi)</p>
+            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 text-sm font-mono">
+              <p>Browser Request</p>
+              <p class="text-gray-500">    ↓</p>
+              <p>_frontend.ts → Fetch data DB</p>
+              <p class="text-gray-500">    ↓</p>
+              <p>Return HTML + JSON in &lt;script&gt;</p>
+              <p class="text-gray-500">    ↓</p>
+              <p>Browser loads Prasi bundle</p>
+              <p class="text-gray-500">    ↓</p>
+              <p class="text-yellow-400">React hydrates & renders</p>
+            </div>
+          </div>
+          <div>
+            <p class="font-medium text-gray-700 mb-3">/custom (Standalone - SSR)</p>
+            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 text-sm font-mono">
+              <p>Browser Request</p>
+              <p class="text-gray-500">    ↓</p>
+              <p>_custom.ts → Fetch DB + WSDL</p>
+              <p class="text-gray-500">    ↓</p>
+              <p>SSR Components → HTML string</p>
+              <p class="text-gray-500">    ↓</p>
+              <p class="text-green-400">Return complete HTML</p>
+              <p class="text-gray-500">    ↓</p>
+              <p class="text-green-400">Browser renders (no hydration)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Komponen -->
+    <section id="komponen" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">4. Struktur File</h2>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border">
+        <pre class="text-sm"><code>tps-core/tps/app/srv/
+├── api/
+│   ├── _custom.ts        # API endpoint /custom (SSR homepage)
+│   ├── _frontend.ts      # API endpoint /new (Prasi renderer)
+│   └── _static.ts        # Static file serving
+│
+├── components/           # SSR Components (template literals)
+│   ├── html.ts           # Utilities (escapeHtml, img, file, formatDate)
+│   ├── Header.ts         # Header + Navigation
+│   ├── HeroBanner.ts     # Hero banner dengan video/image
+│   ├── Services.ts       # Service cards grid
+│   ├── Profile.ts        # Tentang TPS section
+│   ├── Throughput.ts     # Statistics cards
+│   ├── VesselSchedule.ts # Jadwal Sandar & Closing kapal
+│   ├── News.ts           # Berita terbaru cards
+│   ├── Customers.ts      # Logo pelanggan
+│   ├── Instagram.ts      # Instagram feed
+│   ├── Footer.ts         # Footer
+│   └── HomePage.ts       # Main template (combines all)
+│
+├── utils/
+│   └── jadwal-kapal.ts   # WSDL client untuk jadwal kapal
+│
+└── data/
+    └── ig.json           # Instagram data (local cache)</code></pre>
+      </div>
+    </section>
+
+    <!-- Section: Styling -->
+    <section id="styling" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">5. Design Specifications</h2>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-6 shadow-sm border">
+          <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <span class="w-4 h-4 bg-[#0475BC] rounded"></span>
+            Header
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Desktop Layout</span>
+              <span class="font-medium">2-tier (white + blue)</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Upper Height</span>
+              <span class="font-medium">85px</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Container Width</span>
+              <span class="font-medium">max-w-[1100px]</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Primary Color</span>
+              <span class="font-medium">#0475BC</span>
+            </div>
+            <div class="flex justify-between py-2">
+              <span class="text-gray-500">Menu Font</span>
+              <span class="font-medium">14px, white</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border">
+          <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <span class="w-4 h-4 bg-[#0475BC] rounded"></span>
+            Footer
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Background</span>
+              <span class="font-medium">#0475BC</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Box Shadow</span>
+              <span class="font-medium">inset 0 4px 4px rgba(0,0,0,.25)</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Padding Top</span>
+              <span class="font-medium">50px</span>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+              <span class="text-gray-500">Padding Bottom</span>
+              <span class="font-medium">30px</span>
+            </div>
+            <div class="flex justify-between py-2">
+              <span class="text-gray-500">Columns Gap</span>
+              <span class="font-medium">100px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border mt-6">
+        <h3 class="font-semibold text-lg mb-4">Color Palette</h3>
+        <div class="flex flex-wrap gap-4">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0475BC] rounded-lg shadow-sm"></div>
+            <p class="text-xs mt-2 font-medium">#0475BC</p>
+            <p class="text-xs text-gray-500">Primary</p>
+          </div>
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#035a91] rounded-lg shadow-sm"></div>
+            <p class="text-xs mt-2 font-medium">#035a91</p>
+            <p class="text-xs text-gray-500">Hover</p>
+          </div>
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0366a3] rounded-lg shadow-sm"></div>
+            <p class="text-xs mt-2 font-medium">#0366a3</p>
+            <p class="text-xs text-gray-500">Mobile Menu</p>
+          </div>
+          <div class="text-center">
+            <div class="w-20 h-20 bg-white border rounded-lg shadow-sm"></div>
+            <p class="text-xs mt-2 font-medium">#FFFFFF</p>
+            <p class="text-xs text-gray-500">Background</p>
+          </div>
+          <div class="text-center">
+            <div class="w-20 h-20 bg-gray-900 rounded-lg shadow-sm"></div>
+            <p class="text-xs mt-2 font-medium">#111827</p>
+            <p class="text-xs text-gray-500">Text</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Hasil -->
+    <section id="hasil" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">6. Hasil & Akses</h2>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 shadow-sm border border-blue-100">
+          <h3 class="font-semibold text-lg mb-2">/new (Legacy)</h3>
+          <p class="text-gray-600 text-sm mb-4">Homepage dengan Prasi renderer</p>
+          <a href="http://localhost:3300/new" target="_blank"
+             class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            localhost:3300/new
+          </a>
+        </div>
+        <div class="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-sm border border-green-100">
+          <h3 class="font-semibold text-lg mb-2 text-green-700">/custom (Standalone)</h3>
+          <p class="text-gray-600 text-sm mb-4">Homepage dengan SSR components</p>
+          <a href="http://localhost:3300/custom" target="_blank"
+             class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            localhost:3300/custom
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border">
+        <h3 class="font-semibold text-lg mb-4">Checklist Fitur</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Header dengan navigasi</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Hero Banner (video/image)</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Services section</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Profile/About section</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Throughput statistics</span>
+            </label>
+          </div>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Jadwal Sandar Kapal (WSDL)</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Jadwal Closing Kapal (WSDL)</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Berita terbaru</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Pelanggan/Customers</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Instagram feed</span>
+            </label>
+            <label class="flex items-center gap-3">
+              <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded">
+              <span>Footer dengan kontak</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Next Steps -->
+    <section id="next" class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">7. Langkah Selanjutnya (Opsional)</h2>
+
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+        <h3 class="font-semibold text-yellow-800 mb-3">Pengembangan Lanjutan:</h3>
+        <ul class="space-y-2 text-yellow-700">
+          <li class="flex items-start gap-2">
+            <span class="text-yellow-500">○</span>
+            <span>Menyesuaikan section lain (Services, Profile, News, dll) dengan desain asli</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-yellow-500">○</span>
+            <span>Mengganti route default <code class="bg-yellow-100 px-1 rounded">/</code> ke /custom</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-yellow-500">○</span>
+            <span>Membuat halaman lain (About, Contact, News detail, dll)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-yellow-500">○</span>
+            <span>Menghapus dependency Prasi sepenuhnya dari codebase</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-yellow-500">○</span>
+            <span>Implementasi caching untuk performa lebih baik</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-8">
+    <div class="max-w-5xl mx-auto px-6 text-center text-sm">
+      <p>Laporan Refactoring - TPS Standalone Frontend</p>
+      <p class="mt-1">Generated: 23 Desember 2025</p>
+    </div>
+  </footer>
+
+</body>
+</html>

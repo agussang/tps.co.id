@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply c-border-border;
+  }
+  body {
+    @apply c-bg-background c-text-foreground;
+  }
+}
+
+.btn-secondary {
+  border: 2px solid rgb(0, 115, 255);
+}
+
+.main-content-preview {
+  contain: none !important;
+}
+
+/* ============================================
+   Quill Editor Custom Styles
+   ============================================ */
+
+/* Import Quill base styles */
+@import "quill/dist/quill.snow.css";
+
+/* Toolbar styling */
+.ql-toolbar.ql-snow {
+  border: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--muted));
+  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 8px 12px !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  font-family: inherit;
+}
+
+.ql-editor {
+  min-height: 150px;
+  padding: 12px 16px !important;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground));
+  font-style: normal !important;
+  left: 16px !important;
+}
+
+/* Toolbar icons */
+.ql-snow .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+
+.ql-snow .ql-fill {
+  fill: hsl(var(--foreground));
+}
+
+.ql-snow .ql-picker {
+  color: hsl(var(--foreground));
+}
+
+/* Toolbar hover states */
+.ql-snow.ql-toolbar button:hover,
+.ql-snow .ql-toolbar button:hover,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow .ql-toolbar button.ql-active,
+.ql-snow.ql-toolbar .ql-picker-label:hover,
+.ql-snow .ql-toolbar .ql-picker-label:hover,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active,
+.ql-snow .ql-toolbar .ql-picker-label.ql-active {
+  color: #0173ff !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #0173ff !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow .ql-toolbar button.ql-active .ql-fill {
+  fill: #0173ff !important;
+}
+
+/* Dropdown menus */
+.ql-snow .ql-picker-options {
+  background: white;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+}
+
+.ql-snow .ql-picker-item:hover {
+  color: #0173ff;
+}
+
+/* Code block styling */
+.ql-editor pre.ql-syntax {
+  background: #1f2937;
+  color: #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 13px;
+  overflow-x: auto;
+}
+
+/* Blockquote styling */
+.ql-editor blockquote {
+  border-left: 4px solid #0173ff;
+  padding-left: 16px;
+  margin: 8px 0;
+  color: #4b5563;
+  font-style: italic;
+}
+
+/* Link styling in editor */
+.ql-editor a {
+  color: #0173ff;
+  text-decoration: underline;
+}
+
+/* Image styling */
+.ql-editor img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+/* Video styling */
+.ql-editor .ql-video {
+  width: 100%;
+  max-width: 560px;
+  height: 315px;
+  border-radius: 6px;
+}
+
+/* ============================================
+   Form Animations
+   ============================================ */
+
+/* Shake animation for validation errors */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.c-animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* Progress bar animation */
+@keyframes progress-indeterminate {
+  0% {
+    width: 0%;
+    margin-left: 0;
+  }
+  50% {
+    width: 70%;
+    margin-left: 15%;
+  }
+  100% {
+    width: 0%;
+    margin-left: 100%;
+  }
+}
+
+.c-animate-progress {
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}

@@ -1,0 +1,485 @@
+import { file } from "bun";
+import { existsAsync, inspectAsync, listAsync } from "fs-jetpack";
+import { join } from "path";
+import { createRouter } from "radix3";
+import { dir } from "../utils/dir";
+import { g } from "../utils/global";
+import { parseArgs } from "./parse-args";
+import { serveAPI } from "./serve-api";
+import { serveWeb } from "./serve-web";
+import { prodIndex } from "utils/prod-index";
+import { serveDynamicPage } from "../../app/srv/api/_dynamic_page";
+
+// Standalone login handler with SSO support
+const TPS_ESS_API = "https://api.tps.co.id/api/ess/signin";
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function callTpsEssApi(username: string, password: string): Promise<any> {
+  try {
+    console.log("[LOGIN] Calling TPS ESS API for:", username);
+    const res = await fetch(TPS_ESS_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        EmployeeID: username,
+        Password: password,
+        mac_address: "-",
+      }),
+    });
+    const data = await res.json();
+    console.log("[LOGIN] TPS ESS API response:", { successCode: data.successCode, hasResult: !!data.result });
+    return data;
+  } catch (error) {
+    console.error("[LOGIN] TPS ESS API error:", error);
+    return null;
+  }
+}
+
+async function handleStandaloneLogin(req: Request): Promise<Response> {
+  try {
+    const body = await req.json();
+    const username = body.EmployeeID || body.username;
+    const password = body.Password || body.password;
+
+    console.log("[LOGIN] Attempt:", { username });
+
+    if (!username || !password) {
+      return new Response(
+        JSON.stringify({
+          StatusCode: "402",
+          successCode: 402,
+          message: "Username dan password harus diisi",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!g.db) {
+      return new Response(
+        JSON.stringify({
+          StatusCode: "500",
+          successCode: 500,
+          message: "Database tidak tersedia",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Cek user di database
+    let user = await g.db.user.findFirst({
+      where: { username },
+      include: { role: true },
+    });
+
+    console.log("[LOGIN] User found:", user ? { id: user.id, hasPassword: !!user.password, active: user.active } : null);
+
+    // ===== AUTH LOKAL (jika user punya password lokal) =====
+    if (user && user.password) {
+      const hashedInput = await hashPassword(password);
+
+      if (user.password !== hashedInput) {
+        return new Response(
+          JSON.stringify({
+            StatusCode: "402",
+            successCode: 402,
+            message: "Password salah!",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!user.active) {
+        return new Response(
+          JSON.stringify({
+            StatusCode: "402",
+            successCode: 402,
+            message: "Akun belum aktif. Hubungi admin untuk aktivasi.",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update last login
+      await g.db.user.update({
+        where: { id: user.id },
+        data: { last_login: new Date() },
+      });
+
+      // Create session
+      const session = await g.db.user_session.create({
+        data: { id_user: user.id },
+      });
+
+      console.log("[LOGIN] Success (local auth):", { username, sessionId: session.id });
+
+      return new Response(
+        JSON.stringify({
+          StatusCode: "200",
+          successCode: 200,
+          message: "Login successful",
+          valid_mac: "1",
+          session_id: session.id,
+          result: {
+            StatusCode: 200,
+            successCode: 200,
+            Data: {
+              User: {
+                Id: user.id.toString(),
+                FullName: user.name || username,
+                Username: username,
+                EmployeeID: username,
+                Role: user.role.name,
+                Email: null,
+              },
+            },
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // ===== SSO via TPS ESS API (jika tidak ada password lokal) =====
+    console.log("[LOGIN] No local password, trying TPS ESS API...");
+
+    const essResponse = await callTpsEssApi(username, password);
+
+    if (!essResponse) {
+      return new Response(
+        JSON.stringify({
+          StatusCode: "500",
+          successCode: 500,
+          message: "Gagal terhubung ke server TPS ESS",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Cek response dari TPS ESS API
+    if (essResponse.StatusCode && parseInt(essResponse.StatusCode) === 402) {
+      return new Response(JSON.stringify(essResponse), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (essResponse.successCode && essResponse.successCode === 402) {
+      return new Response(JSON.stringify(essResponse), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (essResponse.successCode !== 200) {
+      return new Response(
+        JSON.stringify({
+          StatusCode: "402",
+          successCode: 402,
+          message: essResponse.message || "Login gagal - TPS ESS API error",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // ESS login berhasil - buat/update user di database lokal
+    const fullName = essResponse.result?.Data?.User?.FullName || username;
+
+    if (!user) {
+      // User belum ada di database lokal, buat baru
+      const staffRole = await g.db.role.findFirst({
+        where: { name: "staff" },
+      });
+
+      if (!staffRole) {
+        return new Response(
+          JSON.stringify({
+            StatusCode: "500",
+            successCode: 500,
+            message: "Role 'staff' tidak ditemukan di database",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      user = await g.db.user.create({
+        data: {
+          username,
+          id_role: staffRole.id,
+          name: fullName,
+          active: false, // Perlu aktivasi admin
+          last_login: new Date(),
+          created_at: new Date(),
+        },
+        include: { role: true },
+      });
+
+      console.log("[LOGIN] New user created from ESS:", { id: user.id, username });
+
+      return new Response(
+        JSON.stringify({
+          StatusCode: "402",
+          successCode: 402,
+          message: "Akun berhasil dibuat. Silahkan hubungi admin untuk aktivasi.",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // User sudah ada, cek status aktif
+    if (!user.active) {
+      return new Response(
+        JSON.stringify({
+          StatusCode: "402",
+          successCode: 402,
+          message: "Akun belum aktif. Hubungi admin untuk aktivasi.",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Update user info dan last login
+    await g.db.user.update({
+      where: { id: user.id },
+      data: {
+        name: fullName,
+        last_login: new Date(),
+      },
+    });
+
+    // Create session
+    const session = await g.db.user_session.create({
+      data: { id_user: user.id },
+    });
+
+    console.log("[LOGIN] Success (SSO):", { username, sessionId: session.id });
+
+    return new Response(
+      JSON.stringify({
+        StatusCode: "200",
+        successCode: 200,
+        message: "Login successful",
+        valid_mac: "1",
+        session_id: session.id,
+        result: {
+          StatusCode: 200,
+          successCode: 200,
+          Data: {
+            User: {
+              Id: user.id.toString(),
+              FullName: user.name || username,
+              Username: username,
+              EmployeeID: username,
+              Role: user.role.name,
+              Email: null,
+            },
+          },
+        },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("[LOGIN] Error:", error);
+    return new Response(
+      JSON.stringify({
+        StatusCode: "500",
+        successCode: 500,
+        message: "Terjadi kesalahan server",
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+
+export const createServer = async () => {
+  g.router = createRouter({ strictTrailingSlash: true });
+  g.api = {};
+  const scan = async (path: string, root?: string) => {
+    const apis = await listAsync(path);
+    if (apis) {
+      for (const filename of apis) {
+        const importPath = join(path, filename);
+        if (filename.endsWith(".ts")) {
+          try {
+            const api = await import(importPath);
+            let args: string[] = await parseArgs(importPath);
+            const route = {
+              url: api._.url,
+              args,
+              raw: !!api._.raw,
+              fn: api._.api,
+              path: importPath.substring((root || path).length + 1),
+            };
+            g.api[filename] = route;
+            g.router.insert(route.url, g.api[filename]);
+          } catch (e) {
+            g.log.warn(
+              `Failed to import app/srv/api${importPath.substring(
+                (root || path).length
+              )}`
+            );
+
+            const f = file(importPath);
+            if (f.size > 0) {
+              console.error(e);
+            } else {
+              g.log.warn(` ➨ file is empty`);
+            }
+          }
+        } else {
+          const dir = await inspectAsync(importPath);
+          if (dir?.type === "dir") {
+            await scan(importPath, path);
+          }
+        }
+      }
+    }
+  };
+  await scan(dir(`app/srv/api`));
+  await scan(dir(`pkgs/api`));
+
+  g.createServer = (arg) => {
+    return async (site_id: string) => {
+      return arg;
+    };
+  };
+
+  g.server = Bun.serve({
+    port: g.port,
+    maxRequestBodySize: 1024 * 1024 * 128,
+    async fetch(req) {
+      const url = new URL(req.url) as URL;
+      url.pathname = url.pathname.replace(/\/+/g, "/");
+
+      const prasi = {};
+      const index = prodIndex(g.deploy.config.site_id, prasi);
+
+      const handle = async (req: Request) => {
+        const api = await serveAPI(url, req);
+
+        if (api) {
+          return api;
+        }
+
+        if (g.deploy.router) {
+          const found = g.deploy.router.lookup(url.pathname);
+          if (found) {
+            return await serveWeb({
+              content: index.render(),
+              pathname: "index.html",
+              cache_accept: req.headers.get("accept-encoding") || "",
+            });
+          }
+
+          if (g.deploy.content) {
+            const core = g.deploy.content.code.core;
+            const site = g.deploy.content.code.site;
+
+            let pathname = url.pathname;
+            if (url.pathname[0] === "/") pathname = pathname.substring(1);
+
+            if (
+              !pathname ||
+              pathname === "index.html" ||
+              pathname === "index.htm"
+            ) {
+              return await serveWeb({
+                content: index.render(),
+                pathname: "index.html",
+                cache_accept: req.headers.get("accept-encoding") || "",
+              });
+            }
+
+            let content = "";
+
+            if (core[pathname]) content = core[pathname];
+            else if (site[pathname]) content = site[pathname];
+
+            if (content) {
+              return await serveWeb({
+                content,
+                pathname,
+                cache_accept: req.headers.get("accept-encoding") || "",
+              });
+            }
+          }
+        }
+
+        return new Response(`404 Not Found`, {
+          status: 404,
+          statusText: "Not Found",
+        });
+      };
+
+      // Intercept /backend/api/login untuk standalone auth
+      if (url.pathname === "/backend/api/login") {
+        return await handleStandaloneLogin(req);
+      }
+
+      // /backend/tpsadmin is now handled by SSR login page (_tpsadmin_login.ts)
+      // No redirect needed - the login page checks session and redirects to dashboard if logged in
+
+      // Handle /karir via API first (bypass tps-fw)
+      // Support bilingual URLs: /karir, /career, /id-id/karir, /en/career, etc.
+      const isKarirRoute = url.pathname === "/karir" || url.pathname === "/career" ||
+                           url.pathname.endsWith("/karir") || url.pathname.endsWith("/career");
+      if (isKarirRoute) {
+        // Extract language from path prefix (e.g., /id-id/karir -> id, /en/career -> en)
+        let lang = "id";
+        if (url.pathname.startsWith("/en/") || url.pathname.startsWith("/en-")) {
+          lang = "en";
+        }
+        // Normalize URL to /karir for router lookup
+        const normalizedUrl = new URL(url.toString());
+        normalizedUrl.pathname = "/karir";
+        normalizedUrl.searchParams.set("_lang", lang);
+        const api = await serveAPI(normalizedUrl, req);
+        if (api) return api;
+      }
+
+      // Redirect /file/* to /_file/* (Prasi legacy pages use /file/ URL pattern)
+      if (url.pathname.startsWith("/file/")) {
+        const newPath = "/_file/" + url.pathname.substring(6);
+        return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
+      }
+
+      // Handle dynamic pages from database (based on structure.url_pattern)
+      const dynamicPage = await serveDynamicPage(url, req);
+      if (dynamicPage) return dynamicPage;
+
+      if (
+        !url.pathname.startsWith("/_deploy") &&
+        !url.pathname.startsWith("/_prasi")
+      ) {
+        if (g.deploy.server && index) {
+          try {
+            return await g.deploy.server.http({
+              handle,
+              mode: "prod",
+              req,
+              server: g.server,
+              url: { pathname: url.pathname, raw: url },
+              index: index,
+              prasi,
+            });
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+
+      return handle(req);
+    },
+  });
+
+  if (process.env.PRASI_MODE === "dev") {
+    g.log.info(`http://localhost:${g.server.port}`);
+  } else {
+    g.log.info(`Started at port: ${g.server.port}`);
+  }
+};

@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Setup Server Web dan Database - PT Terminal Petikemas Surabaya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 2;
+            color: #000;
+            background: #fff;
+            max-width: 21cm;
+            margin: 0 auto;
+            padding: 2.54cm;
+        }
+
+        h1 {
+            font-size: 14pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 24pt;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 24pt;
+            margin-bottom: 12pt;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 18pt;
+            margin-bottom: 12pt;
+        }
+
+        p {
+            text-align: justify;
+            text-indent: 1.27cm;
+            margin-bottom: 12pt;
+        }
+
+        .no-indent {
+            text-indent: 0;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12pt 0;
+            font-size: 11pt;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 10pt;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 12pt 0;
+            white-space: pre-wrap;
+        }
+
+        .figure {
+            margin: 24pt 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .figure-caption {
+            font-size: 11pt;
+            margin-top: 8pt;
+            font-style: italic;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 2cm 0;
+            page-break-after: always;
+        }
+
+        .cover h1 {
+            font-size: 16pt;
+            margin-bottom: 48pt;
+        }
+
+        .cover .institution {
+            font-size: 14pt;
+            margin-bottom: 24pt;
+        }
+
+        .cover .date {
+            font-size: 12pt;
+            margin-top: 48pt;
+        }
+
+        .toc {
+            page-break-after: always;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 6pt 0;
+        }
+
+        .toc-dots {
+            flex: 1;
+            border-bottom: 1px dotted #000;
+            margin: 0 8px 4px;
+        }
+
+        ol, ul {
+            margin-left: 1.27cm;
+            margin-bottom: 12pt;
+        }
+
+        li {
+            margin-bottom: 6pt;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- COVER -->
+    <div class="cover">
+        <div class="institution">
+            <strong>PT TERMINAL PETIKEMAS SURABAYA</strong><br>
+            Divisi Teknologi Informasi
+        </div>
+
+        <h1>LAPORAN TEKNIS<br>SETUP SERVER WEB DAN DATABASE<br>SISTEM WEBSITE TPS</h1>
+
+        <p class="no-indent" style="text-align: center; margin-top: 48pt;">
+            <strong>Dokumen Migrasi Infrastruktur</strong><br>
+            Versi 1.0
+        </p>
+
+        <div class="date">
+            <strong>Surabaya</strong><br>
+            3 Februari 2026
+        </div>
+    </div>
+
+    <!-- DAFTAR ISI -->
+    <div class="toc">
+        <h1>DAFTAR ISI</h1>
+
+        <div class="toc-item">
+            <span>BAB I PENDAHULUAN</span>
+            <span class="toc-dots"></span>
+            <span>1</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>1.1 Latar Belakang</span>
+            <span class="toc-dots"></span>
+            <span>1</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>1.2 Tujuan</span>
+            <span class="toc-dots"></span>
+            <span>1</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>1.3 Ruang Lingkup</span>
+            <span class="toc-dots"></span>
+            <span>2</span>
+        </div>
+
+        <div class="toc-item">
+            <span>BAB II ARSITEKTUR SISTEM</span>
+            <span class="toc-dots"></span>
+            <span>3</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>2.1 Topologi Jaringan</span>
+            <span class="toc-dots"></span>
+            <span>3</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>2.2 Spesifikasi Server</span>
+            <span class="toc-dots"></span>
+            <span>3</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>2.3 Stack Teknologi</span>
+            <span class="toc-dots"></span>
+            <span>4</span>
+        </div>
+
+        <div class="toc-item">
+            <span>BAB III IMPLEMENTASI</span>
+            <span class="toc-dots"></span>
+            <span>5</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>3.1 Setup Server Database</span>
+            <span class="toc-dots"></span>
+            <span>5</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>3.2 Setup Server Aplikasi</span>
+            <span class="toc-dots"></span>
+            <span>6</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>3.3 Migrasi Data</span>
+            <span class="toc-dots"></span>
+            <span>8</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>3.4 Konfigurasi Docker</span>
+            <span class="toc-dots"></span>
+            <span>9</span>
+        </div>
+
+        <div class="toc-item">
+            <span>BAB IV HASIL DAN PENGUJIAN</span>
+            <span class="toc-dots"></span>
+            <span>11</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>4.1 Hasil Deployment</span>
+            <span class="toc-dots"></span>
+            <span>11</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>4.2 Screenshot Aplikasi</span>
+            <span class="toc-dots"></span>
+            <span>12</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>4.3 Pengujian Fungsional</span>
+            <span class="toc-dots"></span>
+            <span>15</span>
+        </div>
+
+        <div class="toc-item">
+            <span>BAB V PENUTUP</span>
+            <span class="toc-dots"></span>
+            <span>16</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>5.1 Kesimpulan</span>
+            <span class="toc-dots"></span>
+            <span>16</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>5.2 Rekomendasi</span>
+            <span class="toc-dots"></span>
+            <span>16</span>
+        </div>
+
+        <div class="toc-item">
+            <span>LAMPIRAN</span>
+            <span class="toc-dots"></span>
+            <span>17</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>A. Perintah Operasional</span>
+            <span class="toc-dots"></span>
+            <span>17</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>B. Struktur File Uploads</span>
+            <span class="toc-dots"></span>
+            <span>18</span>
+        </div>
+        <div class="toc-item" style="margin-left: 1cm;">
+            <span>C. Timeline Implementasi (5 Fase)</span>
+            <span class="toc-dots"></span>
+            <span>18</span>
+        </div>
+    </div>
+
+    <!-- BAB I -->
+    <div class="page-break">
+        <h1>BAB I<br>PENDAHULUAN</h1>
+
+        <h2>1.1 Latar Belakang</h2>
+        <p>
+            PT Terminal Petikemas Surabaya (TPS) sebagai salah satu terminal petikemas terbesar di Indonesia memiliki kebutuhan infrastruktur teknologi informasi yang handal dan scalable. Website korporat TPS merupakan salah satu kanal komunikasi penting yang menyajikan informasi layanan, berita, dan berbagai informasi publik kepada stakeholder.
+        </p>
+        <p>
+            Dalam rangka meningkatkan performa, keamanan, dan kemudahan pengelolaan sistem, dilakukan migrasi infrastruktur website dari server lama ke infrastruktur baru dengan arsitektur yang lebih modern. Migrasi ini mencakup pemisahan server database dan aplikasi, serta implementasi containerization menggunakan Docker untuk memudahkan deployment dan maintenance.
+        </p>
+        <p>
+            Dokumen ini disusun sebagai laporan teknis yang mendokumentasikan proses setup server web dan database, termasuk langkah-langkah implementasi, konfigurasi, dan hasil pengujian sistem.
+        </p>
+
+        <h2>1.2 Tujuan</h2>
+        <p class="no-indent">Tujuan dari kegiatan setup server ini adalah:</p>
+        <ol>
+            <li>Membangun infrastruktur server yang terpisah antara database dan aplikasi untuk meningkatkan keamanan dan performa.</li>
+            <li>Mengimplementasikan containerization menggunakan Docker untuk memudahkan deployment dan scaling aplikasi.</li>
+            <li>Melakukan migrasi data dari server lama ke server baru tanpa kehilangan data.</li>
+            <li>Memastikan kontinuitas layanan website TPS selama dan setelah proses migrasi.</li>
+            <li>Menyediakan dokumentasi teknis yang lengkap untuk keperluan maintenance di masa mendatang.</li>
+        </ol>
+
+        <h2>1.3 Ruang Lingkup</h2>
+        <p class="no-indent">Ruang lingkup pekerjaan dalam dokumen ini meliputi:</p>
+        <ol>
+            <li>Setup dan konfigurasi server database PostgreSQL 16 pada server dedicated.</li>
+            <li>Setup dan konfigurasi server aplikasi dengan Docker pada server terpisah.</li>
+            <li>Migrasi database dari server development ke server production baru.</li>
+            <li>Migrasi file uploads dari server production lama ke server production baru.</li>
+            <li>Konfigurasi jaringan dan keamanan antar server.</li>
+            <li>Pengujian fungsional aplikasi setelah deployment.</li>
+        </ol>
+    </div>
+
+    <!-- BAB II -->
+    <div class="page-break">
+        <h1>BAB II<br>ARSITEKTUR SISTEM</h1>
+
+        <h2>2.1 Topologi Jaringan</h2>
+        <p>
+            Arsitektur sistem yang diimplementasikan menggunakan model two-tier architecture dengan pemisahan antara server database dan server aplikasi. Kedua server berada dalam satu network segment yang sama untuk meminimalkan latency komunikasi.
+        </p>
+
+        <div class="code-block">
+┌─────────────────────────────────────────────────────────────────┐
+│                      NETWORK 172.19.154.0/24                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│    ┌──────────────────┐         ┌──────────────────┐           │
+│    │   DB SERVER      │         │   APP SERVER     │           │
+│    │  172.19.154.92   │◄───────►│  172.19.154.93   │           │
+│    │                  │  TCP    │                  │           │
+│    │  PostgreSQL 16   │  5432   │  Docker + Bun    │           │
+│    │  Port: 5432      │         │  Port: 3300      │           │
+│    └──────────────────┘         └──────────────────┘           │
+│                                          │                      │
+│                                          │ HTTP :3300           │
+│                                          ▼                      │
+│                                    ┌──────────┐                 │
+│                                    │  CLIENT  │                 │
+│                                    └──────────┘                 │
+└─────────────────────────────────────────────────────────────────┘
+        </div>
+        <p class="center"><em>Gambar 2.1 Topologi Jaringan Sistem</em></p>
+
+        <h2>2.2 Spesifikasi Server</h2>
+        <p>
+            Berikut adalah spesifikasi teknis dari kedua server yang digunakan dalam implementasi:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Komponen</th>
+                    <th>Database Server</th>
+                    <th>Application Server</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Hostname</td>
+                    <td>tpswebsitedb</td>
+                    <td>tpswebsiteapp</td>
+                </tr>
+                <tr>
+                    <td>IP Address</td>
+                    <td>172.19.154.92</td>
+                    <td>172.19.154.93</td>
+                </tr>
+                <tr>
+                    <td>Operating System</td>
+                    <td>Ubuntu 24.04.3 LTS</td>
+                    <td>Ubuntu 24.04.3 LTS</td>
+                </tr>
+                <tr>
+                    <td>Kernel</td>
+                    <td>6.8.0-90-generic</td>
+                    <td>6.8.0-90-generic</td>
+                </tr>
+                <tr>
+                    <td>RAM</td>
+                    <td>8 GB</td>
+                    <td>8 GB</td>
+                </tr>
+                <tr>
+                    <td>Storage</td>
+                    <td>195 GB (LVM)</td>
+                    <td>195 GB (LVM)</td>
+                </tr>
+                <tr>
+                    <td>Service</td>
+                    <td>PostgreSQL 16</td>
+                    <td>Docker 29.2.1</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel 2.1 Spesifikasi Server</em></p>
+
+        <h2>2.3 Stack Teknologi</h2>
+        <p>
+            Aplikasi website TPS dibangun menggunakan stack teknologi modern yang mendukung performa tinggi dan kemudahan pengembangan:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Teknologi</th>
+                    <th>Versi</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runtime</td>
+                    <td>Bun</td>
+                    <td>1.1.20</td>
+                    <td>JavaScript runtime yang cepat</td>
+                </tr>
+                <tr>
+                    <td>Framework</td>
+                    <td>Custom (prasi-deploy)</td>
+                    <td>-</td>
+                    <td>Framework internal</td>
+                </tr>
+                <tr>
+                    <td>ORM</td>
+                    <td>Prisma</td>
+                    <td>5.11.0</td>
+                    <td>Database ORM</td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>PostgreSQL</td>
+                    <td>16.11</td>
+                    <td>Relational database</td>
+                </tr>
+                <tr>
+                    <td>Container</td>
+                    <td>Docker</td>
+                    <td>29.2.1</td>
+                    <td>Containerization platform</td>
+                </tr>
+                <tr>
+                    <td>Orchestration</td>
+                    <td>Docker Compose</td>
+                    <td>5.0.2</td>
+                    <td>Container orchestration</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel 2.2 Stack Teknologi</em></p>
+    </div>
+
+    <!-- BAB III -->
+    <div class="page-break">
+        <h1>BAB III<br>IMPLEMENTASI</h1>
+
+        <h2>3.1 Setup Server Database</h2>
+        <p>
+            Server database dikonfigurasi menggunakan PostgreSQL 16 yang diinstall secara native (standalone) pada sistem operasi Ubuntu. Pemilihan instalasi native dibandingkan container bertujuan untuk mendapatkan performa optimal dan kemudahan backup.
+        </p>
+
+        <h3>3.1.1 Instalasi PostgreSQL</h3>
+        <p class="no-indent">Perintah instalasi PostgreSQL pada server database:</p>
+        <div class="code-block">apt-get update
+apt-get install -y postgresql postgresql-contrib
+systemctl enable postgresql
+systemctl start postgresql</div>
+
+        <h3>3.1.2 Konfigurasi Keamanan</h3>
+        <p>
+            Konfigurasi keamanan PostgreSQL dilakukan dengan mengatur password untuk user postgres dan membatasi akses hanya dari server aplikasi.
+        </p>
+        <div class="code-block"># Set password untuk user postgres
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'TpsDB2026Secure';"
+
+# Konfigurasi pg_hba.conf untuk akses remote
+echo "host    all    all    172.19.154.93/32    scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+
+# Konfigurasi postgresql.conf untuk listen address
+echo "listen_addresses = '*'" >> /etc/postgresql/16/main/postgresql.conf
+
+# Restart PostgreSQL
+systemctl restart postgresql</div>
+
+        <h3>3.1.3 Pembuatan Database</h3>
+        <p class="no-indent">Database untuk aplikasi dibuat dengan perintah:</p>
+        <div class="code-block">sudo -u postgres psql -c "CREATE DATABASE tps_web;"</div>
+
+        <h2>3.2 Setup Server Aplikasi</h2>
+        <p>
+            Server aplikasi dikonfigurasi menggunakan Docker untuk menjalankan aplikasi dalam container. Hal ini memudahkan deployment, scaling, dan maintenance aplikasi.
+        </p>
+
+        <h3>3.2.1 Instalasi Docker</h3>
+        <p class="no-indent">Instalasi Docker menggunakan repository resmi Docker:</p>
+        <div class="code-block"># Install dependencies
+apt-get update
+apt-get install -y ca-certificates curl
+
+# Add Docker GPG key
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add Docker repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
+tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker
+apt-get update
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</div>
+
+        <h3>3.2.2 Struktur Direktori</h3>
+        <p class="no-indent">Struktur direktori yang dibuat pada server aplikasi:</p>
+        <div class="code-block">/opt/
+├── tps-app/                    # Direktori aplikasi
+│   ├── Dockerfile              # Docker build file
+│   ├── docker-compose.yml      # Docker Compose configuration
+│   ├── app/                    # Source code aplikasi
+│   │   ├── db/                 # Prisma schema dan konfigurasi
+│   │   ├── srv/                # Server-side code
+│   │   └── web/                # Frontend assets
+│   └── pkgs/                   # Package modules
+│
+└── tps-data/                   # Direktori data (external volume)
+    ├── uploads/                # File uploads (4.7 GB)
+    └── logs/                   # Application logs</div>
+
+        <h2>3.3 Migrasi Data</h2>
+
+        <h3>3.3.1 Migrasi Database</h3>
+        <p>
+            Data database dimigrasi dari server development (103.187.215.236:5333) ke server production baru. Proses migrasi menggunakan pg_dump untuk export dan psql untuk import.
+        </p>
+        <div class="code-block"># Export dari server development
+PGPASSWORD='[password]' pg_dump -h 103.187.215.236 -p 5333 -U postgres -d tps-web > backup_dev.sql
+
+# Import ke server production
+sudo -u postgres psql -d tps_web -f backup_dev.sql</div>
+
+        <p class="no-indent">Hasil migrasi database:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tabel</th>
+                    <th>Jumlah Record</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>content</td>
+                    <td>17,728</td>
+                </tr>
+                <tr>
+                    <td>structure</td>
+                    <td>293</td>
+                </tr>
+                <tr>
+                    <td>file</td>
+                    <td>5,641</td>
+                </tr>
+                <tr>
+                    <td>user</td>
+                    <td>9</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel 3.1 Hasil Migrasi Database</em></p>
+
+        <h3>3.3.2 Migrasi File Uploads</h3>
+        <p>
+            File uploads dimigrasi dari server production lama (172.19.154.97) ke server production baru. Total ukuran file yang dimigrasi adalah 4.7 GB.
+        </p>
+        <div class="code-block"># Compress files di server lama
+cd /var/www/html/tps-web/data
+tar -czvf /tmp/files_backup.tar.gz files/
+
+# Transfer ke server baru
+scp /tmp/files_backup.tar.gz root@172.19.154.93:/opt/tps-data/
+
+# Extract di server baru
+cd /opt/tps-data
+tar -xzvf files_backup.tar.gz
+mv files uploads</div>
+
+        <h2>3.4 Konfigurasi Docker</h2>
+
+        <h3>3.4.1 Dockerfile</h3>
+        <p class="no-indent">Dockerfile untuk build image aplikasi:</p>
+        <div class="code-block"># TPS Web Application
+FROM oven/bun:1.1.20-debian
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy all application code
+COPY . ./
+
+# Install dependencies
+RUN bun install --production
+
+# Create necessary directories
+RUN mkdir -p /app/uploads /app/logs
+
+# Generate Prisma client
+RUN cd app/db && rm -f .env && bunx prisma generate --schema=prisma/schema.prisma
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3300
+
+# Expose port
+EXPOSE 3300
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3300/ || exit 1
+
+# Start application
+CMD ["bun", "run", "prod"]</div>
+
+        <h3>3.4.2 Docker Compose</h3>
+        <p class="no-indent">Konfigurasi Docker Compose untuk orchestration:</p>
+        <div class="code-block">services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+      - /opt/tps-app/app/db/.env:/app/app/db/.env:ro
+    networks:
+      - tps-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tps-network:
+    driver: bridge</div>
+
+        <h3>3.4.3 Deployment</h3>
+        <p class="no-indent">Perintah untuk build dan deploy aplikasi:</p>
+        <div class="code-block"># Build image
+docker compose build
+
+# Start container
+docker compose up -d
+
+# Verifikasi status
+docker compose ps
+docker compose logs --tail=20</div>
+    </div>
+
+    <!-- BAB IV -->
+    <div class="page-break">
+        <h1>BAB IV<br>HASIL DAN PENGUJIAN</h1>
+
+        <h2>4.1 Hasil Deployment</h2>
+        <p>
+            Deployment aplikasi website TPS pada infrastruktur baru telah berhasil dilaksanakan. Berikut adalah ringkasan hasil deployment:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Komponen</th>
+                    <th>Status</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Database Server</td>
+                    <td style="color: green;">✓ Running</td>
+                    <td>PostgreSQL 16 aktif di port 5432</td>
+                </tr>
+                <tr>
+                    <td>Application Server</td>
+                    <td style="color: green;">✓ Running</td>
+                    <td>Docker container aktif di port 3300</td>
+                </tr>
+                <tr>
+                    <td>Database Migration</td>
+                    <td style="color: green;">✓ Complete</td>
+                    <td>17,728 content records</td>
+                </tr>
+                <tr>
+                    <td>File Migration</td>
+                    <td style="color: green;">✓ Complete</td>
+                    <td>4.7 GB files uploaded</td>
+                </tr>
+                <tr>
+                    <td>Homepage</td>
+                    <td style="color: green;">✓ HTTP 200</td>
+                    <td>Accessible</td>
+                </tr>
+                <tr>
+                    <td>Static Files</td>
+                    <td style="color: green;">✓ HTTP 200</td>
+                    <td>Images loading correctly</td>
+                </tr>
+                <tr>
+                    <td>Admin Panel</td>
+                    <td style="color: green;">✓ HTTP 200</td>
+                    <td>Login page accessible</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel 4.1 Status Deployment</em></p>
+
+        <h2>4.2 Screenshot Aplikasi</h2>
+        <p>
+            Berikut adalah screenshot aplikasi yang diambil menggunakan Playwright automated testing framework pada tanggal 3 Februari 2026:
+        </p>
+
+        <div class="figure">
+            <img src="screenshots/01-homepage.png" alt="Homepage TPS">
+            <div class="figure-caption">Gambar 4.1 Halaman Utama Website TPS</div>
+        </div>
+
+        <div class="figure">
+            <img src="screenshots/03-admin-login.png" alt="Admin Login">
+            <div class="figure-caption">Gambar 4.2 Halaman Login Admin Panel</div>
+        </div>
+
+        <div class="figure">
+            <img src="screenshots/04-berita.png" alt="Berita">
+            <div class="figure-caption">Gambar 4.3 Halaman Berita Press Release</div>
+        </div>
+
+        <div class="figure">
+            <img src="screenshots/05-karir.png" alt="Karir">
+            <div class="figure-caption">Gambar 4.4 Halaman Karir</div>
+        </div>
+
+        <div class="figure">
+            <img src="screenshots/06-layanan.png" alt="Layanan">
+            <div class="figure-caption">Gambar 4.5 Halaman Layanan Container Services</div>
+        </div>
+
+        <h2>4.3 Pengujian Fungsional</h2>
+        <p>
+            Pengujian fungsional dilakukan untuk memastikan semua fitur website berjalan dengan baik setelah migrasi. Dari 10 test case yang diuji, 8 berhasil PASS, 1 memiliki bug, dan 1 masih perlu pengecekan lebih lanjut:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Test Case</th>
+                    <th>Expected Result</th>
+                    <th>Actual Result</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Akses Homepage</td>
+                    <td>HTTP 200, content loaded</td>
+                    <td>HTTP 200, content loaded</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Load gambar/file</td>
+                    <td>HTTP 200, image displayed</td>
+                    <td>HTTP 200, image displayed</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Akses halaman berita</td>
+                    <td>HTTP 200, list berita</td>
+                    <td>HTTP 200, list berita</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Akses halaman karir</td>
+                    <td>HTTP 200, job listings</td>
+                    <td>HTTP 200, job listings</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Akses halaman layanan</td>
+                    <td>HTTP 200, services info</td>
+                    <td>HTTP 200, services info</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Akses admin login</td>
+                    <td>HTTP 200, login form</td>
+                    <td>HTTP 200, login form</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Database connection</td>
+                    <td>Connected, data loaded</td>
+                    <td>Connected, data loaded</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>File serving (uploads)</td>
+                    <td>HTTP 200 for uploads</td>
+                    <td>HTTP 200 for uploads</td>
+                    <td style="color: green;">PASS</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Admin - Simpan konten</td>
+                    <td>Data tersimpan ke database</td>
+                    <td>Error saat menyimpan</td>
+                    <td style="color: #e65100;">BUG</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Fitur admin lainnya</td>
+                    <td>Semua fitur berfungsi</td>
+                    <td>Perlu verifikasi</td>
+                    <td style="color: #1565c0;">PENDING</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel 4.2 Hasil Pengujian Fungsional</em></p>
+
+        <p>
+            <strong>Catatan Bug:</strong> Ditemukan masalah pada fungsi simpan konten di panel admin. Bug ini terkait dengan proses penyimpanan data ke database yang perlu investigasi lebih lanjut dan perbaikan sebelum sistem dapat digunakan secara penuh untuk pengelolaan konten.
+        </p>
+    </div>
+
+    <!-- BAB V -->
+    <div class="page-break">
+        <h1>BAB V<br>PENUTUP</h1>
+
+        <h2>5.1 Kesimpulan</h2>
+        <p>
+            Berdasarkan implementasi dan pengujian yang telah dilakukan, dapat disimpulkan bahwa:
+        </p>
+        <ol>
+            <li>Setup server database PostgreSQL 16 dan server aplikasi Docker telah berhasil dilakukan dengan arsitektur two-tier yang memisahkan database dan aplikasi.</li>
+            <li>Migrasi data dari server development (database) dan server production lama (files) ke infrastruktur baru telah berhasil dengan total 17,728 content records dan 4.7 GB file uploads.</li>
+            <li>Aplikasi website TPS berjalan pada infrastruktur baru dengan fitur-fitur publik berfungsi normal. Ditemukan bug pada fungsi simpan konten di panel admin yang perlu diperbaiki, serta beberapa fitur admin lainnya yang masih memerlukan verifikasi lebih lanjut.</li>
+            <li>Implementasi Docker memudahkan proses deployment dan memberikan kemampuan untuk scaling di masa mendatang.</li>
+            <li>Pemisahan server database dan aplikasi meningkatkan keamanan dan memudahkan maintenance masing-masing komponen.</li>
+        </ol>
+
+        <h2>5.2 Rekomendasi</h2>
+        <p>
+            Untuk pengembangan dan pemeliharaan sistem ke depan, direkomendasikan hal-hal berikut:
+        </p>
+        <ol>
+            <li><strong>Perbaikan Bug Admin</strong> - Segera perbaiki bug pada fungsi simpan konten di panel admin dan lakukan verifikasi menyeluruh terhadap fitur-fitur admin lainnya sebelum sistem digunakan untuk operasional.</li>
+            <li><strong>Setup Nginx Reverse Proxy</strong> - Implementasikan Nginx sebagai reverse proxy di depan aplikasi untuk load balancing, caching, dan SSL termination.</li>
+            <li><strong>SSL/TLS Certificate</strong> - Pasang sertifikat SSL untuk mengaktifkan HTTPS dan mengamankan komunikasi client-server.</li>
+            <li><strong>Automated Backup</strong> - Konfigurasi backup otomatis harian untuk database dan file uploads dengan retention policy yang sesuai.</li>
+            <li><strong>Monitoring</strong> - Implementasikan monitoring sistem menggunakan tools seperti Prometheus dan Grafana untuk memantau health server dan aplikasi.</li>
+            <li><strong>CI/CD Pipeline</strong> - Bangun pipeline CI/CD untuk otomatisasi testing dan deployment saat ada perubahan kode.</li>
+            <li><strong>Disaster Recovery Plan</strong> - Susun dan dokumentasikan prosedur disaster recovery untuk mengantisipasi kejadian tidak terduga.</li>
+            <li><strong>Security Hardening</strong> - Lakukan hardening keamanan server termasuk firewall configuration, fail2ban, dan security patches rutin.</li>
+        </ol>
+    </div>
+
+    <!-- LAMPIRAN -->
+    <div class="page-break">
+        <h1>LAMPIRAN</h1>
+
+        <h2>A. Perintah Operasional</h2>
+
+        <h3>A.1 Docker Commands</h3>
+        <div class="code-block"># Start aplikasi
+cd /opt/tps-app && docker compose up -d
+
+# Stop aplikasi
+cd /opt/tps-app && docker compose down
+
+# Restart aplikasi
+cd /opt/tps-app && docker compose restart
+
+# Lihat logs
+docker compose logs -f --tail=100
+
+# Rebuild image
+docker compose build --no-cache
+
+# Masuk ke container
+docker exec -it tps-app /bin/bash</div>
+
+        <h3>A.2 PostgreSQL Commands</h3>
+        <div class="code-block"># Akses PostgreSQL
+sudo -u postgres psql -d tps_web
+
+# Backup database
+sudo -u postgres pg_dump tps_web > backup.sql
+
+# Restore database
+sudo -u postgres psql -d tps_web < backup.sql
+
+# Check status
+systemctl status postgresql</div>
+
+        <h2>B. Struktur File Uploads</h2>
+        <div class="code-block">/opt/tps-data/uploads/
+├── annualthroughput/
+├── berita_terkini/
+├── contact/
+├── csr/
+├── direksi/
+├── fasilitas/
+├── footer/
+├── home/
+├── home_banner/
+├── kebijakan/
+├── komisaris/
+├── latest_news/
+├── layanan/
+├── layout/
+├── maklumat/
+├── management/
+├── media/
+├── menu/
+├── ppid/
+├── profil/
+├── service/
+├── sitemap/
+├── smi/
+├── tariff/
+├── throughput/
+├── tutorial/
+└── visi/
+
+Total: 4.7 GB</div>
+
+        <h2>C. Timeline Implementasi</h2>
+
+        <h3>C.1 Fase 1: Persiapan Infrastruktur (3 Februari 2026)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu (WIB)</th>
+                    <th>Aktivitas</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>09:00 - 09:10</td>
+                    <td>Akses dan verifikasi server baru (DB & App)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>09:10 - 09:15</td>
+                    <td>Instalasi PostgreSQL 16 di DB Server</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>09:15 - 09:20</td>
+                    <td>Instalasi Docker & Docker Compose di App Server</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>09:20 - 09:25</td>
+                    <td>Konfigurasi keamanan PostgreSQL (pg_hba.conf)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>09:25 - 09:30</td>
+                    <td>Pembuatan database dan restore backup awal</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>C.2 Fase 2: Deployment Aplikasi (3 Februari 2026)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu (WIB)</th>
+                    <th>Aktivitas</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>09:30 - 09:45</td>
+                    <td>Upload source code dan build Docker image (Alpine)</td>
+                    <td>Tim IT</td>
+                    <td>Gagal - Segfault</td>
+                </tr>
+                <tr>
+                    <td>09:45 - 09:50</td>
+                    <td>Troubleshooting: Ganti ke Debian base image</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>09:50 - 10:05</td>
+                    <td>Rebuild Docker image (Debian) dan start container</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>10:05 - 10:20</td>
+                    <td>Troubleshooting: Fix database password encoding</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>10:20</td>
+                    <td>Aplikasi running - HTTP 200 OK</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>C.3 Fase 3: Migrasi Data (3 Februari 2026)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu (WIB)</th>
+                    <th>Aktivitas</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>10:20 - 10:30</td>
+                    <td>Migrasi database dari server development</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>10:30 - 10:50</td>
+                    <td>Compress file uploads di server lama (4.7 GB)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>10:50 - 11:05</td>
+                    <td>Transfer file uploads ke server baru via SCP</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>11:05 - 11:15</td>
+                    <td>Extract file uploads dan troubleshooting volume mount</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>11:15 - 11:20</td>
+                    <td>Fix volume mount path (/data/files)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>11:20</td>
+                    <td>Deployment selesai - Semua file accessible</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>C.4 Fase 4: Pengujian (3 Februari 2026)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu (WIB)</th>
+                    <th>Aktivitas</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>11:20 - 11:35</td>
+                    <td>Pengujian halaman publik (homepage, berita, karir, layanan)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>11:35 - 11:50</td>
+                    <td>Pengujian file serving dan gambar</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>11:50 - 12:15</td>
+                    <td>Screenshot dengan Playwright (homepage, admin, berita, karir, layanan)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>12:15 - 12:45</td>
+                    <td>Pengujian panel admin (login, navigasi, list konten)</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+                <tr>
+                    <td>12:45 - 13:15</td>
+                    <td>Pengujian fungsi simpan konten admin</td>
+                    <td>Tim IT</td>
+                    <td>Bug Ditemukan</td>
+                </tr>
+                <tr>
+                    <td>13:15 - 13:30</td>
+                    <td>Dokumentasi hasil pengujian dan penyusunan laporan</td>
+                    <td>Tim IT</td>
+                    <td>Selesai</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>C.5 Fase 5: Perbaikan dan Finalisasi (TBD)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Aktivitas</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Investigasi dan perbaikan bug simpan konten admin</td>
+                    <td>Tim Development</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>Verifikasi fitur admin lainnya</td>
+                    <td>Tim IT & QA</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>Pengujian ulang setelah perbaikan</td>
+                    <td>Tim QA</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>User Acceptance Test (UAT)</td>
+                    <td>User & Tim IT</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>Go-live production</td>
+                    <td>Tim IT</td>
+                    <td>Pending</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="center"><em>Tabel C.1 - C.5 Timeline Implementasi per Fase</em></p>
+
+        <div style="margin-top: 48pt; text-align: center;">
+            <p><em>--- Akhir Dokumen ---</em></p>
+        </div>
+    </div>
+
+</body>
+</html>

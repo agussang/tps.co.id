@@ -1,0 +1,9 @@
+import { apiContext } from "service-srv";
+
+export const _ = {
+  url: "/_api_nested_item.ts.tmp.2308.1766732367)}",
+  async api() {
+    const { req, res } = apiContext(this);
+    return "This is _api_nested_item.ts.tmp.2308.1766732367559";
+  }
+}

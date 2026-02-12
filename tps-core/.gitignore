@@ -1,0 +1,4 @@
+node_modules
+data/files/upload/thumb
+data/br-cache
+.DS_Store

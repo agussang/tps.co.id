@@ -1,0 +1,29 @@
+services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+      - /opt/tps-app/app/db/.env:/app/app/db/.env:ro
+    networks:
+      - tps-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tps-network:
+    driver: bridge

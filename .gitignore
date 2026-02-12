@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build & Deploy bundles (large .gz files)
+tps-core/tps/app/web/deploy/*.gz
+tps-core/tps/app/web/deploy/*.gz.bak
+tps-core/tps/app/web/server/
+
+# Database backups & large files
+*.sql
+*.tar.gz
+tps-core/tps/app/web/deploy/*.zip
+
+# Screenshots
+screenshots/
+
+# Environment files
+.env
+tps-core/tps/app/db/.env
+
+# Logs
+*.log
+firebase-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Media/upload data (too large for git, sync separately)
+tps-core/data/
+
+# Bun
+bun.lockb

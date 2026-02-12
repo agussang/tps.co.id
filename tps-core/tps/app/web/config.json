@@ -1,0 +1,8 @@
+{
+  "deploy": {
+    "ts": "1766335010850",
+    "mode": "standalone"
+  },
+  "site_id": "tps-standalone",
+  "domain": "*"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "prasi-deploy",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --silent --watch ./pkgs/index.ts dev",
+    "prod": "bun run --silent ./pkgs/prod.ts",
+    "prep": "bun run --silent ./pkgs/docker-prep.ts",
+    "pkgs-upgrade": "bun run --silent ./pkgs/upgrade.ts"
+  },
+  "workspaces": [
+    "app/*",
+    "pkgs"
+  ],
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "brotli-wasm": "^2.0.1",
+    "exit-hook": "^4.0.0",
+    "firebase-admin": "^11.11.0",
+    "prisma": "^5.8.1"
+  }
+}

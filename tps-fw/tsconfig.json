@@ -1,0 +1,28 @@
+{
+  "include": ["./*", "./app/**/*", "./lib/**/*", "./server/**/*",  "./typings/**/*"],
+  "exclude": ["./index.tsx"],
+  "compilerOptions": {
+    "paths": {
+      "lib/*": ["./lib/*"],
+      "app/*": ["./app/*"],
+      "server/*": ["./server/*"],
+      "@/*": ["./lib/*"]
+    },
+    "lib": ["ESNext", "DOM"],
+    "module": "esnext",
+    "target": "esnext",
+    "moduleDetection": "force",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "composite": true,
+    "strict": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types", "./lib/types"]
+  }
+}

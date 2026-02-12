@@ -1,0 +1,9 @@
+import { apiContext } from "service-srv";
+
+export const _ = {
+  url: "/_backend_login.ts.tmp.65216.1766506916)}",
+  async api() {
+    const { req, res } = apiContext(this);
+    return "This is _backend_login.ts.tmp.65216.1766506916274";
+  }
+}

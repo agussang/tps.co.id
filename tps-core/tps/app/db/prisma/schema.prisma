@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model content {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_parent       String?           @db.Uuid
+  id_structure    String?           @db.Uuid
+  lang            String?           @default("inherited") @db.VarChar(10)
+  text            String?
+  id_layout       String?           @db.Uuid
+  status          String?           @default("inherited")
+  id_file         String?           @db.Uuid
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  url             String?
+  id_ori_lang     String?           @db.Uuid
+  file            file?             @relation(fields: [id_file], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  layout          layout?           @relation(fields: [id_layout], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  content         content?          @relation("contentTocontent", fields: [id_parent], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_content   content[]         @relation("contentTocontent")
+  structure       structure?        @relation(fields: [id_structure], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  content_history content_history[]
+}
+
+model content_history {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_content String    @db.Uuid
+  date       DateTime? @default(now()) @db.Timestamp(6)
+  data       Json?
+  content    content   @relation(fields: [id_content], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model file {
+  uuid           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  path           String?
+  name           String?
+  type           String?
+  size           Int?
+  method         String?        @default("upload")
+  created_at     DateTime?      @default(now()) @db.Timestamp(6)
+  download_count Int            @default(0)
+  config         config[]
+  content        content[]
+  file_preview   file_preview[]
+}
+
+model file_preview {
+  id      String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_file String? @db.Uuid
+  name    String?
+  path    String?
+  width   Int?
+  height  Int?
+  size    Int?
+  file    file?   @relation(fields: [id_file], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model layout {
+  id               String             @id(map: "template_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_page          String?            @db.Uuid
+  url              String
+  seo              Json?
+  meta             Json?
+  id_site          String?            @db.Uuid
+  content          content[]
+  site             site?              @relation(fields: [id_site], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  layout_component layout_component[]
+}
+
+model layout_component {
+  id              String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_component    String? @db.Uuid
+  component_props Json?
+  meta            Json?
+  id_layout       String? @db.Uuid
+  layout          layout? @relation(fields: [id_layout], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model router {
+  id          String   @id(map: "routes_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  url_pattern String   @unique(map: "routes_url_pattern")
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  name        String?
+  seo         Json?
+  meta        Json?    @default("{\"banner\": \"\", \"header\": \"\", \"heading\": \"\", \"tagline\": \"\", \"template\": \"\", \"sub_heading\": \"\"}")
+}
+
+model site {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String?
+  logo      String?
+  id_client String?  @db.Uuid
+  meta      Json?
+  layout    layout[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model structure {
+  id               String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  path             String?           @unique
+  indexs           Boolean?          @default(false)
+  multiple         Boolean?          @default(false)
+  type             String?           @default("text")
+  title            String?
+  parent           String?           @db.Uuid
+  depth            Int?              @default(0)
+  meta             Json?
+  status           String?           @default("draft")
+  created_at       DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?         @db.Timestamp(6)
+  icon             String            @default("")
+  id_folder        String?           @db.Uuid
+  sort_idx         Int               @default(0)
+  required         Boolean           @default(false)
+  url_pattern      String            @default("")
+  prasi_page_id    String            @default("")
+  options          Json?
+  visible          Boolean?          @default(true)
+  translate        Boolean?          @default(true)
+  content          content[]
+  structure_folder structure_folder? @relation(fields: [id_folder], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model structure_folder {
+  name                   String
+  icon                   String             @default("")
+  id                     String             @id(map: "structure_folder_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sort_idx               Int
+  id_parent              String?            @db.Uuid
+  role_menu              role_menu[]
+  structure              structure[]
+  structure_folder       structure_folder?  @relation("structure_folderTostructure_folder", fields: [id_parent], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_structure_folder structure_folder[] @relation("structure_folderTostructure_folder")
+}
+
+model config {
+  id         String    @id(map: "config_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  logo       String    @db.Uuid
+  lang       Json
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  file       file      @relation(fields: [logo], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model role {
+  id          Int         @id @default(autoincrement())
+  name        String
+  id_parent   Int?
+  can_publish Boolean     @default(true)
+  role        role?       @relation("roleTorole", fields: [id_parent], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_role  role[]      @relation("roleTorole")
+  role_menu   role_menu[]
+  user        user[]
+}
+
+model role_menu {
+  id_role          Int
+  id_menu          String           @db.Uuid
+  id               Int              @id @default(autoincrement())
+  structure_folder structure_folder @relation(fields: [id_menu], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  role             role             @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id           Int            @id @default(autoincrement())
+  username     String
+  id_role      Int
+  active       Boolean?       @default(false)
+  name         String?
+  raw          String?
+  last_login   DateTime?      @db.Timestamp(6)
+  description  String?
+  created_at   DateTime?      @db.Timestamp(6)
+  password     String?
+  role         role           @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_session user_session[]
+}
+
+model user_session {
+  id       String   @id(map: "user_session_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_user  Int
+  login_at DateTime @default(now()) @db.Timestamp(6)
+  user     user     @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model logs {
+  id         Int      @id @default(autoincrement())
+  activity   String
+  user       String
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
