@@ -182,13 +182,17 @@ const renderFieldEditor = (field: FieldData, sectionId: string, lang: string): s
       `;
     case "file":
       return `
-        <div class="field-group">
+        <div class="field-group" data-field="${inputId}">
           <label class="block text-sm font-medium text-gray-700 mb-2">${field.title}</label>
-          <div class="flex items-center gap-3">
-            ${value ? `<img src="/_img/${value}" class="w-20 h-20 object-cover rounded border">` : ""}
-            <input type="file" name="${inputId}" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#0475BC]/10 file:text-[#0475BC] hover:file:bg-[#0475BC]/20">
+          <div class="flex items-center gap-3" id="preview-${inputId}">
+            ${value ? `<img src="/_img/${value}" class="w-20 h-20 object-cover rounded border">
+            <span class="text-sm text-gray-500">${escapeHtml(value)}</span>` : `<span class="text-sm text-gray-400">Belum ada file</span>`}
           </div>
-          <input type="hidden" name="${inputId}-current" value="${escapeHtml(value || "")}">
+          <div class="mt-2">
+            <input type="file" accept="image/*" onchange="handlePageFileUpload('${inputId}', this)"
+              class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#0475BC]/10 file:text-[#0475BC] hover:file:bg-[#0475BC]/20">
+          </div>
+          <input type="hidden" name="${inputId}" id="input-${inputId}" value="${escapeHtml(value || "")}">
         </div>
       `;
     case "textarea":
@@ -639,6 +643,37 @@ const renderPage = (
         if (emptyState) {
           emptyState.style.display = 'block';
         }
+      }
+    }
+
+    async function handlePageFileUpload(fieldId, input) {
+      var file = input.files[0];
+      if (!file) return;
+
+      var formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        var res = await fetch('/_upload?to=pages', {
+          method: 'POST',
+          body: formData
+        });
+        var result = await res.json();
+
+        if (result && result[0]) {
+          var filePath = result[0];
+          document.getElementById('input-' + fieldId).value = filePath;
+
+          var preview = document.getElementById('preview-' + fieldId);
+          if (preview) {
+            preview.innerHTML = '<img src="/_img/' + filePath + '" style="width:80px;height:80px;object-fit:cover;border-radius:0.375rem;border:1px solid #e5e7eb;">' +
+              '<span style="font-size:0.875rem;color:#059669;margin-left:0.5rem;">Uploaded! Klik Simpan.</span>';
+          }
+        } else {
+          alert('Upload gagal: response tidak valid');
+        }
+      } catch(e) {
+        alert('Upload gagal: ' + e.message);
       }
     }
 

@@ -303,7 +303,23 @@ function generateHTML(
       if (candidates.length > 0) {
         var target = candidates[0].el;
         console.log('[DYNAMIC_PAGE] Replacing body section');
-        target.innerHTML = '<div class="__dynamic_page_content__">' + window.__PAGE_CONTENT__ + '</div>';
+        target.innerHTML = '<div class="__dynamic_page_content__" style="width:100%;">' + window.__PAGE_CONTENT__ + '</div>';
+
+        // Remove width constraints on parent containers so content can be full-width
+        target.style.maxWidth = 'none';
+        target.style.width = '100%';
+        target.style.padding = '0';
+        target.style.margin = '0';
+        var parentEl = target.parentElement;
+        while (parentEl && parentEl.id !== 'root') {
+          var cs = window.getComputedStyle(parentEl);
+          if (cs.maxWidth !== 'none' && parseInt(cs.maxWidth) < window.innerWidth) {
+            parentEl.style.maxWidth = 'none';
+            parentEl.style.width = '100%';
+            parentEl.style.padding = '0';
+          }
+          parentEl = parentEl.parentElement;
+        }
 
         // Execute embedded scripts (innerHTML doesn't auto-execute <script> tags)
         var scripts = target.querySelectorAll('script');
