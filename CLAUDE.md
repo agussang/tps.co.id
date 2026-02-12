@@ -125,6 +125,42 @@ Both projects use strict TypeScript with path aliases:
 
 The backend uses Ubuntu base with pm2-runtime for production. See `tps-core/tps/Dockerfile`.
 
+### Production Server
+
+- **Server**: `172.19.154.93`
+- **Database**: PostgreSQL at `172.19.154.92:5432` (database: `tps_web`)
+- **Container**: `tps-app` (Docker Compose at `/opt/tps-app/docker-compose.yml`)
+- **App files**: `/opt/tps-app/` (host) → `/app/` (container)
+- **Upload files**: `/opt/tps-data/uploads/` (host) → `/data/files/` (container)
+- **Port**: 3300
+
+### Manual Deploy to Server
+
+Source code is NOT volume-mounted — it's baked into the Docker image. To hotfix:
+
+```bash
+# 1. SCP files to host
+scp <local-file> root@172.19.154.93:/opt/tps-app/<path>
+
+# 2. Copy into running container
+ssh root@172.19.154.93 "docker cp /opt/tps-app/<path> tps-app:/app/<path>"
+
+# 3. Restart container
+ssh root@172.19.154.93 "docker restart tps-app"
+
+# 4. Verify health
+ssh root@172.19.154.93 "docker ps --filter name=tps-app --format '{{.Status}}'"
+```
+
+### Docker Volumes (docker-compose.yml)
+
+```yaml
+volumes:
+  - /opt/tps-data/uploads:/data/files        # File uploads
+  - /opt/tps-data/logs:/app/logs             # Application logs
+  - /opt/tps-app/app/db/.env:/app/app/db/.env:ro  # DB connection (read-only)
+```
+
 ## Prasi Bundle System
 
 **IMPORTANT:** tps-fw is bundled by Prasi into `.gz` files stored in `tps-core/tps/app/web/deploy/`.
@@ -1200,3 +1236,65 @@ paging: { skip, take }
 2. Bundle: `tps-core/tps/app/web/deploy/1766335010850.gz`
 
 **Unit Tests:** `app/srv/tests/_berita.test.ts` (11 tests)
+
+### File Upload Bug (Fixed Feb 2026)
+
+**Issue:** File upload di admin edit page (`/backend/tpsadmin/edit/:id`) tidak berfungsi. Uploaded file tidak tersimpan.
+
+**Root Causes (3 bugs):**
+
+1. **Frontend mengirim raw File, bukan FormData** (`_tpsadmin_edit.ts:1002`)
+   ```javascript
+   // BUG - raw file, multipart parser gagal
+   body: file
+   // FIX - FormData dengan boundary
+   body: formData
+   ```
+
+2. **Upload directory creation gagal** (`pkgs/api/_upload.ts:56-58`)
+   ```typescript
+   // BUG - relative path + logika terbalik (create only if exists)
+   if (await existsAsync(dirname(to))) { dirAsync(dirname(to)); }
+   // FIX - absolute path, selalu create
+   const fullPath = dir(`${g.datadir}/files/${to}`);
+   await dirAsync(dirname(fullPath));
+   ```
+
+3. **`location.reload()` setelah upload menghapus file path** (`_tpsadmin_edit.ts:1010`)
+   - Sebelum: upload → set hidden input → reload (path hilang, belum di-save)
+   - Sesudah: upload → set hidden input → update preview di DOM → user klik Simpan
+
+**Files Changed:**
+- `tps-core/tps/app/srv/api/_tpsadmin_edit.ts`
+- `tps-core/tps/pkgs/api/_upload.ts`
+
+### File URL /file/* vs /_file/* (Fixed Feb 2026)
+
+**Issue:** Halaman Prasi legacy (unduh-dokumen) generate URL `/file/media/...` tapi endpoint server hanya handle `/_file/...`.
+
+**Fix:** Redirect 301 di `pkgs/server/create.ts`:
+```typescript
+if (url.pathname.startsWith("/file/")) {
+  const newPath = "/_file/" + url.pathname.substring(6);
+  return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
+}
+```
+
+### Prisma Init Crash (Fixed Feb 2026)
+
+**Issue:** Semua halaman Prasi legacy error `db.config is undefined` karena `global.db` tidak ter-set.
+
+**Root Cause:** `prisma generate` gagal (bug Prisma 5.11.0 schema parser) dan karena generate + import PrismaClient dalam satu try-catch, kegagalan generate menyebabkan import juga di-skip.
+
+**Fix:** Pisahkan ke dua try-catch terpisah di `pkgs/utils/prisma.ts`:
+```typescript
+// Try generate (non-fatal)
+try { await $(...)`bun prisma generate`; }
+catch (e) { console.log("Using existing client"); }
+
+// Import client (independent)
+try { g.db = new PrismaClient(); }
+catch (e) { console.log("Prisma not initialized"); }
+```
+
+**PENTING:** Jangan upgrade Prisma tanpa testing `prisma generate` dulu — versi 5.11.0 punya bug schema parser.
