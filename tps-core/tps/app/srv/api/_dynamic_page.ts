@@ -212,12 +212,9 @@ function generateHTML(
   const langPrefix = isEnglish ? "/en" : "";
   const basepath = "/";
 
-  // Escape pageBodyHTML for safe embedding in script
-  const escapedPageHTML = pageBodyHTML
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r');
+  // Encode pageBodyHTML as base64 for safe embedding in script
+  // (avoids all escaping issues: single quotes, </script>, special chars, etc.)
+  const encodedPageHTML = Buffer.from(pageBodyHTML, 'utf-8').toString('base64');
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -245,8 +242,8 @@ function generateHTML(
   // DYNAMIC PAGE: Store content and set up persistent injection (same approach as karir page)
   console.log('[DYNAMIC_PAGE] Script initialized for ${pageUrl}');
 
-  // Store page content globally
-  window.__PAGE_CONTENT__ = '${escapedPageHTML}';
+  // Decode base64-encoded page content (safe from escaping issues)
+  window.__PAGE_CONTENT__ = decodeURIComponent(escape(atob('${encodedPageHTML}')));
   window.__PAGE_URL__ = '${pageUrl}';
 
   function isCurrentPage() {
