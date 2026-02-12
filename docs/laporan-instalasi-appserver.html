@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Instalasi Application Server dan Deployment System - TPS CMS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: A4;
+    margin: 2.5cm 3cm 2.5cm 3cm;
+  }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2.5cm 3cm;
+  }
+
+  .cover-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 85vh;
+    text-align: center;
+    page-break-after: always;
+  }
+  .cover-page .doc-type {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #0475BC;
+    margin-bottom: 30px;
+    border-top: 3px solid #0475BC;
+    border-bottom: 3px solid #0475BC;
+    padding: 10px 30px;
+  }
+  .cover-page h1 {
+    font-size: 22pt;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    color: #0a0a0a;
+  }
+  .cover-page .subtitle {
+    font-size: 14pt;
+    color: #444;
+    margin-bottom: 60px;
+  }
+  .cover-page .meta-table {
+    width: 70%;
+    border-collapse: collapse;
+    margin-bottom: 60px;
+    font-size: 11pt;
+  }
+  .cover-page .meta-table td {
+    padding: 8px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  .cover-page .meta-table td:first-child {
+    font-weight: bold;
+    width: 40%;
+    color: #333;
+  }
+  .cover-page .prepared-for {
+    margin-top: 50px;
+    padding: 20px;
+    border: 2px solid #0475BC;
+    border-radius: 8px;
+  }
+  .cover-page .prepared-for .label {
+    font-size: 10pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .cover-page .prepared-for .name {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+  .cover-page .company-info {
+    margin-top: 40px;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+  .cover-page .company-info .company-name {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+
+  .toc { page-break-after: always; }
+  .toc h2 { text-align: center; font-size: 16pt; margin-bottom: 30px; color: #0a0a0a; }
+  .toc-list { list-style: none; }
+  .toc-list li { padding: 6px 0; border-bottom: 1px dotted #ccc; display: flex; justify-content: space-between; }
+  .toc-list li.chapter { font-weight: bold; margin-top: 12px; font-size: 12pt; }
+  .toc-list li.section { padding-left: 25px; font-size: 11pt; }
+  .toc-list li.subsection { padding-left: 50px; font-size: 10.5pt; color: #444; }
+  .toc-page { font-weight: normal; color: #666; }
+
+  h1.chapter {
+    font-size: 18pt; font-weight: bold;
+    margin-top: 40px; margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #0475BC;
+    color: #0a0a0a;
+    page-break-before: always;
+  }
+  h1.chapter:first-of-type { page-break-before: auto; }
+  h2 { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 12px; color: #1a1a1a; }
+  h3 { font-size: 12pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #333; }
+
+  p { text-align: justify; margin-bottom: 12px; text-indent: 1.27cm; }
+  p.no-indent { text-indent: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10.5pt; }
+  table th { background: #0475BC; color: white; padding: 10px 12px; text-align: left; font-weight: bold; font-size: 10pt; }
+  table td { padding: 8px 12px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  table tr:nth-child(even) { background: #f8f9fa; }
+  table.bordered td, table.bordered th { border: 1px solid #ccc; }
+  table caption { caption-side: bottom; font-size: 10pt; color: #666; font-style: italic; padding-top: 8px; }
+
+  pre {
+    background: #f4f4f4; border: 1px solid #ddd; border-left: 4px solid #0475BC;
+    padding: 12px 16px; margin: 12px 0;
+    font-family: 'Courier New', monospace; font-size: 9.5pt; line-height: 1.5;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  code {
+    font-family: 'Courier New', monospace; font-size: 10pt;
+    background: #f0f0f0; padding: 2px 5px; border-radius: 3px;
+  }
+
+  .info-box {
+    background: #e8f4fd; border: 1px solid #b8d9f0; border-left: 4px solid #0475BC;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+  .warning-box {
+    background: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #ff9800;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+  .danger-box {
+    background: #fdecea; border: 1px solid #f5c6cb; border-left: 4px solid #dc3545;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+
+  ol, ul { margin: 10px 0 10px 35px; }
+  li { margin-bottom: 6px; }
+
+  .diagram {
+    background: #fafafa; border: 2px solid #ddd; border-radius: 8px;
+    padding: 20px; margin: 20px 0; text-align: center;
+    font-family: 'Courier New', monospace; font-size: 10pt; line-height: 1.6;
+  }
+
+  .step {
+    margin: 15px 0; padding: 12px 16px;
+    border-left: 3px solid #0475BC; background: #fafbfc;
+  }
+  .step-number {
+    display: inline-block; background: #0475BC; color: white;
+    width: 28px; height: 28px; line-height: 28px;
+    text-align: center; border-radius: 50%; font-weight: bold; font-size: 11pt; margin-right: 10px;
+  }
+  .step-title { font-weight: bold; font-size: 11pt; }
+
+  .page-footer {
+    font-size: 9pt; color: #999; text-align: center;
+    margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd;
+  }
+
+  .highlight-red { color: #dc3545; font-weight: bold; }
+  .highlight-blue { color: #0475BC; font-weight: bold; }
+
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1.chapter { page-break-before: always; }
+    table, pre, .step, .diagram { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-page">
+  <div class="doc-type">Laporan Teknis</div>
+
+  <h1>Instalasi dan Konfigurasi<br>Application Server, Deployment System,<br>serta Analisis Kebutuhan Akses Internet</h1>
+
+  <p class="subtitle">Sistem CMS Website — PT Terminal Petikemas Surabaya</p>
+
+  <table class="meta-table">
+    <tr><td>Nomor Dokumen</td><td>TPS-PRIMALINK/APP/2026-002</td></tr>
+    <tr><td>Versi</td><td>1.0</td></tr>
+    <tr><td>Tanggal</td><td>12 Februari 2026</td></tr>
+    <tr><td>Klasifikasi</td><td>Rahasia / Internal</td></tr>
+    <tr><td>Status</td><td>Final</td></tr>
+  </table>
+
+  <div class="prepared-for">
+    <div class="label">Dipersiapkan untuk</div>
+    <div class="name">PT Terminal Petikemas Surabaya</div>
+  </div>
+
+  <div class="company-info">
+    <div class="company-name">PT PRIMALINK</div>
+    <p class="no-indent">Technology Solutions Partner</p>
+  </div>
+</div>
+
+<!-- ==================== LEMBAR PENGESAHAN ==================== -->
+<div style="page-break-after: always;">
+  <h2 style="text-align: center; font-size: 16pt; margin-top: 40px; margin-bottom: 40px;">LEMBAR PENGESAHAN</h2>
+
+  <table class="bordered" style="width: 100%; margin-bottom: 30px;">
+    <tr>
+      <td style="width: 30%; font-weight: bold;">Judul Dokumen</td>
+      <td>Laporan Instalasi Application Server, Deployment System, serta Analisis Kebutuhan Akses Internet untuk Sistem CMS Website PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr><td style="font-weight: bold;">Nomor Dokumen</td><td>TPS-PRIMALINK/APP/2026-002</td></tr>
+    <tr><td style="font-weight: bold;">Versi</td><td>1.0</td></tr>
+  </table>
+
+  <table class="bordered" style="width: 100%; text-align: center;">
+    <tr>
+      <th style="width: 33%;">Disiapkan Oleh</th>
+      <th style="width: 33%;">Diperiksa Oleh</th>
+      <th style="width: 34%;">Disetujui Oleh</th>
+    </tr>
+    <tr style="height: 100px;"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+      <td><strong>Tim Teknis</strong><br>PT PRIMALINK</td>
+      <td><strong>Project Manager</strong><br>PT PRIMALINK</td>
+      <td><strong>PIC IT</strong><br>PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top: 40px;">Riwayat Perubahan Dokumen</h3>
+  <table class="bordered">
+    <thead><tr><th>Versi</th><th>Tanggal</th><th>Perubahan</th><th>Penulis</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>03 Feb 2026</td><td>Draft awal — instalasi Docker dan deployment aplikasi</td><td>Tim Teknis</td></tr>
+      <tr><td>0.2</td><td>12 Feb 2026</td><td>Bug fixing upload file, konfigurasi routing, Prisma init</td><td>Tim Teknis</td></tr>
+      <tr><td>0.3</td><td>12 Feb 2026</td><td>Setup volume mount deployment, analisis kebutuhan internet</td><td>Tim Teknis</td></tr>
+      <tr><td>1.0</td><td>12 Feb 2026</td><td>Finalisasi dokumen</td><td>Tim Teknis</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== DAFTAR ISI ==================== -->
+<div class="toc">
+  <h2>DAFTAR ISI</h2>
+  <ul class="toc-list">
+    <li class="chapter"><span>BAB I &mdash; PENDAHULUAN</span></li>
+    <li class="section"><span>1.1 Latar Belakang</span></li>
+    <li class="section"><span>1.2 Tujuan Dokumen</span></li>
+    <li class="section"><span>1.3 Ruang Lingkup</span></li>
+
+    <li class="chapter"><span>BAB II &mdash; SPESIFIKASI APPLICATION SERVER</span></li>
+    <li class="section"><span>2.1 Spesifikasi Hardware dan Software</span></li>
+    <li class="section"><span>2.2 Arsitektur Aplikasi</span></li>
+    <li class="section"><span>2.3 Teknologi yang Digunakan</span></li>
+
+    <li class="chapter"><span>BAB III &mdash; INSTALASI DAN KONFIGURASI</span></li>
+    <li class="section"><span>3.1 Instalasi Docker Engine</span></li>
+    <li class="section"><span>3.2 Konfigurasi Docker Compose</span></li>
+    <li class="section"><span>3.3 Pembuatan Docker Image</span></li>
+    <li class="section"><span>3.4 Konfigurasi Volume Mount</span></li>
+    <li class="section"><span>3.5 Migrasi File Upload</span></li>
+    <li class="section"><span>3.6 Verifikasi Deployment</span></li>
+
+    <li class="chapter"><span>BAB IV &mdash; KENDALA DAN PENYELESAIAN</span></li>
+    <li class="section"><span>4.1 Prisma Client Initialization Failure</span></li>
+    <li class="section"><span>4.2 File Upload Tidak Berfungsi</span></li>
+    <li class="section"><span>4.3 Routing File URL Tidak Konsisten</span></li>
+    <li class="section"><span>4.4 Encoding Spasi pada URL File Legacy</span></li>
+
+    <li class="chapter"><span>BAB V &mdash; SISTEM DEPLOYMENT</span></li>
+    <li class="section"><span>5.1 Workflow Deployment Saat Ini</span></li>
+    <li class="section"><span>5.2 Deploy Script (deploy.sh)</span></li>
+    <li class="section"><span>5.3 Keterbatasan Tanpa Akses Internet</span></li>
+
+    <li class="chapter"><span>BAB VI &mdash; ANALISIS KEBUTUHAN AKSES INTERNET</span></li>
+    <li class="section"><span>6.1 Kondisi Saat Ini</span></li>
+    <li class="section"><span>6.2 Dampak Ketiadaan Akses Internet</span></li>
+    <li class="section"><span>6.3 Kebutuhan Internet untuk CI/CD Pipeline</span></li>
+    <li class="section"><span>6.4 Kebutuhan Internet untuk Package Management</span></li>
+    <li class="section"><span>6.5 Kebutuhan Internet untuk Security Updates</span></li>
+    <li class="section"><span>6.6 Kebutuhan Internet untuk Docker Registry</span></li>
+    <li class="section"><span>6.7 Kebutuhan Internet untuk Monitoring dan Alerting</span></li>
+    <li class="section"><span>6.8 Perbandingan Workflow: Tanpa Internet vs Dengan Internet</span></li>
+    <li class="section"><span>6.9 Rekomendasi Konfigurasi Akses Internet</span></li>
+
+    <li class="chapter"><span>BAB VII &mdash; PENGUJIAN DAN VALIDASI</span></li>
+    <li class="section"><span>7.1 Pengujian Fungsional</span></li>
+    <li class="section"><span>7.2 Pengujian Deployment</span></li>
+
+    <li class="chapter"><span>BAB VIII &mdash; KESIMPULAN DAN REKOMENDASI</span></li>
+    <li class="section"><span>8.1 Kesimpulan</span></li>
+    <li class="section"><span>8.2 Rekomendasi</span></li>
+
+    <li class="chapter"><span>LAMPIRAN</span></li>
+  </ul>
+</div>
+
+<!-- ==================== BAB I ==================== -->
+<h1 class="chapter">BAB I<br>PENDAHULUAN</h1>
+
+<h2>1.1 Latar Belakang</h2>
+<p>
+Sebagai bagian dari proyek pengembangan sistem CMS (Content Management System) website PT Terminal Petikemas Surabaya, telah dilakukan instalasi dan konfigurasi application server pada infrastruktur jaringan internal TPS. Application server berfungsi sebagai host dari aplikasi CMS yang melayani website publik dan panel admin untuk pengelolaan konten.
+</p>
+<p>
+Dalam proses implementasi, ditemukan beberapa kendala teknis yang memerlukan penanganan khusus, terutama terkait dengan keterbatasan akses internet pada server. Kendala ini berdampak signifikan terhadap proses deployment, pemeliharaan, dan pengembangan berkelanjutan dari sistem CMS.
+</p>
+<p>
+Dokumen ini memaparkan secara lengkap proses instalasi, kendala yang dihadapi beserta solusinya, serta analisis mendalam mengenai mengapa akses internet sangat diperlukan untuk mengakomodir proses deployment dan pemeliharaan server secara optimal.
+</p>
+
+<h2>1.2 Tujuan Dokumen</h2>
+<p class="no-indent">Dokumen ini disusun dengan tujuan:</p>
+<ol>
+  <li>Mendokumentasikan proses instalasi dan konfigurasi application server (172.19.154.93).</li>
+  <li>Mendokumentasikan kendala teknis yang ditemui selama proses implementasi beserta solusinya.</li>
+  <li>Menjelaskan sistem deployment yang saat ini diterapkan dan keterbatasannya.</li>
+  <li><strong>Memberikan analisis dan justifikasi teknis mengapa akses internet sangat dibutuhkan</strong> untuk menunjang proses deployment, pemeliharaan, dan pengembangan server.</li>
+  <li>Memberikan rekomendasi konfigurasi akses internet yang aman.</li>
+</ol>
+
+<h2>1.3 Ruang Lingkup</h2>
+<p class="no-indent">Ruang lingkup dokumen ini meliputi:</p>
+<ol>
+  <li>Instalasi Docker Engine dan konfigurasi container aplikasi pada server 172.19.154.93.</li>
+  <li>Konfigurasi volume mount untuk deployment system.</li>
+  <li>Dokumentasi seluruh kendala teknis dan bug fixing yang dilakukan.</li>
+  <li>Analisis komprehensif kebutuhan akses internet untuk server.</li>
+</ol>
+
+<!-- ==================== BAB II ==================== -->
+<h1 class="chapter">BAB II<br>SPESIFIKASI APPLICATION SERVER</h1>
+
+<h2>2.1 Spesifikasi Hardware dan Software</h2>
+
+<table>
+  <caption>Tabel 2.1 — Spesifikasi Application Server</caption>
+  <thead><tr><th style="width: 35%;">Parameter</th><th>Nilai</th></tr></thead>
+  <tbody>
+    <tr><td>Hostname</td><td><code>tpswebsiteapp</code></td></tr>
+    <tr><td>IP Address</td><td>172.19.154.93</td></tr>
+    <tr><td>Sistem Operasi</td><td>Ubuntu 24.04.3 LTS (Noble Numbat)</td></tr>
+    <tr><td>Kernel</td><td>Linux 6.8.0-90-generic x86_64</td></tr>
+    <tr><td>CPU</td><td>4 Core</td></tr>
+    <tr><td>RAM</td><td>8 GB</td></tr>
+    <tr><td>Disk</td><td>200 GB (LVM), terpakai 24 GB (12%)</td></tr>
+    <tr><td>Docker Engine</td><td>Docker 29.2.1</td></tr>
+    <tr><td>Uptime</td><td>12+ hari (stabil)</td></tr>
+  </tbody>
+</table>
+
+<h2>2.2 Arsitektur Aplikasi</h2>
+
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+┌─────────────────────────────────────────────────────────────┐
+│              APPLICATION SERVER (172.19.154.93)               │
+│                                                               │
+│  ┌──────────────── Docker Container ────────────────────┐    │
+│  │  Container: tps-app                                   │    │
+│  │  Image: oven/bun:1.1.20-debian (1.17 GB)             │    │
+│  │                                                       │    │
+│  │  ┌─────────────────────────────────────────────────┐ │    │
+│  │  │  Bun.js Runtime v1.1.20                          │ │    │
+│  │  │  ┌─────────────┐  ┌──────────────────────────┐ │ │    │
+│  │  │  │ Prasi Bundle │  │ SSR API Endpoints        │ │ │    │
+│  │  │  │ (Legacy CMS) │  │ (Admin Backend)          │ │ │    │
+│  │  │  └─────────────┘  └──────────────────────────┘ │ │    │
+│  │  │  ┌─────────────┐  ┌──────────────────────────┐ │ │    │
+│  │  │  │ Prisma ORM   │  │ File Upload Handler      │ │ │    │
+│  │  │  │ (DB Client)  │  │ (/_upload, /_file)       │ │ │    │
+│  │  │  └──────┬──────┘  └──────────────────────────┘ │ │    │
+│  │  └─────────┼───────────────────────────────────────┘ │    │
+│  │            │ TCP:5432                                  │    │
+│  └────────────┼──────────────────────────────────────────┘    │
+│               │        Port 3300 (HTTP) ↕ User/Admin          │
+│               ▼                                               │
+│     ┌───────────────────┐                                     │
+│     │  172.19.154.92     │                                     │
+│     │  PostgreSQL 16     │                                     │
+│     │  Database: tps_web │                                     │
+│     └───────────────────┘                                     │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+<p class="no-indent" style="text-align: center; font-style: italic; font-size: 10pt; color: #666;">
+Gambar 2.1 — Arsitektur Application Server dan Koneksi Database
+</p>
+
+<h2>2.3 Teknologi yang Digunakan</h2>
+
+<table>
+  <caption>Tabel 2.2 — Stack Teknologi</caption>
+  <thead><tr><th>Komponen</th><th>Teknologi</th><th>Versi</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>Container Runtime</td><td>Docker</td><td>29.2.1</td><td>Isolasi aplikasi</td></tr>
+    <tr><td>JavaScript Runtime</td><td>Bun</td><td>1.1.20</td><td>Server-side JavaScript (pengganti Node.js)</td></tr>
+    <tr><td>Database ORM</td><td>Prisma</td><td>5.11.0</td><td>Type-safe database access</td></tr>
+    <tr><td>CMS Engine</td><td>Prasi</td><td>Custom</td><td>Content management &amp; page rendering</td></tr>
+    <tr><td>Process Manager</td><td>PM2-style (built-in)</td><td>-</td><td>Auto-restart on crash</td></tr>
+    <tr><td>Dependencies</td><td>247 npm packages</td><td>Various</td><td>Termasuk firebase-admin, brotli-wasm, dll</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB III ==================== -->
+<h1 class="chapter">BAB III<br>INSTALASI DAN KONFIGURASI</h1>
+
+<h2>3.1 Instalasi Docker Engine</h2>
+<p>
+Docker Engine diinstall pada server untuk menjalankan aplikasi CMS dalam lingkungan container yang terisolasi. Pendekatan containerisasi dipilih untuk memudahkan deployment, menjaga konsistensi environment, dan memungkinkan rollback jika terjadi masalah.
+</p>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Instalasi Docker</span>
+  <pre># Install Docker menggunakan script resmi
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Verifikasi instalasi
+docker --version
+# Docker version 29.2.1, build a5c7197
+
+# Enable Docker service
+sudo systemctl enable docker
+sudo systemctl start docker</pre>
+</div>
+
+<h2>3.2 Konfigurasi Docker Compose</h2>
+<p>
+Docker Compose digunakan untuk mendefinisikan dan menjalankan container aplikasi beserta seluruh konfigurasinya (environment variables, volume mounts, health check, networking).
+</p>
+
+<p class="no-indent"><strong>File:</strong> <code>/opt/tps-app/docker-compose.yml</code></p>
+<pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:***@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      # Source code mounts (synced via deploy.sh)
+      - /opt/tps-app/pkgs:/app/pkgs
+      - /opt/tps-app/app/srv:/app/app/srv
+      - /opt/tps-app/app/db:/app/app/db
+      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
+      # Data mounts
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s</pre>
+
+<h2>3.3 Pembuatan Docker Image</h2>
+<p>
+Docker image dibuat berdasarkan base image <code>oven/bun:1.1.20-debian</code> yang menyediakan runtime Bun.js. Proses build menginstall seluruh dependencies (247 npm packages) dan generate Prisma client.
+</p>
+
+<p class="no-indent"><strong>File:</strong> <code>/opt/tps-app/Dockerfile</code></p>
+<pre>FROM oven/bun:1.1.20-debian
+
+RUN apt-get update && apt-get install -y curl git openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . ./
+RUN bun install --production
+RUN mkdir -p /app/uploads /app/logs
+RUN cd app/db && rm -f .env && \
+    bunx prisma generate --schema=prisma/schema.prisma
+
+ENV NODE_ENV=production
+ENV PORT=3300
+EXPOSE 3300
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3300/ || exit 1
+
+CMD ["bun", "run", "prod"]</pre>
+
+<table>
+  <caption>Tabel 3.1 — Informasi Docker Image</caption>
+  <thead><tr><th>Parameter</th><th>Nilai</th></tr></thead>
+  <tbody>
+    <tr><td>Image Name</td><td><code>tps-app-tps-app:latest</code></td></tr>
+    <tr><td>Image Size</td><td>1.17 GB</td></tr>
+    <tr><td>Base Image</td><td><code>oven/bun:1.1.20-debian</code></td></tr>
+    <tr><td>Total Build Cache</td><td>3.48 GB</td></tr>
+  </tbody>
+</table>
+
+<h2>3.4 Konfigurasi Volume Mount</h2>
+<p>
+Volume mount dikonfigurasi agar source code pada host langsung digunakan oleh container. Dengan pendekatan ini, perubahan kode cukup di-sync ke host lalu restart container — tidak perlu rebuild Docker image.
+</p>
+
+<table class="bordered">
+  <caption>Tabel 3.2 — Daftar Volume Mount</caption>
+  <thead><tr><th>Host Path</th><th>Container Path</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td><code>/opt/tps-app/pkgs</code></td><td><code>/app/pkgs</code></td><td>Server framework (routing, upload handler, utils)</td></tr>
+    <tr><td><code>/opt/tps-app/app/srv</code></td><td><code>/app/app/srv</code></td><td>SSR API endpoints &amp; admin components</td></tr>
+    <tr><td><code>/opt/tps-app/app/db</code></td><td><code>/app/app/db</code></td><td>Prisma schema &amp; database config</td></tr>
+    <tr><td><code>/opt/tps-app/app/web/deploy</code></td><td><code>/app/app/web/deploy</code></td><td>Prasi bundled files (.gz)</td></tr>
+    <tr><td><code>/opt/tps-data/uploads</code></td><td><code>/data/files</code></td><td>File uploads (4.7 GB)</td></tr>
+    <tr><td><code>/opt/tps-data/logs</code></td><td><code>/app/logs</code></td><td>Application logs</td></tr>
+  </tbody>
+</table>
+
+<div class="info-box">
+  <strong>Catatan:</strong> <code>node_modules</code> (247 packages) tetap berada di dalam Docker image dan <strong>tidak</strong> di-mount dari host. Hal ini memastikan dependencies selalu konsisten dan tidak perlu install Bun/npm pada host server.
+</div>
+
+<h2>3.5 Migrasi File Upload</h2>
+<p>
+File upload dari production existing (total 4.7 GB) dimigrasikan ke direktori <code>/opt/tps-data/uploads/</code> pada server.
+</p>
+<pre># Transfer file backup ke server
+scp files_backup.tar.gz root@172.19.154.93:/opt/tps-data/
+
+# Extract file backup
+cd /opt/tps-data
+tar xzf files_backup.tar.gz -C uploads/</pre>
+
+<h2>3.6 Verifikasi Deployment</h2>
+
+<table class="bordered">
+  <caption>Tabel 3.3 — Checklist Verifikasi Deployment</caption>
+  <thead><tr><th>Item</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Container running</td><td>Up (healthy)</td><td>Up (healthy)</td><td>✅ Pass</td></tr>
+    <tr><td>Port 3300 listening</td><td>LISTEN</td><td>LISTEN</td><td>✅ Pass</td></tr>
+    <tr><td>Homepage accessible</td><td>HTTP 200</td><td>HTTP 200 (237 KB)</td><td>✅ Pass</td></tr>
+    <tr><td>DB connection</td><td>Connected</td><td>17.773 records</td><td>✅ Pass</td></tr>
+    <tr><td>File serving</td><td>Files accessible</td><td>4.7 GB files served</td><td>✅ Pass</td></tr>
+    <tr><td>Admin panel</td><td>HTTP 200</td><td>HTTP 200</td><td>✅ Pass</td></tr>
+    <tr><td>6 volume mounts</td><td>All mounted</td><td>All mounted (bind)</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB IV ==================== -->
+<h1 class="chapter">BAB IV<br>KENDALA DAN PENYELESAIAN</h1>
+
+<p>
+Selama proses implementasi dan pengoperasian application server, ditemukan beberapa kendala teknis yang memerlukan investigasi dan perbaikan. Berikut dokumentasi lengkap setiap kendala beserta solusinya.
+</p>
+
+<h2>4.1 Prisma Client Initialization Failure</h2>
+
+<table class="bordered" style="margin-bottom: 15px;">
+  <tr><td style="width: 25%; font-weight: bold;">Severity</td><td><span class="highlight-red">CRITICAL</span> — Seluruh halaman website tidak dapat diakses</td></tr>
+  <tr><td style="font-weight: bold;">Tanggal Ditemukan</td><td>12 Februari 2026</td></tr>
+  <tr><td style="font-weight: bold;">File Terkait</td><td><code>pkgs/utils/prisma.ts</code></td></tr>
+</table>
+
+<h3>Deskripsi Masalah</h3>
+<p>
+Seluruh halaman website (homepage, berita, unduh dokumen, dll) menampilkan error atau halaman kosong. Log container menunjukkan error berulang: <code>TypeError: undefined is not an object (evaluating 'db.config')</code>.
+</p>
+
+<h3>Root Cause Analysis</h3>
+<p>
+Prisma ORM versi 5.11.0 memiliki bug pada schema parser (<code>psl/parser-database/src/walkers/relation/inline.rs</code>) yang menyebabkan perintah <code>prisma generate</code> gagal dengan error <em>"index out of bounds: the len is 0 but the index is 0"</em>.
+</p>
+<p>
+Dalam kode original, perintah <code>prisma generate</code> dan <code>import PrismaClient</code> berada dalam satu blok <code>try-catch</code> yang sama. Ketika <code>prisma generate</code> gagal, seluruh blok di-skip — termasuk <code>import PrismaClient</code> yang sebenarnya masih bisa berfungsi menggunakan client yang sudah di-generate sebelumnya saat Docker build.
+</p>
+
+<pre># Kode sebelum perbaikan (BERMASALAH)
+try {
+  await prisma generate;      // ← GAGAL (bug Prisma 5.11.0)
+  g.db = new PrismaClient();  // ← TIDAK PERNAH DIEKSEKUSI
+} catch (e) {
+  // g.db tetap undefined → seluruh website error
+}</pre>
+
+<h3>Solusi</h3>
+<p>
+Memisahkan <code>prisma generate</code> dan <code>import PrismaClient</code> ke dalam dua blok <code>try-catch</code> independen, sehingga kegagalan generate tidak menghalangi penggunaan client yang sudah ada.
+</p>
+
+<pre># Kode setelah perbaikan
+try {
+  await prisma generate;
+} catch (e) {
+  console.log("Using existing client");  // Non-fatal
+}
+
+try {
+  g.db = new PrismaClient();  // ← Tetap dieksekusi
+} catch (e) {
+  console.log("Prisma not initialized");
+}</pre>
+
+<h2>4.2 File Upload Tidak Berfungsi</h2>
+
+<table class="bordered" style="margin-bottom: 15px;">
+  <tr><td style="width: 25%; font-weight: bold;">Severity</td><td><span class="highlight-red">HIGH</span> — Admin tidak dapat upload dokumen/media</td></tr>
+  <tr><td style="font-weight: bold;">Tanggal Ditemukan</td><td>12 Februari 2026</td></tr>
+  <tr><td style="font-weight: bold;">File Terkait</td><td><code>app/srv/api/_tpsadmin_edit.ts</code>, <code>pkgs/api/_upload.ts</code></td></tr>
+</table>
+
+<h3>Deskripsi Masalah</h3>
+<p>
+Fitur upload file pada halaman admin edit content (<code>/backend/tpsadmin/edit/:id</code>) tidak berfungsi. Terdapat tiga bug yang saling terkait:
+</p>
+
+<h3>Bug 1: Request Body Format Salah</h3>
+<p>
+Frontend mengirim raw <code>File</code> object sebagai request body, padahal backend menggunakan multipart parser yang membutuhkan <code>FormData</code> dengan boundary.
+</p>
+<pre># Sebelum (SALAH)
+fetch('/_upload', { method: 'POST', body: file })
+
+# Sesudah (BENAR)
+const formData = new FormData();
+formData.append('file', file);
+fetch('/_upload', { method: 'POST', body: formData })</pre>
+
+<h3>Bug 2: Direktori Upload Tidak Dibuat</h3>
+<p>
+Backend menggunakan path relatif untuk mengecek dan membuat direktori upload, serta memiliki logika yang terbalik (hanya membuat direktori jika sudah ada).
+</p>
+<pre># Sebelum (SALAH — relative path + logika terbalik)
+if (await existsAsync(dirname(to))) {
+  dirAsync(dirname(to));  // No-op: sudah ada
+}
+
+# Sesudah (BENAR — absolute path, selalu buat)
+const fullPath = dir(`${g.datadir}/files/${to}`);
+await dirAsync(dirname(fullPath));</pre>
+
+<h3>Bug 3: Page Reload Sebelum Save</h3>
+<p>
+Setelah upload berhasil, halaman langsung melakukan <code>location.reload()</code> tanpa menyimpan file path ke database terlebih dahulu, sehingga path yang baru diupload hilang.
+</p>
+<p class="no-indent"><strong>Solusi:</strong> Mengganti <code>location.reload()</code> dengan update preview langsung di DOM, sehingga user bisa melihat file yang diupload dan menyimpannya melalui tombol "Simpan".</p>
+
+<h2>4.3 Routing File URL Tidak Konsisten</h2>
+
+<table class="bordered" style="margin-bottom: 15px;">
+  <tr><td style="width: 25%; font-weight: bold;">Severity</td><td><span style="color: #ff9800; font-weight: bold;">MEDIUM</span> — File download dari halaman unduh dokumen error 404</td></tr>
+  <tr><td style="font-weight: bold;">File Terkait</td><td><code>pkgs/server/create.ts</code></td></tr>
+</table>
+
+<h3>Deskripsi Masalah</h3>
+<p>
+Halaman Prasi legacy (unduh-dokumen) menghasilkan URL file dengan pola <code>/file/...</code>, sedangkan endpoint server hanya menangani <code>/_file/...</code> (dengan underscore). Akibatnya, klik download file menghasilkan error 404 Not Found.
+</p>
+
+<h3>Solusi</h3>
+<p>Menambahkan redirect permanen (HTTP 301) dari <code>/file/*</code> ke <code>/_file/*</code> pada server routing.</p>
+
+<h2>4.4 Encoding Spasi pada URL File Legacy</h2>
+
+<table class="bordered" style="margin-bottom: 15px;">
+  <tr><td style="width: 25%; font-weight: bold;">Severity</td><td><span style="color: #ff9800; font-weight: bold;">MEDIUM</span> — File dengan spasi di nama tidak bisa didownload</td></tr>
+  <tr><td style="font-weight: bold;">File Terkait</td><td><code>pkgs/server/create.ts</code></td></tr>
+</table>
+
+<h3>Deskripsi Masalah</h3>
+<p>
+Prasi legacy mengencode karakter spasi sebagai tilde (<code>~</code>) pada URL file, sedangkan file di disk menggunakan spasi. Contoh: URL <code>/file/media/laporan~penggantian~ssl.pdf</code> mengarah ke file <code>laporan penggantian ssl.pdf</code>.
+</p>
+
+<h3>Solusi</h3>
+<p>Menambahkan konversi <code>~</code> ke <code>%20</code> (spasi) pada redirect handler.</p>
+
+<!-- ==================== BAB V ==================== -->
+<h1 class="chapter">BAB V<br>SISTEM DEPLOYMENT</h1>
+
+<h2>5.1 Workflow Deployment Saat Ini</h2>
+<p>
+Karena server tidak memiliki akses internet, proses deployment tidak dapat menggunakan mekanisme standar seperti <code>git pull</code> atau CI/CD pipeline. Saat ini, deployment dilakukan melalui sinkronisasi file manual dari komputer developer ke server menggunakan SSH dan <code>rsync</code>.
+</p>
+
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+┌──────────────────────────────────────────────────────────────┐
+│                  WORKFLOW DEPLOYMENT SAAT INI                  │
+│                                                                │
+│  ┌─────────────┐      ┌────────────┐      ┌───────────────┐  │
+│  │  Developer   │ SSH  │  Server    │      │   Docker      │  │
+│  │  (Local PC)  │─────▶│  Host      │─────▶│   Container   │  │
+│  │              │rsync │ /opt/tps-  │volume│   tps-app     │  │
+│  │  ./deploy.sh │      │  app/      │mount │   /app/       │  │
+│  └─────────────┘      └────────────┘      └───────────────┘  │
+│       │                                                        │
+│       │ git push                                               │
+│       ▼                                                        │
+│  ┌─────────────┐                                               │
+│  │   GitHub    │   ← TIDAK BISA DIAKSES DARI SERVER            │
+│  │  (Backup)   │      (Server tanpa internet)                  │
+│  └─────────────┘                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+<p class="no-indent" style="text-align: center; font-style: italic; font-size: 10pt; color: #666;">
+Gambar 5.1 — Workflow Deployment Saat Ini (Tanpa Internet)
+</p>
+
+<h2>5.2 Deploy Script (deploy.sh)</h2>
+<p>
+Script deployment otomatis telah dibuat untuk menyederhanakan proses. Script ini melakukan sinkronisasi 4 direktori source code, restart container, dan verifikasi health check.
+</p>
+
+<pre>#!/bin/bash
+# Usage:
+#   ./deploy.sh              # Sync + restart
+#   ./deploy.sh --sync-only  # Sync + clear cache
+#   ./deploy.sh --restart    # Restart only
+
+# 1. Sync source code via rsync (SSH)
+rsync -az pkgs/     root@172.19.154.93:/opt/tps-app/pkgs/
+rsync -az app/srv/  root@172.19.154.93:/opt/tps-app/app/srv/
+rsync -az app/db/   root@172.19.154.93:/opt/tps-app/app/db/
+rsync -az app/web/deploy/ root@172.19.154.93:/opt/tps-app/app/web/deploy/
+
+# 2. Restart container
+ssh root@172.19.154.93 "docker restart tps-app"
+
+# 3. Health check & smoke test
+# → Verifikasi container Up (healthy) dan homepage HTTP 200</pre>
+
+<h2>5.3 Keterbatasan Tanpa Akses Internet</h2>
+
+<div class="danger-box">
+  <strong>KETERBATASAN KRITIS:</strong> Server 172.19.154.93 <strong>tidak memiliki akses internet sama sekali</strong>. Hasil pengujian menunjukkan bahwa koneksi ke GitHub.com dan Google.com timeout (HTTP 000). Hal ini menyebabkan beberapa keterbatasan serius yang dijabarkan pada BAB VI.
+</div>
+
+<pre># Bukti tidak ada akses internet
+$ curl --connect-timeout 5 https://github.com
+# → TIMEOUT (HTTP 000)
+
+$ curl --connect-timeout 5 https://google.com
+# → TIMEOUT (HTTP 000)</pre>
+
+<!-- ==================== BAB VI ==================== -->
+<h1 class="chapter">BAB VI<br>ANALISIS KEBUTUHAN AKSES INTERNET</h1>
+
+<h2>6.1 Kondisi Saat Ini</h2>
+<p>
+Berdasarkan pengujian yang dilakukan pada 12 Februari 2026, server application (172.19.154.93) tidak memiliki akses internet. Seluruh upaya koneksi ke layanan eksternal (GitHub, Google, npm registry, Docker Hub) menghasilkan timeout. Kondisi ini menyebabkan sejumlah dampak operasional yang signifikan.
+</p>
+
+<h2>6.2 Dampak Ketiadaan Akses Internet</h2>
+<p class="no-indent">Berikut adalah dampak langsung yang sudah terjadi akibat tidak adanya akses internet pada server:</p>
+
+<table class="bordered">
+  <caption>Tabel 6.1 — Dampak Operasional Ketiadaan Internet</caption>
+  <thead><tr><th>No</th><th>Dampak</th><th>Severity</th><th>Penjelasan</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Deployment manual &amp; lambat</td><td class="highlight-red">HIGH</td><td>Setiap perubahan kode harus di-rsync manual dari PC developer. Proses ini bergantung pada satu orang yang memiliki akses SSH, menciptakan single point of failure.</td></tr>
+    <tr><td>2</td><td>Tidak bisa update dependencies</td><td class="highlight-red">HIGH</td><td>Server tidak bisa menjalankan <code>bun install</code> atau <code>npm install</code> untuk update/patch library. Jika ditemukan vulnerability pada library, patching tidak bisa dilakukan langsung.</td></tr>
+    <tr><td>3</td><td>Tidak bisa rebuild Docker image</td><td class="highlight-red">HIGH</td><td>Proses <code>docker build</code> membutuhkan download base image dan dependencies dari internet. Tanpa internet, Docker image harus di-build di tempat lain lalu di-transfer manual.</td></tr>
+    <tr><td>4</td><td>Tidak ada automated deployment</td><td style="color: #ff9800; font-weight: bold;">MEDIUM</td><td>CI/CD pipeline (GitHub Actions, GitLab CI) tidak bisa diterapkan karena server tidak bisa pull dari repository.</td></tr>
+    <tr><td>5</td><td>Tidak ada security updates</td><td class="highlight-red">HIGH</td><td>Server tidak bisa menjalankan <code>apt update</code> untuk security patches OS dan Docker.</td></tr>
+    <tr><td>6</td><td>Tidak bisa monitoring external</td><td style="color: #ff9800; font-weight: bold;">MEDIUM</td><td>Uptime monitoring services dan alerting (email, Slack) tidak bisa diterapkan.</td></tr>
+  </tbody>
+</table>
+
+<h2>6.3 Kebutuhan Internet untuk CI/CD Pipeline</h2>
+<p>
+CI/CD (Continuous Integration / Continuous Deployment) adalah praktik standar industri untuk deployment otomatis. Dengan CI/CD, setiap perubahan kode yang di-push ke repository secara otomatis di-deploy ke server tanpa intervensi manual.
+</p>
+
+<h3>Workflow CI/CD Ideal</h3>
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+┌───────────┐   git push   ┌────────────┐  SSH deploy  ┌────────────┐
+│ Developer │──────────────▶│  GitHub    │─────────────▶│  Server    │
+│           │               │  Actions   │   auto       │ 172.19.    │
+│           │               │  (CI/CD)   │              │ 154.93     │
+└───────────┘               └────────────┘              └────────────┘
+     │                            │                           │
+     │                            │ ✅ Run tests              │
+     │                            │ ✅ Build validation       │
+     │                            │ ✅ Auto deploy            │
+     │                            │ ✅ Health check           │
+     │                            │ ✅ Rollback on failure    │
+     ▼                            ▼                           ▼
+   1 menit                    Otomatis                  Zero downtime
+</pre>
+</div>
+
+<h3>Perbandingan Waktu Deployment</h3>
+<table class="bordered">
+  <caption>Tabel 6.2 — Perbandingan Proses Deployment</caption>
+  <thead><tr><th>Langkah</th><th>Tanpa Internet (Saat Ini)</th><th>Dengan Internet (CI/CD)</th></tr></thead>
+  <tbody>
+    <tr><td>1. Developer commit kode</td><td>Manual: git commit + push</td><td>git commit + push</td></tr>
+    <tr><td>2. Transfer kode ke server</td><td>Manual: jalankan <code>./deploy.sh</code></td><td><strong>Otomatis</strong>: GitHub Actions</td></tr>
+    <tr><td>3. Testing</td><td>Tidak ada (manual)</td><td><strong>Otomatis</strong>: run test suite</td></tr>
+    <tr><td>4. Restart server</td><td>Termasuk di deploy.sh</td><td><strong>Otomatis</strong>: restart + health check</td></tr>
+    <tr><td>5. Rollback jika gagal</td><td>Manual: rsync versi lama</td><td><strong>Otomatis</strong>: rollback ke commit sebelumnya</td></tr>
+    <tr><td><strong>Total Waktu</strong></td><td><strong>5-10 menit (manual)</strong></td><td><strong>&lt;2 menit (otomatis)</strong></td></tr>
+    <tr><td><strong>Ketergantungan</strong></td><td>Developer harus available</td><td>Berjalan otomatis 24/7</td></tr>
+  </tbody>
+</table>
+
+<h2>6.4 Kebutuhan Internet untuk Package Management</h2>
+<p>
+Aplikasi CMS bergantung pada 247 npm packages yang dikelola oleh Bun package manager. Setiap package dapat memiliki security vulnerability yang ditemukan setelah deployment. Tanpa akses internet, proses update dan patching library tidak dapat dilakukan langsung pada server.
+</p>
+
+<h3>Skenario Risiko</h3>
+<p>
+Jika ditemukan critical vulnerability (contoh: Remote Code Execution) pada salah satu dari 247 dependencies, proses patching tanpa internet memerlukan:
+</p>
+<ol>
+  <li>Developer update package di PC lokal.</li>
+  <li>Rebuild seluruh Docker image di PC lokal.</li>
+  <li>Transfer Docker image (1.17 GB) ke server melalui <code>scp</code>.</li>
+  <li>Load image dan restart container di server.</li>
+</ol>
+<p>
+Proses ini memakan waktu <strong>30-60 menit</strong> dibandingkan <strong>5 menit</strong> jika server memiliki akses internet (cukup <code>bun install</code> + restart).
+</p>
+
+<h2>6.5 Kebutuhan Internet untuk Security Updates</h2>
+<p>
+Server menjalankan Ubuntu 24.04 LTS yang secara rutin menerima security patches dari Canonical. Tanpa akses internet, perintah <code>apt update && apt upgrade</code> tidak dapat dijalankan, sehingga server rentan terhadap vulnerability yang telah diketahui.
+</p>
+
+<table class="bordered">
+  <caption>Tabel 6.3 — Komponen yang Memerlukan Security Updates</caption>
+  <thead><tr><th>Komponen</th><th>Current Version</th><th>Update Source</th><th>Status Tanpa Internet</th></tr></thead>
+  <tbody>
+    <tr><td>Ubuntu OS</td><td>24.04.3 LTS</td><td>archive.ubuntu.com</td><td class="highlight-red">Tidak bisa update</td></tr>
+    <tr><td>Docker Engine</td><td>29.2.1</td><td>download.docker.com</td><td class="highlight-red">Tidak bisa update</td></tr>
+    <tr><td>Bun Runtime</td><td>1.1.20</td><td>bun.sh</td><td class="highlight-red">Tidak bisa update</td></tr>
+    <tr><td>npm Packages (247)</td><td>Various</td><td>registry.npmjs.org</td><td class="highlight-red">Tidak bisa update</td></tr>
+    <tr><td>Prisma ORM</td><td>5.11.0</td><td>registry.npmjs.org</td><td class="highlight-red">Tidak bisa update</td></tr>
+    <tr><td>OpenSSL</td><td>OS bundled</td><td>archive.ubuntu.com</td><td class="highlight-red">Tidak bisa update</td></tr>
+  </tbody>
+</table>
+
+<h2>6.6 Kebutuhan Internet untuk Docker Registry</h2>
+<p>
+Docker image perlu diperbarui secara berkala — baik untuk update base image (security patches) maupun untuk perubahan dependencies. Tanpa akses ke Docker Hub (<code>hub.docker.com</code>) dan npm registry (<code>registry.npmjs.org</code>), proses rebuild Docker image tidak dapat dilakukan di server.
+</p>
+
+<h3>Proses Rebuild Saat Ini (Tanpa Internet)</h3>
+<ol>
+  <li>Build Docker image di PC developer lokal.</li>
+  <li><code>docker save</code> image ke file tar (~1.2 GB).</li>
+  <li><code>scp</code> file tar ke server (tergantung bandwidth internal).</li>
+  <li><code>docker load</code> image di server.</li>
+  <li>Restart container dengan image baru.</li>
+</ol>
+
+<h3>Proses Rebuild Ideal (Dengan Internet)</h3>
+<ol>
+  <li>SSH ke server.</li>
+  <li><code>docker compose build && docker compose up -d</code> (otomatis download semua yang dibutuhkan).</li>
+</ol>
+
+<h2>6.7 Kebutuhan Internet untuk Monitoring dan Alerting</h2>
+<p>
+Sistem produksi memerlukan monitoring untuk mendeteksi masalah secara proaktif. Tanpa akses internet, notifikasi error tidak dapat dikirimkan melalui email, Slack, atau layanan monitoring seperti UptimeRobot, Datadog, atau Sentry.
+</p>
+<p>
+Saat ini, jika server mengalami masalah di luar jam kerja, tidak ada mekanisme notifikasi otomatis. Masalah baru diketahui ketika ada laporan dari pengguna.
+</p>
+
+<h2>6.8 Perbandingan Workflow: Tanpa Internet vs Dengan Internet</h2>
+
+<table class="bordered">
+  <caption>Tabel 6.4 — Perbandingan Komprehensif</caption>
+  <thead><tr><th style="width: 30%;">Aspek</th><th style="width: 35%;">Tanpa Internet (Saat Ini)</th><th style="width: 35%;">Dengan Internet (Rekomendasi)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Deployment</strong></td>
+      <td>Manual rsync dari PC developer. Bergantung pada 1 orang. 5-10 menit per deploy.</td>
+      <td>Otomatis via CI/CD. Push ke GitHub = auto deploy. &lt;2 menit.</td>
+    </tr>
+    <tr>
+      <td><strong>Rollback</strong></td>
+      <td>Manual rsync versi lama. Rawan human error.</td>
+      <td><code>git revert</code> + auto deploy. Cepat dan aman.</td>
+    </tr>
+    <tr>
+      <td><strong>Security Patches</strong></td>
+      <td>Tidak bisa dilakukan langsung. Harus transfer manual dari luar.</td>
+      <td><code>apt update && apt upgrade</code>. Bisa otomatis via unattended-upgrades.</td>
+    </tr>
+    <tr>
+      <td><strong>Dependency Updates</strong></td>
+      <td>Rebuild image di luar, transfer 1.2 GB file. 30-60 menit.</td>
+      <td><code>bun install</code> + restart. 5 menit.</td>
+    </tr>
+    <tr>
+      <td><strong>Docker Rebuild</strong></td>
+      <td>Harus build + save + scp + load. Sangat lambat.</td>
+      <td><code>docker compose build</code>. Otomatis download.</td>
+    </tr>
+    <tr>
+      <td><strong>Monitoring</strong></td>
+      <td>Tidak ada notifikasi otomatis. Masalah diketahui dari user.</td>
+      <td>UptimeRobot / Datadog. Alert via email/Slack.</td>
+    </tr>
+    <tr>
+      <td><strong>Version Control</strong></td>
+      <td>Hanya di PC developer. Server tidak punya akses ke repository.</td>
+      <td>Git repo di server. <code>git pull</code> langsung.</td>
+    </tr>
+    <tr>
+      <td><strong>Response Time (Hotfix)</strong></td>
+      <td>30+ menit (developer harus available + SSH access).</td>
+      <td>&lt;5 menit (push fix → auto deploy).</td>
+    </tr>
+    <tr>
+      <td><strong>Single Point of Failure</strong></td>
+      <td><span class="highlight-red">Ya</span> — bergantung pada 1 PC developer.</td>
+      <td><span class="highlight-blue">Tidak</span> — siapapun dengan akses GitHub bisa deploy.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6.9 Rekomendasi Konfigurasi Akses Internet</h2>
+<p>
+Untuk menjaga keamanan jaringan internal TPS sambil memenuhi kebutuhan operasional server, direkomendasikan konfigurasi akses internet yang terbatas (<em>whitelisted</em>) — hanya mengizinkan koneksi ke layanan-layanan yang dibutuhkan.
+</p>
+
+<h3>Opsi A: Whitelist Domain (Recommended)</h3>
+<p>
+Mengizinkan server mengakses hanya domain-domain tertentu melalui firewall atau proxy:
+</p>
+
+<table class="bordered">
+  <caption>Tabel 6.5 — Daftar Domain yang Dibutuhkan</caption>
+  <thead><tr><th>Domain</th><th>Port</th><th>Kebutuhan</th><th>Prioritas</th></tr></thead>
+  <tbody>
+    <tr><td><code>github.com</code></td><td>443 (HTTPS)</td><td>Git repository, CI/CD</td><td class="highlight-red">Critical</td></tr>
+    <tr><td><code>registry.npmjs.org</code></td><td>443</td><td>npm/Bun package download</td><td class="highlight-red">Critical</td></tr>
+    <tr><td><code>hub.docker.com</code></td><td>443</td><td>Docker base images</td><td class="highlight-red">Critical</td></tr>
+    <tr><td><code>archive.ubuntu.com</code></td><td>80/443</td><td>OS security updates</td><td class="highlight-red">Critical</td></tr>
+    <tr><td><code>security.ubuntu.com</code></td><td>80/443</td><td>OS security patches</td><td class="highlight-red">Critical</td></tr>
+    <tr><td><code>download.docker.com</code></td><td>443</td><td>Docker engine updates</td><td style="color: #ff9800; font-weight: bold;">High</td></tr>
+    <tr><td><code>bun.sh</code></td><td>443</td><td>Bun runtime updates</td><td style="color: #ff9800; font-weight: bold;">High</td></tr>
+  </tbody>
+</table>
+
+<h3>Opsi B: VPN atau Proxy Terbatas</h3>
+<p>
+Menggunakan forward proxy (seperti Squid) yang hanya mengizinkan koneksi ke domain yang di-whitelist. Semua traffic internet dari server melalui proxy, sehingga IT Security TPS dapat memonitor dan mengontrol traffic.
+</p>
+
+<h3>Opsi C: Scheduled Internet Access</h3>
+<p>
+Memberikan akses internet hanya pada waktu tertentu (contoh: jam maintenance 00:00-06:00) untuk keperluan update dan deployment, dan menutup akses di luar jam tersebut.
+</p>
+
+<div class="info-box">
+  <strong>Rekomendasi:</strong> <strong>Opsi A (Whitelist Domain)</strong> memberikan keseimbangan terbaik antara keamanan dan operasional. Server hanya bisa mengakses layanan yang benar-benar dibutuhkan, sementara IT Security tetap memiliki kontrol penuh.
+</div>
+
+<!-- ==================== BAB VII ==================== -->
+<h1 class="chapter">BAB VII<br>PENGUJIAN DAN VALIDASI</h1>
+
+<h2>7.1 Pengujian Fungsional</h2>
+
+<table class="bordered">
+  <caption>Tabel 7.1 — Hasil Pengujian Fungsional Website</caption>
+  <thead><tr><th>Halaman</th><th>URL</th><th>HTTP</th><th>Size</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Homepage</td><td><code>/</code></td><td>200</td><td>237 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Unduh Dokumen</td><td><code>/unduh-dokumen</code></td><td>200</td><td>20 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Berita</td><td><code>/berita/press-release</code></td><td>200</td><td>64 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Admin Dashboard</td><td><code>/backend/tpsadmin/dashboard</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+    <tr><td>Admin Edit</td><td><code>/backend/tpsadmin/edit/:id</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+    <tr><td>File Download</td><td><code>/_file/media/...</code></td><td>200</td><td>6.7 MB</td><td>✅ Pass</td></tr>
+    <tr><td>File Upload</td><td><code>/_upload</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+    <tr><td>File Redirect (legacy)</td><td><code>/file/media/...</code></td><td>301→200</td><td>OK</td><td>✅ Pass</td></tr>
+    <tr><td>Karir</td><td><code>/karir</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<h2>7.2 Pengujian Deployment</h2>
+
+<table class="bordered">
+  <caption>Tabel 7.2 — Hasil Pengujian Deploy Script</caption>
+  <thead><tr><th>Test Case</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>./deploy.sh</code> (full deploy)</td><td>Sync + restart + healthy</td><td>4 dirs synced, container Up (healthy), HTTP 200</td><td>✅ Pass</td></tr>
+    <tr><td><code>./deploy.sh --restart</code></td><td>Restart only</td><td>Container restarted, Up (healthy)</td><td>✅ Pass</td></tr>
+    <tr><td><code>./deploy.sh --sync-only</code></td><td>Sync + clear cache</td><td>4 dirs synced, cache cleared</td><td>✅ Pass</td></tr>
+    <tr><td>Volume mount verification</td><td>6 mounts active</td><td>6 bind mounts confirmed</td><td>✅ Pass</td></tr>
+    <tr><td>Health check after deploy</td><td>Healthy within 40s</td><td>Healthy within 25s</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB VIII ==================== -->
+<h1 class="chapter">BAB VIII<br>KESIMPULAN DAN REKOMENDASI</h1>
+
+<h2>8.1 Kesimpulan</h2>
+<ol>
+  <li><strong>Application server</strong> (172.19.154.93) telah berhasil diinstall dan dikonfigurasi dengan Docker Engine, menjalankan aplikasi CMS pada container <code>tps-app</code> yang terhubung ke database server (172.19.154.92).</li>
+  <li><strong>Empat kendala teknis</strong> telah berhasil ditemukan dan diperbaiki: Prisma initialization failure, file upload bugs (3 issues), file URL routing, dan tilde encoding pada URL legacy.</li>
+  <li><strong>Sistem deployment</strong> menggunakan volume mount + rsync telah di-setup dan divalidasi berfungsi dengan baik melalui script <code>deploy.sh</code>.</li>
+  <li><strong>Ketiadaan akses internet</strong> pada server merupakan kendala operasional yang signifikan, berdampak pada kecepatan deployment, keamanan (tidak bisa patch), dan menciptakan single point of failure pada proses deployment.</li>
+  <li>Seluruh halaman website dan fitur admin (termasuk upload file) telah diverifikasi berfungsi normal.</li>
+</ol>
+
+<h2>8.2 Rekomendasi</h2>
+
+<table class="bordered">
+  <caption>Tabel 8.1 — Daftar Rekomendasi</caption>
+  <thead><tr><th>No</th><th>Rekomendasi</th><th>Prioritas</th><th>Justifikasi</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Memberikan akses internet terbatas (whitelisted) pada server</strong></td>
+      <td class="highlight-red">CRITICAL</td>
+      <td>Diperlukan untuk CI/CD, security patches, dependency updates, dan Docker rebuild. Tanpa ini, server bergantung pada deployment manual dan rentan terhadap vulnerability yang tidak bisa di-patch.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Setup CI/CD pipeline (GitHub Actions)</td>
+      <td class="highlight-red">HIGH</td>
+      <td>Menghilangkan single point of failure dan mempercepat deployment dari 10 menit manual menjadi &lt;2 menit otomatis. Memerlukan internet pada server.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Automated backup database</td>
+      <td class="highlight-red">HIGH</td>
+      <td>Jadwal backup harian menggunakan <code>pg_dump</code> dan penyimpanan di lokasi terpisah untuk disaster recovery.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Monitoring dan alerting</td>
+      <td style="color: #ff9800; font-weight: bold;">HIGH</td>
+      <td>Implementasi monitoring uptime dan error alerting agar masalah terdeteksi proaktif, bukan dari laporan pengguna. Memerlukan internet untuk notifikasi.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>SSL/TLS certificate</td>
+      <td style="color: #ff9800; font-weight: bold;">HIGH</td>
+      <td>Mengamankan koneksi HTTP dengan HTTPS menggunakan Let's Encrypt atau certificate internal. Memerlukan internet untuk Let's Encrypt.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Upgrade Prisma ORM</td>
+      <td style="color: #ff9800; font-weight: bold;">MEDIUM</td>
+      <td>Versi 5.11.0 memiliki bug schema parser. Upgrade ke versi terbaru diperlukan. Memerlukan internet untuk download package.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Scheduled security updates</td>
+      <td style="color: #ff9800; font-weight: bold;">MEDIUM</td>
+      <td>Jadwal patch OS dan Docker secara berkala (minimal bulanan). Memerlukan internet.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="danger-box">
+  <strong>CATATAN PENTING:</strong> Dari 7 rekomendasi di atas, <strong>5 di antaranya memerlukan akses internet pada server</strong>. Tanpa akses internet, hanya rekomendasi #3 (backup database) dan sebagian #6 (dengan workaround manual) yang dapat direalisasikan. Hal ini menekankan urgensitas pemberian akses internet terbatas pada server.
+</div>
+
+<!-- ==================== LAMPIRAN ==================== -->
+<h1 class="chapter">LAMPIRAN</h1>
+
+<h2>Lampiran A — Dockerfile Lengkap</h2>
+<pre>FROM oven/bun:1.1.20-debian
+
+RUN apt-get update && apt-get install -y \
+    curl git openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . ./
+RUN bun install --production
+RUN mkdir -p /app/uploads /app/logs
+RUN cd app/db && rm -f .env && \
+    bunx prisma generate --schema=prisma/schema.prisma
+
+ENV NODE_ENV=production
+ENV PORT=3300
+EXPOSE 3300
+
+HEALTHCHECK --interval=30s --timeout=10s \
+    --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3300/ || exit 1
+
+CMD ["bun", "run", "prod"]</pre>
+
+<h2>Lampiran B — Docker Compose Lengkap</h2>
+<pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:***@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      - /opt/tps-app/pkgs:/app/pkgs
+      - /opt/tps-app/app/srv:/app/app/srv
+      - /opt/tps-app/app/db:/app/app/db
+      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    networks:
+      - tps-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tps-network:
+    driver: bridge</pre>
+
+<h2>Lampiran C — Deploy Script (deploy.sh)</h2>
+<pre>#!/bin/bash
+set -e
+
+SERVER="root@172.19.154.93"
+REMOTE_APP="/opt/tps-app"
+LOCAL_SRC="tps-core/tps"
+
+# Sync source code
+rsync -az --delete --exclude='node_modules' \
+    "$LOCAL_SRC/pkgs/" "$SERVER:$REMOTE_APP/pkgs/"
+rsync -az --delete \
+    "$LOCAL_SRC/app/srv/" "$SERVER:$REMOTE_APP/app/srv/"
+rsync -az --exclude='node_modules' --exclude='.env' \
+    "$LOCAL_SRC/app/db/" "$SERVER:$REMOTE_APP/app/db/"
+rsync -az \
+    "$LOCAL_SRC/app/web/deploy/" "$SERVER:$REMOTE_APP/app/web/deploy/"
+
+# Restart + health check
+ssh $SERVER "docker restart tps-app"
+sleep 12
+ssh $SERVER "docker ps --filter name=tps-app --format '{{.Status}}'"
+ssh $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:3300/"</pre>
+
+<h2>Lampiran D — Daftar File yang Diperbaiki</h2>
+<table class="bordered">
+  <thead><tr><th>No</th><th>File</th><th>Perubahan</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>pkgs/utils/prisma.ts</code></td><td>Pisahkan prisma generate dan PrismaClient import ke try-catch terpisah</td></tr>
+    <tr><td>2</td><td><code>app/srv/api/_tpsadmin_edit.ts</code></td><td>Fix FormData body, hapus location.reload(), update preview di DOM</td></tr>
+    <tr><td>3</td><td><code>pkgs/api/_upload.ts</code></td><td>Fix directory creation dengan absolute path</td></tr>
+    <tr><td>4</td><td><code>pkgs/server/create.ts</code></td><td>Tambah redirect /file/* → /_file/*, konversi ~ ke %20</td></tr>
+    <tr><td>5</td><td><code>deploy/docker-compose.yml</code></td><td>Tambah volume mounts untuk source code directories</td></tr>
+    <tr><td>6</td><td><code>deploy.sh</code></td><td>Update workflow rsync + restart (tanpa docker cp)</td></tr>
+  </tbody>
+</table>
+
+<br><br>
+<div class="page-footer">
+  <p class="no-indent">Dokumen ini bersifat <strong>RAHASIA</strong> dan hanya untuk penggunaan internal PT Terminal Petikemas Surabaya dan PT PRIMALINK.</p>
+  <p class="no-indent">TPS-PRIMALINK/APP/2026-002 | Versi 1.0 | 12 Februari 2026</p>
+</div>
+
+</body>
+</html>

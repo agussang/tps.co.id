@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Instalasi dan Konfigurasi PostgreSQL Server - TPS CMS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Source+Sans+3:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: A4;
+    margin: 2.5cm 3cm 2.5cm 3cm;
+  }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2.5cm 3cm;
+  }
+
+  /* Cover Page */
+  .cover-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    text-align: center;
+    page-break-after: always;
+  }
+  .cover-page .logo-area {
+    margin-bottom: 40px;
+  }
+  .cover-page .logo-area img {
+    height: 80px;
+  }
+  .cover-page .doc-type {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #0475BC;
+    margin-bottom: 30px;
+    border-top: 3px solid #0475BC;
+    border-bottom: 3px solid #0475BC;
+    padding: 10px 30px;
+  }
+  .cover-page h1 {
+    font-size: 22pt;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    color: #0a0a0a;
+  }
+  .cover-page .subtitle {
+    font-size: 14pt;
+    color: #444;
+    margin-bottom: 60px;
+  }
+  .cover-page .meta-table {
+    width: 70%;
+    border-collapse: collapse;
+    margin-bottom: 60px;
+    font-size: 11pt;
+  }
+  .cover-page .meta-table td {
+    padding: 8px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  .cover-page .meta-table td:first-child {
+    font-weight: bold;
+    width: 40%;
+    color: #333;
+  }
+  .cover-page .company-info {
+    margin-top: 40px;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+  .cover-page .company-info .company-name {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+  .cover-page .prepared-for {
+    margin-top: 50px;
+    padding: 20px;
+    border: 2px solid #0475BC;
+    border-radius: 8px;
+  }
+  .cover-page .prepared-for .label {
+    font-size: 10pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .cover-page .prepared-for .name {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+
+  /* Table of Contents */
+  .toc {
+    page-break-after: always;
+  }
+  .toc h2 {
+    text-align: center;
+    font-size: 16pt;
+    margin-bottom: 30px;
+    color: #0a0a0a;
+  }
+  .toc-list {
+    list-style: none;
+    counter-reset: toc;
+  }
+  .toc-list li {
+    counter-increment: toc;
+    padding: 6px 0;
+    border-bottom: 1px dotted #ccc;
+    display: flex;
+    justify-content: space-between;
+  }
+  .toc-list li.chapter {
+    font-weight: bold;
+    margin-top: 12px;
+    font-size: 12pt;
+  }
+  .toc-list li.section {
+    padding-left: 25px;
+    font-size: 11pt;
+  }
+  .toc-list li.subsection {
+    padding-left: 50px;
+    font-size: 10.5pt;
+    color: #444;
+  }
+  .toc-page {
+    font-weight: normal;
+    color: #666;
+  }
+
+  /* Chapter Headings */
+  h1.chapter {
+    font-size: 18pt;
+    font-weight: bold;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #0475BC;
+    color: #0a0a0a;
+    page-break-before: always;
+  }
+  h1.chapter:first-of-type {
+    page-break-before: auto;
+  }
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+  }
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  p {
+    text-align: justify;
+    margin-bottom: 12px;
+    text-indent: 1.27cm;
+  }
+  p.no-indent {
+    text-indent: 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10.5pt;
+  }
+  table th {
+    background: #0475BC;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+  table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+  }
+  table tr:nth-child(even) {
+    background: #f8f9fa;
+  }
+  table.bordered td, table.bordered th {
+    border: 1px solid #ccc;
+  }
+  table caption {
+    caption-side: bottom;
+    font-size: 10pt;
+    color: #666;
+    font-style: italic;
+    padding-top: 8px;
+  }
+
+  /* Code blocks */
+  pre {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-left: 4px solid #0475BC;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5pt;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    background: #f0f0f0;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  /* Figures */
+  .figure {
+    margin: 20px 0;
+    text-align: center;
+  }
+  .figure .caption {
+    font-size: 10pt;
+    color: #666;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* Info boxes */
+  .info-box {
+    background: #e8f4fd;
+    border: 1px solid #b8d9f0;
+    border-left: 4px solid #0475BC;
+    padding: 12px 16px;
+    margin: 15px 0;
+    font-size: 11pt;
+  }
+  .warning-box {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-left: 4px solid #ff9800;
+    padding: 12px 16px;
+    margin: 15px 0;
+    font-size: 11pt;
+  }
+
+  /* Lists */
+  ol, ul {
+    margin: 10px 0 10px 35px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+
+  /* Diagram box */
+  .diagram {
+    background: #fafafa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    line-height: 1.6;
+  }
+
+  /* Footer */
+  .page-footer {
+    font-size: 9pt;
+    color: #999;
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+  }
+
+  /* Print */
+  @media print {
+    body { padding: 0; max-width: none; }
+    .cover-page { min-height: 100vh; }
+    h1.chapter { page-break-before: always; }
+    table, pre { page-break-inside: avoid; }
+    .no-break { page-break-inside: avoid; }
+  }
+
+  /* Step numbering */
+  .step {
+    margin: 15px 0;
+    padding: 12px 16px;
+    border-left: 3px solid #0475BC;
+    background: #fafbfc;
+  }
+  .step-number {
+    display: inline-block;
+    background: #0475BC;
+    color: white;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 11pt;
+    margin-right: 10px;
+  }
+  .step-title {
+    font-weight: bold;
+    font-size: 11pt;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-page">
+  <div class="doc-type">Laporan Teknis</div>
+
+  <h1>Instalasi dan Konfigurasi<br>PostgreSQL Database Server<br>untuk Sistem CMS Website</h1>
+
+  <p class="subtitle">PT Terminal Petikemas Surabaya</p>
+
+  <table class="meta-table">
+    <tr><td>Nomor Dokumen</td><td>TPS-PRIMALINK/DB/2026-001</td></tr>
+    <tr><td>Versi</td><td>1.0</td></tr>
+    <tr><td>Tanggal</td><td>12 Februari 2026</td></tr>
+    <tr><td>Klasifikasi</td><td>Rahasia / Internal</td></tr>
+    <tr><td>Status</td><td>Final</td></tr>
+  </table>
+
+  <div class="prepared-for">
+    <div class="label">Dipersiapkan untuk</div>
+    <div class="name">PT Terminal Petikemas Surabaya</div>
+  </div>
+
+  <div class="company-info">
+    <div class="company-name">PT PRIMALINK</div>
+    <p class="no-indent">Technology Solutions Partner</p>
+  </div>
+</div>
+
+<!-- ==================== LEMBAR PENGESAHAN ==================== -->
+<div style="page-break-after: always;">
+  <h2 style="text-align: center; font-size: 16pt; margin-top: 40px; margin-bottom: 40px;">LEMBAR PENGESAHAN</h2>
+
+  <table class="bordered" style="width: 100%; margin-bottom: 30px;">
+    <tr>
+      <td style="width: 30%; font-weight: bold;">Judul Dokumen</td>
+      <td>Laporan Instalasi dan Konfigurasi PostgreSQL Database Server untuk Sistem CMS Website PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Nomor Dokumen</td>
+      <td>TPS-PRIMALINK/DB/2026-001</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Versi</td>
+      <td>1.0</td>
+    </tr>
+  </table>
+
+  <table class="bordered" style="width: 100%; text-align: center;">
+    <tr>
+      <th style="width: 33%;">Disiapkan Oleh</th>
+      <th style="width: 33%;">Diperiksa Oleh</th>
+      <th style="width: 34%;">Disetujui Oleh</th>
+    </tr>
+    <tr style="height: 100px;">
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td><strong>Tim Teknis</strong><br>PT PRIMALINK</td>
+      <td><strong>Project Manager</strong><br>PT PRIMALINK</td>
+      <td><strong>PIC IT</strong><br>PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top: 40px;">Riwayat Perubahan Dokumen</h3>
+  <table class="bordered">
+    <thead>
+      <tr><th>Versi</th><th>Tanggal</th><th>Perubahan</th><th>Penulis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0.1</td><td>03 Feb 2026</td><td>Draft awal — instalasi PostgreSQL</td><td>Tim Teknis</td></tr>
+      <tr><td>0.2</td><td>03 Feb 2026</td><td>Konfigurasi keamanan dan restore database</td><td>Tim Teknis</td></tr>
+      <tr><td>1.0</td><td>12 Feb 2026</td><td>Finalisasi dokumen, verifikasi dan validasi</td><td>Tim Teknis</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== DAFTAR ISI ==================== -->
+<div class="toc">
+  <h2>DAFTAR ISI</h2>
+  <ul class="toc-list">
+    <li class="chapter"><span>BAB I &mdash; PENDAHULUAN</span><span class="toc-page">1</span></li>
+    <li class="section"><span>1.1 Latar Belakang</span></li>
+    <li class="section"><span>1.2 Tujuan</span></li>
+    <li class="section"><span>1.3 Ruang Lingkup</span></li>
+    <li class="section"><span>1.4 Arsitektur Sistem</span></li>
+
+    <li class="chapter"><span>BAB II &mdash; SPESIFIKASI SERVER</span><span class="toc-page">3</span></li>
+    <li class="section"><span>2.1 Database Server (172.19.154.92)</span></li>
+    <li class="section"><span>2.2 Application Server (172.19.154.93)</span></li>
+    <li class="section"><span>2.3 Topologi Jaringan</span></li>
+
+    <li class="chapter"><span>BAB III &mdash; INSTALASI POSTGRESQL</span><span class="toc-page">5</span></li>
+    <li class="section"><span>3.1 Persiapan Sistem Operasi</span></li>
+    <li class="section"><span>3.2 Instalasi PostgreSQL 16</span></li>
+    <li class="section"><span>3.3 Verifikasi Instalasi</span></li>
+
+    <li class="chapter"><span>BAB IV &mdash; KONFIGURASI DATABASE</span><span class="toc-page">7</span></li>
+    <li class="section"><span>4.1 Konfigurasi Koneksi (postgresql.conf)</span></li>
+    <li class="section"><span>4.2 Konfigurasi Autentikasi (pg_hba.conf)</span></li>
+    <li class="section"><span>4.3 Konfigurasi User dan Password</span></li>
+    <li class="section"><span>4.4 Pembuatan Database</span></li>
+    <li class="section"><span>4.5 Restart dan Validasi Service</span></li>
+
+    <li class="chapter"><span>BAB V &mdash; RESTORE DATABASE</span><span class="toc-page">10</span></li>
+    <li class="section"><span>5.1 Persiapan File Backup</span></li>
+    <li class="section"><span>5.2 Proses Restore</span></li>
+    <li class="section"><span>5.3 Verifikasi Data</span></li>
+    <li class="section"><span>5.4 Struktur Tabel</span></li>
+
+    <li class="chapter"><span>BAB VI &mdash; KONFIGURASI KEAMANAN</span><span class="toc-page">13</span></li>
+    <li class="section"><span>6.1 Pembatasan Akses Jaringan</span></li>
+    <li class="section"><span>6.2 Metode Autentikasi</span></li>
+    <li class="section"><span>6.3 Firewall (UFW)</span></li>
+
+    <li class="chapter"><span>BAB VII &mdash; INTEGRASI DENGAN APPLICATION SERVER</span><span class="toc-page">15</span></li>
+    <li class="section"><span>7.1 Konfigurasi Connection String</span></li>
+    <li class="section"><span>7.2 Prisma ORM</span></li>
+    <li class="section"><span>7.3 Pengujian Koneksi</span></li>
+
+    <li class="chapter"><span>BAB VIII &mdash; PENGUJIAN DAN VALIDASI</span><span class="toc-page">17</span></li>
+    <li class="section"><span>8.1 Pengujian Konektivitas</span></li>
+    <li class="section"><span>8.2 Pengujian Query</span></li>
+    <li class="section"><span>8.3 Pengujian Aplikasi End-to-End</span></li>
+
+    <li class="chapter"><span>BAB IX &mdash; KESIMPULAN DAN REKOMENDASI</span><span class="toc-page">19</span></li>
+    <li class="section"><span>9.1 Kesimpulan</span></li>
+    <li class="section"><span>9.2 Rekomendasi</span></li>
+
+    <li class="chapter"><span>LAMPIRAN</span><span class="toc-page">20</span></li>
+  </ul>
+</div>
+
+<!-- ==================== BAB I ==================== -->
+<h1 class="chapter">BAB I<br>PENDAHULUAN</h1>
+
+<h2>1.1 Latar Belakang</h2>
+<p>
+PT Terminal Petikemas Surabaya (TPS) merupakan operator terminal petikemas kelas dunia yang berlokasi di Pelabuhan Tanjung Perak, Surabaya. Sebagai perusahaan yang terus berkembang dan bertransformasi digital, TPS memiliki kebutuhan akan sistem pengelolaan konten website (Content Management System / CMS) yang handal, aman, dan mudah dikelola.
+</p>
+<p>
+Sistem CMS website TPS yang baru dikembangkan membutuhkan infrastruktur database yang terpisah dari application server untuk memastikan performa optimal, keamanan data, serta kemudahan dalam pengelolaan dan pemeliharaan. Pemisahan ini mengikuti praktik terbaik (best practice) arsitektur multi-tier yang memisahkan presentation layer, application layer, dan data layer.
+</p>
+<p>
+Dalam rangka implementasi sistem tersebut, PT PRIMALINK selaku mitra teknologi ditugaskan untuk melakukan instalasi, konfigurasi, dan migrasi database PostgreSQL pada server yang telah disediakan oleh TPS di lingkungan jaringan internal perusahaan.
+</p>
+
+<h2>1.2 Tujuan</h2>
+<p class="no-indent">Dokumen ini disusun dengan tujuan sebagai berikut:</p>
+<ol>
+  <li>Mendokumentasikan seluruh proses instalasi dan konfigurasi PostgreSQL database server pada infrastruktur TPS.</li>
+  <li>Mendokumentasikan proses migrasi (restore) data dari database existing ke server baru.</li>
+  <li>Mendokumentasikan konfigurasi keamanan yang diterapkan pada database server.</li>
+  <li>Memberikan panduan teknis untuk pemeliharaan dan troubleshooting di masa mendatang.</li>
+  <li>Sebagai laporan progres pekerjaan kepada PT Terminal Petikemas Surabaya.</li>
+</ol>
+
+<h2>1.3 Ruang Lingkup</h2>
+<p class="no-indent">Ruang lingkup pekerjaan yang didokumentasikan dalam laporan ini meliputi:</p>
+<ol>
+  <li>Instalasi PostgreSQL 16 pada server database (172.19.154.92).</li>
+  <li>Konfigurasi koneksi, autentikasi, dan keamanan database.</li>
+  <li>Pembuatan user dan database untuk sistem CMS.</li>
+  <li>Restore (migrasi) data dari backup database production.</li>
+  <li>Integrasi dan pengujian koneksi dengan application server (172.19.154.93).</li>
+  <li>Verifikasi dan validasi seluruh data hasil migrasi.</li>
+</ol>
+
+<h2>1.4 Arsitektur Sistem</h2>
+<p>
+Sistem CMS Website TPS menggunakan arsitektur multi-tier yang memisahkan fungsi aplikasi dan database ke dalam dua server terpisah dalam satu segmen jaringan internal yang sama. Berikut adalah gambaran arsitektur yang diimplementasikan:
+</p>
+
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+┌─────────────────────────────────────────────────────────────────┐
+│                    JARINGAN INTERNAL TPS                        │
+│                     Subnet: 172.19.154.x                       │
+│                                                                 │
+│  ┌──────────────────────┐      ┌──────────────────────┐        │
+│  │   APPLICATION SERVER  │      │    DATABASE SERVER    │        │
+│  │    172.19.154.93      │      │    172.19.154.92      │        │
+│  │                       │      │                       │        │
+│  │  ┌─────────────────┐ │      │  ┌─────────────────┐ │        │
+│  │  │   Docker Engine  │ │      │  │  PostgreSQL 16   │ │        │
+│  │  │  ┌────────────┐ │ │      │  │                   │ │        │
+│  │  │  │  TPS App   │ │ │ TCP  │  │  Database:        │ │        │
+│  │  │  │  (Bun.js)  │─┼─┼─────┼──┤  tps_web          │ │        │
+│  │  │  │  Port 3300 │ │ │ 5432 │  │                   │ │        │
+│  │  │  └────────────┘ │ │      │  │  16 Tables        │ │        │
+│  │  └─────────────────┘ │      │  │  17.773 Records   │ │        │
+│  │                       │      │  └─────────────────┘ │        │
+│  │  Ubuntu 24.04 LTS     │      │  Ubuntu 24.04 LTS     │        │
+│  │  RAM: 8 GB            │      │  RAM: 8 GB            │        │
+│  │  Disk: 200 GB         │      │  Disk: 200 GB         │        │
+│  │  CPU: 4 Core          │      │  CPU: 4 Core          │        │
+│  └──────────────────────┘      └──────────────────────┘        │
+│                                                                 │
+│  ┌──────────────────────┐                                      │
+│  │     USER / ADMIN      │                                      │
+│  │   Browser Access      │                                      │
+│  │   Port 3300 (HTTP)    │                                      │
+│  └──────────────────────┘                                      │
+└─────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+<p class="no-indent" style="text-align: center; font-style: italic; font-size: 10pt; color: #666;">
+Gambar 1.1 — Diagram Arsitektur Sistem CMS Website TPS
+</p>
+
+<!-- ==================== BAB II ==================== -->
+<h1 class="chapter">BAB II<br>SPESIFIKASI SERVER</h1>
+
+<h2>2.1 Database Server (172.19.154.92)</h2>
+<p>
+Server database merupakan server yang didedikasikan untuk menjalankan layanan PostgreSQL. Server ini tidak menjalankan layanan aplikasi lain selain database, sesuai dengan praktik terbaik pemisahan concern.
+</p>
+
+<table>
+  <caption>Tabel 2.1 — Spesifikasi Database Server</caption>
+  <thead>
+    <tr><th style="width: 35%;">Parameter</th><th>Nilai</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Hostname</td><td><code>tpswebsitedb</code></td></tr>
+    <tr><td>IP Address</td><td>172.19.154.92</td></tr>
+    <tr><td>Sistem Operasi</td><td>Ubuntu 24.04.3 LTS (Noble Numbat)</td></tr>
+    <tr><td>Kernel</td><td>Linux 6.8.0-90-generic x86_64</td></tr>
+    <tr><td>CPU</td><td>4 Core</td></tr>
+    <tr><td>RAM</td><td>8 GB</td></tr>
+    <tr><td>Disk</td><td>200 GB (LVM)</td></tr>
+    <tr><td>Database Engine</td><td>PostgreSQL 16.11</td></tr>
+    <tr><td>Port Database</td><td>5432</td></tr>
+  </tbody>
+</table>
+
+<h2>2.2 Application Server (172.19.154.93)</h2>
+<p>
+Server aplikasi menjalankan sistem CMS dalam container Docker. Aplikasi terhubung ke database server melalui jaringan internal pada port 5432.
+</p>
+
+<table>
+  <caption>Tabel 2.2 — Spesifikasi Application Server</caption>
+  <thead>
+    <tr><th style="width: 35%;">Parameter</th><th>Nilai</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Hostname</td><td><code>tpswebsiteapp</code></td></tr>
+    <tr><td>IP Address</td><td>172.19.154.93</td></tr>
+    <tr><td>Sistem Operasi</td><td>Ubuntu 24.04.3 LTS (Noble Numbat)</td></tr>
+    <tr><td>Kernel</td><td>Linux 6.8.0-90-generic x86_64</td></tr>
+    <tr><td>CPU</td><td>4 Core</td></tr>
+    <tr><td>RAM</td><td>8 GB</td></tr>
+    <tr><td>Disk</td><td>200 GB (LVM)</td></tr>
+    <tr><td>Docker</td><td>Docker 29.2.1</td></tr>
+    <tr><td>Runtime</td><td>Bun 1.1.20 (dalam container)</td></tr>
+    <tr><td>Port Aplikasi</td><td>3300</td></tr>
+  </tbody>
+</table>
+
+<h2>2.3 Topologi Jaringan</h2>
+<p>
+Kedua server berada dalam satu segmen jaringan internal TPS (subnet 172.19.154.0/24). Komunikasi antar server menggunakan protokol TCP pada port 5432 untuk koneksi database. Jaringan ini merupakan jaringan internal yang tidak memiliki akses langsung ke internet, sehingga meningkatkan keamanan infrastruktur.
+</p>
+
+<table>
+  <caption>Tabel 2.3 — Koneksi Jaringan Antar Server</caption>
+  <thead>
+    <tr><th>Dari</th><th>Ke</th><th>Port</th><th>Protokol</th><th>Keterangan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>172.19.154.93 (App)</td><td>172.19.154.92 (DB)</td><td>5432</td><td>TCP</td><td>Koneksi PostgreSQL</td></tr>
+    <tr><td>User/Admin</td><td>172.19.154.93 (App)</td><td>3300</td><td>HTTP</td><td>Akses Website & CMS</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB III ==================== -->
+<h1 class="chapter">BAB III<br>INSTALASI POSTGRESQL</h1>
+
+<h2>3.1 Persiapan Sistem Operasi</h2>
+<p>
+Sebelum melakukan instalasi PostgreSQL, dilakukan persiapan pada sistem operasi server database (172.19.154.92) yang meliputi update paket sistem dan instalasi dependensi yang dibutuhkan.
+</p>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Update Sistem Operasi</span>
+  <pre>sudo apt update && sudo apt upgrade -y</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini memperbarui daftar paket dan menginstall seluruh update keamanan yang tersedia untuk Ubuntu 24.04 LTS.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Instalasi Dependensi</span>
+  <pre>sudo apt install -y wget curl gnupg2 lsb-release</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Paket-paket ini diperlukan untuk mengunduh dan memverifikasi repository PostgreSQL.</p>
+</div>
+
+<h2>3.2 Instalasi PostgreSQL 16</h2>
+<p>
+PostgreSQL versi 16 dipilih karena merupakan versi stabil terbaru yang tersedia di repository resmi Ubuntu 24.04 LTS, dengan dukungan jangka panjang dan fitur-fitur terbaru yang dibutuhkan oleh sistem CMS.
+</p>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Instalasi PostgreSQL dari Repository Ubuntu</span>
+  <pre>sudo apt install -y postgresql postgresql-contrib</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Paket <code>postgresql</code> berisi server database, sedangkan <code>postgresql-contrib</code> berisi ekstensi tambahan termasuk <code>uuid-ossp</code> yang dibutuhkan untuk generate UUID.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Mengaktifkan Autostart Service</span>
+  <pre>sudo systemctl enable postgresql
+sudo systemctl start postgresql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini memastikan PostgreSQL otomatis berjalan ketika server di-restart.</p>
+</div>
+
+<h2>3.3 Verifikasi Instalasi</h2>
+<p>
+Setelah instalasi selesai, dilakukan verifikasi untuk memastikan PostgreSQL terinstall dengan benar dan berjalan dengan normal.
+</p>
+
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Verifikasi Versi dan Status</span>
+  <pre>psql --version
+# Output: psql (PostgreSQL) 16.11 (Ubuntu 16.11-0ubuntu0.24.04.1)
+
+sudo systemctl status postgresql
+# Output: Active: active (exited) ✓
+
+pg_lsclusters
+# Output:
+# Ver Cluster Port Status Owner    Data directory
+# 16  main    5432 online postgres /var/lib/postgresql/16/main</pre>
+</div>
+
+<table>
+  <caption>Tabel 3.1 — Hasil Verifikasi Instalasi PostgreSQL</caption>
+  <thead>
+    <tr><th>Item Verifikasi</th><th>Expected</th><th>Actual</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Versi PostgreSQL</td><td>16.x</td><td>16.11</td><td>✅ Pass</td></tr>
+    <tr><td>Status Service</td><td>active</td><td>active (exited)</td><td>✅ Pass</td></tr>
+    <tr><td>Cluster Status</td><td>online</td><td>online</td><td>✅ Pass</td></tr>
+    <tr><td>Port</td><td>5432</td><td>5432</td><td>✅ Pass</td></tr>
+    <tr><td>Data Directory</td><td>/var/lib/postgresql/16/main</td><td>/var/lib/postgresql/16/main</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB IV ==================== -->
+<h1 class="chapter">BAB IV<br>KONFIGURASI DATABASE</h1>
+
+<h2>4.1 Konfigurasi Koneksi (postgresql.conf)</h2>
+<p>
+File konfigurasi utama PostgreSQL perlu diubah agar server database dapat menerima koneksi dari application server. Secara default, PostgreSQL hanya menerima koneksi dari localhost.
+</p>
+
+<p class="no-indent"><strong>File:</strong> <code>/etc/postgresql/16/main/postgresql.conf</code></p>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Mengubah Listen Address</span>
+  <pre># Sebelum (default - hanya localhost)
+listen_addresses = 'localhost'
+
+# Sesudah (menerima koneksi dari semua interface)
+listen_addresses = '*'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Parameter <code>listen_addresses = '*'</code> memungkinkan PostgreSQL menerima koneksi TCP dari network interface manapun. Keamanan tetap dijaga melalui konfigurasi <code>pg_hba.conf</code> yang membatasi IP yang diizinkan.</p>
+</div>
+
+<table>
+  <caption>Tabel 4.1 — Parameter Konfigurasi PostgreSQL</caption>
+  <thead>
+    <tr><th>Parameter</th><th>Nilai</th><th>Keterangan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>listen_addresses</code></td><td><code>'*'</code></td><td>Menerima koneksi dari semua interface</td></tr>
+    <tr><td><code>port</code></td><td><code>5432</code></td><td>Port standar PostgreSQL</td></tr>
+    <tr><td><code>max_connections</code></td><td><code>100</code></td><td>Maksimum koneksi bersamaan</td></tr>
+    <tr><td><code>shared_buffers</code></td><td><code>128MB</code></td><td>Memory untuk shared buffer</td></tr>
+  </tbody>
+</table>
+
+<h2>4.2 Konfigurasi Autentikasi (pg_hba.conf)</h2>
+<p>
+File <code>pg_hba.conf</code> (Host-Based Authentication) mengontrol siapa yang boleh terhubung ke database, dari mana, dan dengan metode autentikasi apa. Konfigurasi ini merupakan lapisan keamanan utama pada level database.
+</p>
+
+<p class="no-indent"><strong>File:</strong> <code>/etc/postgresql/16/main/pg_hba.conf</code></p>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Menambahkan Akses untuk Application Server</span>
+  <pre># Koneksi lokal (default)
+local   all   postgres                      peer
+local   all   all                           peer
+host    all   all       127.0.0.1/32        scram-sha-256
+host    all   all       ::1/128             scram-sha-256
+
+# Tambahan: akses dari Application Server
+host    all   all       172.19.154.93/32    scram-sha-256</pre>
+</div>
+
+<div class="info-box">
+  <strong>Penjelasan Konfigurasi:</strong><br>
+  &bull; <code>host</code> — Koneksi melalui TCP/IP<br>
+  &bull; <code>all all</code> — Berlaku untuk semua database dan semua user<br>
+  &bull; <code>172.19.154.93/32</code> — Hanya IP application server yang diizinkan (subnet mask /32 = exact match)<br>
+  &bull; <code>scram-sha-256</code> — Metode autentikasi terenkripsi (paling aman yang tersedia)
+</div>
+
+<h2>4.3 Konfigurasi User dan Password</h2>
+<p>
+Untuk keamanan, password user <code>postgres</code> (superuser) di-set dengan password yang kuat menggunakan metode autentikasi <code>scram-sha-256</code>.
+</p>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Set Password User postgres</span>
+  <pre>sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'TpsDB2026Secure';"</pre>
+</div>
+
+<div class="warning-box">
+  <strong>Catatan Keamanan:</strong> Password yang tercantum dalam dokumen ini bersifat rahasia. Distribusi dokumen ini harus dibatasi kepada personel yang berwenang saja. Disarankan untuk mengganti password secara berkala sesuai kebijakan keamanan TPS.
+</div>
+
+<h2>4.4 Pembuatan Database</h2>
+<p>
+Database <code>tps_web</code> dibuat untuk menyimpan seluruh data sistem CMS website. Ekstensi <code>uuid-ossp</code> diaktifkan karena sistem CMS menggunakan UUID sebagai primary key.
+</p>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Membuat Database dan Ekstensi</span>
+  <pre>sudo -u postgres psql
+
+-- Membuat database
+CREATE DATABASE tps_web;
+
+-- Beralih ke database baru
+\c tps_web
+
+-- Mengaktifkan ekstensi UUID
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Verifikasi
+\dx
+# Output: uuid-ossp | 1.1 | public | generate universally unique identifiers</pre>
+</div>
+
+<h2>4.5 Restart dan Validasi Service</h2>
+
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Restart PostgreSQL untuk Menerapkan Konfigurasi</span>
+  <pre>sudo systemctl restart postgresql
+sudo systemctl status postgresql</pre>
+</div>
+
+<table>
+  <caption>Tabel 4.2 — Checklist Konfigurasi Database</caption>
+  <thead>
+    <tr><th>Item</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>listen_addresses = '*'</td><td>✅ Configured</td></tr>
+    <tr><td>Port 5432 aktif</td><td>✅ Active</td></tr>
+    <tr><td>pg_hba.conf — akses 172.19.154.93</td><td>✅ Configured</td></tr>
+    <tr><td>Metode autentikasi scram-sha-256</td><td>✅ Configured</td></tr>
+    <tr><td>Password user postgres</td><td>✅ Set</td></tr>
+    <tr><td>Database tps_web</td><td>✅ Created</td></tr>
+    <tr><td>Ekstensi uuid-ossp</td><td>✅ Enabled</td></tr>
+    <tr><td>Service restart</td><td>✅ Restarted</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB V ==================== -->
+<h1 class="chapter">BAB V<br>RESTORE DATABASE</h1>
+
+<h2>5.1 Persiapan File Backup</h2>
+<p>
+Data dari database production existing perlu dimigrasikan ke server database baru. File backup (dump) disiapkan dari database production dan ditransfer ke server database baru.
+</p>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Transfer File Backup ke Server</span>
+  <pre># Transfer backup file ke server database
+scp tps_web_backup.sql root@172.19.154.92:/tmp/</pre>
+</div>
+
+<h2>5.2 Proses Restore</h2>
+<p>
+Proses restore dilakukan menggunakan tool <code>psql</code> yang membaca file SQL dump dan menjalankan seluruh perintah SQL untuk membuat struktur tabel dan memasukkan data.
+</p>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Restore Database dari Backup</span>
+  <pre># Restore menggunakan psql
+sudo -u postgres psql tps_web &lt; /tmp/tps_web_backup.sql
+
+# Atau menggunakan pg_restore untuk format custom
+# sudo -u postgres pg_restore -d tps_web /tmp/tps_web_backup.dump</pre>
+</div>
+
+<h2>5.3 Verifikasi Data</h2>
+<p>
+Setelah proses restore selesai, dilakukan verifikasi menyeluruh terhadap seluruh tabel dan data yang telah dimigrasikan.
+</p>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Verifikasi Jumlah Tabel dan Record</span>
+  <pre>-- Cek jumlah tabel
+\dt
+# Output: 16 tables
+
+-- Cek jumlah record per tabel
+SELECT count(*) FROM content;          -- 17.773 records
+SELECT count(*) FROM file;             -- 5.645 records
+SELECT count(*) FROM structure;        -- 302 records
+SELECT count(*) FROM logs;             -- 3.403 records
+SELECT count(*) FROM "user";           -- 9 records
+SELECT count(*) FROM role;             -- 4 records</pre>
+</div>
+
+<h2>5.4 Struktur Tabel</h2>
+<p>
+Database <code>tps_web</code> terdiri dari 16 tabel yang saling terelasi. Berikut adalah daftar lengkap tabel beserta ukuran dan jumlah record masing-masing:
+</p>
+
+<table class="bordered">
+  <caption>Tabel 5.1 — Daftar Tabel Database tps_web</caption>
+  <thead>
+    <tr><th>No</th><th>Nama Tabel</th><th>Jumlah Record</th><th>Ukuran</th><th>Keterangan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><code>content</code></td><td>17.773</td><td>4.160 KB</td><td>Konten utama CMS (berita, halaman, dll)</td></tr>
+    <tr><td>2</td><td><code>file</code></td><td>5.645</td><td>1.040 KB</td><td>Metadata file yang diupload</td></tr>
+    <tr><td>3</td><td><code>structure</code></td><td>302</td><td>152 KB</td><td>Definisi struktur konten</td></tr>
+    <tr><td>4</td><td><code>logs</code></td><td>3.403</td><td>1.696 KB</td><td>Log aktivitas pengguna</td></tr>
+    <tr><td>5</td><td><code>router</code></td><td>-</td><td>80 KB</td><td>Konfigurasi routing URL</td></tr>
+    <tr><td>6</td><td><code>structure_folder</code></td><td>-</td><td>64 KB</td><td>Folder/kategori struktur</td></tr>
+    <tr><td>7</td><td><code>user</code></td><td>9</td><td>32 KB</td><td>Data pengguna admin</td></tr>
+    <tr><td>8</td><td><code>role</code></td><td>4</td><td>32 KB</td><td>Role/peran pengguna</td></tr>
+    <tr><td>9</td><td><code>user_session</code></td><td>-</td><td>56 KB</td><td>Sesi login pengguna</td></tr>
+    <tr><td>10</td><td><code>role_menu</code></td><td>-</td><td>24 KB</td><td>Hak akses menu per role</td></tr>
+    <tr><td>11</td><td><code>config</code></td><td>-</td><td>32 KB</td><td>Konfigurasi sistem CMS</td></tr>
+    <tr><td>12</td><td><code>layout</code></td><td>-</td><td>16 KB</td><td>Layout halaman website</td></tr>
+    <tr><td>13</td><td><code>layout_component</code></td><td>-</td><td>16 KB</td><td>Komponen layout</td></tr>
+    <tr><td>14</td><td><code>site</code></td><td>-</td><td>16 KB</td><td>Konfigurasi site</td></tr>
+    <tr><td>15</td><td><code>file_preview</code></td><td>-</td><td>16 KB</td><td>Preview/thumbnail file</td></tr>
+    <tr><td>16</td><td><code>content_history</code></td><td>-</td><td>16 KB</td><td>Riwayat perubahan konten</td></tr>
+  </tbody>
+  <tfoot>
+    <tr style="font-weight: bold; background: #e8f4fd;">
+      <td colspan="3">Total Ukuran Database</td>
+      <td colspan="2">15 MB</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="info-box">
+  <strong>Relasi Antar Tabel:</strong><br>
+  &bull; <code>content</code> → <code>structure</code> (setiap konten terkait dengan definisi struktur)<br>
+  &bull; <code>content</code> → <code>file</code> (konten dapat memiliki file attachment)<br>
+  &bull; <code>content</code> → <code>content</code> (self-relation untuk hierarki parent-child)<br>
+  &bull; <code>user</code> → <code>role</code> (setiap user memiliki satu role)<br>
+  &bull; <code>role_menu</code> → <code>structure_folder</code> (akses menu per role)<br>
+  &bull; <code>structure</code> → <code>structure_folder</code> (pengelompokan struktur)
+</div>
+
+<!-- ==================== BAB VI ==================== -->
+<h1 class="chapter">BAB VI<br>KONFIGURASI KEAMANAN</h1>
+
+<h2>6.1 Pembatasan Akses Jaringan</h2>
+<p>
+Keamanan database diterapkan melalui beberapa lapisan (defense in depth). Lapisan pertama adalah pembatasan akses jaringan melalui konfigurasi <code>pg_hba.conf</code> yang hanya mengizinkan koneksi dari IP address yang telah ditentukan.
+</p>
+
+<table class="bordered">
+  <caption>Tabel 6.1 — Matriks Akses Database</caption>
+  <thead>
+    <tr><th>Sumber</th><th>IP Address</th><th>Akses</th><th>Metode Auth</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Localhost</td><td>127.0.0.1</td><td>✅ Diizinkan</td><td>scram-sha-256</td></tr>
+    <tr><td>Application Server</td><td>172.19.154.93</td><td>✅ Diizinkan</td><td>scram-sha-256</td></tr>
+    <tr><td>IP Lainnya</td><td>*</td><td>❌ Ditolak</td><td>-</td></tr>
+  </tbody>
+</table>
+
+<h2>6.2 Metode Autentikasi</h2>
+<p>
+Metode autentikasi yang digunakan adalah <code>scram-sha-256</code>, yang merupakan metode autentikasi paling aman yang tersedia di PostgreSQL 16. Metode ini menggunakan challenge-response mechanism dengan hashing SHA-256, sehingga password tidak pernah dikirimkan dalam bentuk plain text melalui jaringan.
+</p>
+
+<table>
+  <caption>Tabel 6.2 — Perbandingan Metode Autentikasi PostgreSQL</caption>
+  <thead>
+    <tr><th>Metode</th><th>Keamanan</th><th>Digunakan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>trust</code></td><td>Tidak aman — tanpa password</td><td>❌</td></tr>
+    <tr><td><code>password</code></td><td>Rendah — plain text</td><td>❌</td></tr>
+    <tr><td><code>md5</code></td><td>Sedang — hash MD5</td><td>❌</td></tr>
+    <tr><td><code>scram-sha-256</code></td><td>Tinggi — hash SHA-256</td><td>✅</td></tr>
+  </tbody>
+</table>
+
+<h2>6.3 Firewall (UFW)</h2>
+<p>
+Sebagai lapisan keamanan tambahan, disarankan untuk mengkonfigurasi firewall menggunakan UFW (Uncomplicated Firewall) pada server database untuk membatasi port yang dapat diakses.
+</p>
+
+<pre># Konfigurasi firewall (rekomendasi)
+sudo ufw allow from 172.19.154.93 to any port 5432
+sudo ufw allow ssh
+sudo ufw enable</pre>
+
+<!-- ==================== BAB VII ==================== -->
+<h1 class="chapter">BAB VII<br>INTEGRASI DENGAN APPLICATION SERVER</h1>
+
+<h2>7.1 Konfigurasi Connection String</h2>
+<p>
+Application server (172.19.154.93) menjalankan aplikasi CMS dalam container Docker. Koneksi ke database dikonfigurasi melalui environment variable <code>DATABASE_URL</code> dalam format connection string PostgreSQL.
+</p>
+
+<pre># Format Connection String
+postgresql://[user]:[password]@[host]:[port]/[database]
+
+# Konfigurasi aktual
+DATABASE_URL="postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web"</pre>
+
+<p>
+Connection string ini dikonfigurasi pada dua tempat:
+</p>
+<ol>
+  <li><strong>Docker Compose</strong> (<code>docker-compose.yml</code>) — sebagai environment variable untuk container.</li>
+  <li><strong>Prisma ORM</strong> (<code>app/db/.env</code>) — untuk ORM database yang digunakan oleh aplikasi.</li>
+</ol>
+
+<h2>7.2 Prisma ORM</h2>
+<p>
+Aplikasi CMS menggunakan Prisma ORM versi 5.11.0 sebagai database abstraction layer. Prisma menyediakan type-safe query builder dan auto-generated client berdasarkan schema database.
+</p>
+
+<p class="no-indent"><strong>File schema:</strong> <code>app/db/prisma/schema.prisma</code></p>
+<pre>generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}</pre>
+
+<h2>7.3 Pengujian Koneksi</h2>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Test Koneksi dari Application Server ke Database</span>
+  <pre># Test konektivitas jaringan
+ping -c 3 172.19.154.92
+# PING 172.19.154.92: 3 packets transmitted, 3 received, 0% packet loss
+# rtt avg: 0.171 ms
+
+# Test port PostgreSQL
+nc -zv 172.19.154.92 5432
+# Connection to 172.19.154.92 5432 port [tcp/postgresql] succeeded!</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Test Query dari Application Server</span>
+  <pre># Query langsung dari application server
+PGPASSWORD=TpsDB2026Secure psql -h 172.19.154.92 -U postgres -d tps_web \
+  -c "SELECT count(*) FROM content;"
+#  count
+# -------
+#  17773</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Test Koneksi dari Dalam Docker Container</span>
+  <pre># Test dari dalam container aplikasi
+docker exec tps-app sh -c \
+  'timeout 3 bash -c "echo > /dev/tcp/172.19.154.92/5432" && echo DB_REACHABLE'
+# Output: DB_REACHABLE</pre>
+</div>
+
+<!-- ==================== BAB VIII ==================== -->
+<h1 class="chapter">BAB VIII<br>PENGUJIAN DAN VALIDASI</h1>
+
+<h2>8.1 Pengujian Konektivitas</h2>
+
+<table class="bordered">
+  <caption>Tabel 8.1 — Hasil Pengujian Konektivitas</caption>
+  <thead>
+    <tr><th>Test Case</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Ping dari App Server ke DB Server</td><td>Reply, 0% loss</td><td>3/3 received, avg 0.171ms</td><td>✅ Pass</td></tr>
+    <tr><td>TCP port 5432 accessible</td><td>Connection succeeded</td><td>Connection succeeded</td><td>✅ Pass</td></tr>
+    <tr><td>PostgreSQL auth dari App Server</td><td>Authenticated</td><td>Authenticated</td><td>✅ Pass</td></tr>
+    <tr><td>Koneksi dari Docker container</td><td>DB_REACHABLE</td><td>DB_REACHABLE</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<h2>8.2 Pengujian Query</h2>
+
+<table class="bordered">
+  <caption>Tabel 8.2 — Hasil Pengujian Query Database</caption>
+  <thead>
+    <tr><th>Test Case</th><th>Query</th><th>Result</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Count content</td><td><code>SELECT count(*) FROM content</code></td><td>17.773 rows</td><td>✅ Pass</td></tr>
+    <tr><td>Count files</td><td><code>SELECT count(*) FROM file</code></td><td>5.645 rows</td><td>✅ Pass</td></tr>
+    <tr><td>Count structures</td><td><code>SELECT count(*) FROM structure</code></td><td>302 rows</td><td>✅ Pass</td></tr>
+    <tr><td>Count users</td><td><code>SELECT count(*) FROM "user"</code></td><td>9 rows</td><td>✅ Pass</td></tr>
+    <tr><td>List tables</td><td><code>\dt</code></td><td>16 tables</td><td>✅ Pass</td></tr>
+    <tr><td>Database size</td><td><code>pg_database_size('tps_web')</code></td><td>15 MB</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<h2>8.3 Pengujian Aplikasi End-to-End</h2>
+<p>
+Pengujian end-to-end dilakukan dengan mengakses seluruh jenis halaman website untuk memastikan aplikasi dapat membaca data dari database dengan benar.
+</p>
+
+<table class="bordered">
+  <caption>Tabel 8.3 — Hasil Pengujian Halaman Website</caption>
+  <thead>
+    <tr><th>Halaman</th><th>URL</th><th>HTTP Status</th><th>Size</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Homepage</td><td><code>/</code></td><td>200</td><td>237 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Unduh Dokumen</td><td><code>/unduh-dokumen</code></td><td>200</td><td>20 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Berita</td><td><code>/berita/press-release</code></td><td>200</td><td>64 KB</td><td>✅ Pass</td></tr>
+    <tr><td>Admin Dashboard</td><td><code>/backend/tpsadmin/dashboard</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+    <tr><td>Admin Edit Content</td><td><code>/backend/tpsadmin/edit/:id</code></td><td>200</td><td>OK</td><td>✅ Pass</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== BAB IX ==================== -->
+<h1 class="chapter">BAB IX<br>KESIMPULAN DAN REKOMENDASI</h1>
+
+<h2>9.1 Kesimpulan</h2>
+<p>
+Berdasarkan seluruh proses yang telah dilakukan, dapat disimpulkan bahwa:
+</p>
+<ol>
+  <li><strong>Instalasi PostgreSQL 16</strong> pada server database (172.19.154.92) telah berhasil dilakukan dengan status service active dan berjalan normal pada port 5432.</li>
+  <li><strong>Konfigurasi keamanan</strong> telah diterapkan dengan baik, meliputi pembatasan akses IP hanya dari application server (172.19.154.93) dan penggunaan metode autentikasi <code>scram-sha-256</code>.</li>
+  <li><strong>Migrasi (restore) database</strong> dari backup production telah berhasil dilakukan. Seluruh 16 tabel dengan total 17.773 record konten telah berhasil dimigrasikan dan terverifikasi.</li>
+  <li><strong>Integrasi</strong> antara application server dan database server telah berfungsi dengan baik, dibuktikan dengan seluruh halaman website yang dapat diakses dan menampilkan data dengan benar.</li>
+  <li><strong>Pengujian end-to-end</strong> menunjukkan seluruh komponen sistem berfungsi normal, termasuk homepage, halaman berita, halaman download dokumen, dan panel admin CMS.</li>
+</ol>
+
+<h2>9.2 Rekomendasi</h2>
+<p class="no-indent">Untuk menjaga keberlangsungan dan keamanan sistem, direkomendasikan hal-hal berikut:</p>
+
+<ol>
+  <li><strong>Backup Berkala</strong> — Mengimplementasikan backup otomatis database menggunakan <code>pg_dump</code> dengan jadwal harian, dan menyimpan backup di lokasi terpisah.
+  <pre>pg_dump -h 172.19.154.92 -U postgres tps_web > backup_$(date +%Y%m%d).sql</pre>
+  </li>
+  <li><strong>Monitoring</strong> — Memasang monitoring untuk memantau kesehatan database (koneksi aktif, disk usage, query performance).</li>
+  <li><strong>Rotasi Password</strong> — Mengganti password database secara berkala (minimal setiap 90 hari) sesuai kebijakan keamanan perusahaan.</li>
+  <li><strong>Update Keamanan</strong> — Menerapkan security patch untuk PostgreSQL dan sistem operasi secara berkala.</li>
+  <li><strong>Firewall</strong> — Mengaktifkan UFW pada server database sebagai lapisan keamanan tambahan.</li>
+  <li><strong>SSL/TLS</strong> — Mempertimbangkan aktivasi enkripsi SSL/TLS pada koneksi database untuk keamanan data in-transit.</li>
+  <li><strong>Connection Pooling</strong> — Jika jumlah koneksi meningkat, mempertimbangkan penggunaan PgBouncer sebagai connection pooler.</li>
+</ol>
+
+<!-- ==================== LAMPIRAN ==================== -->
+<h1 class="chapter">LAMPIRAN</h1>
+
+<h2>Lampiran A — Konfigurasi Lengkap pg_hba.conf</h2>
+<pre># PostgreSQL Client Authentication Configuration File
+# TYPE  DATABASE  USER  ADDRESS          METHOD
+
+# Local connections
+local   all       postgres                peer
+local   all       all                     peer
+
+# IPv4 local connections
+host    all       all    127.0.0.1/32     scram-sha-256
+
+# IPv6 local connections
+host    all       all    ::1/128          scram-sha-256
+
+# Replication connections
+local   replication   all                 peer
+host    replication   all  127.0.0.1/32   scram-sha-256
+host    replication   all  ::1/128        scram-sha-256
+
+# Application Server access
+host    all    all    172.19.154.93/32    scram-sha-256</pre>
+
+<h2>Lampiran B — Prisma Schema (schema.prisma)</h2>
+<pre>generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model content {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_parent    String?  @db.Uuid
+  id_structure String?  @db.Uuid
+  lang         String?  @default("inherited") @db.VarChar(10)
+  text         String?
+  status       String?  @default("inherited")
+  id_file      String?  @db.Uuid
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @db.Timestamp(6)
+  // ... (16 models total)
+}
+
+// Total: 16 models matching 16 database tables</pre>
+
+<h2>Lampiran C — Docker Compose Configuration</h2>
+<pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      - /opt/tps-app/pkgs:/app/pkgs
+      - /opt/tps-app/app/srv:/app/app/srv
+      - /opt/tps-app/app/db:/app/app/db
+      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s</pre>
+
+<h2>Lampiran D — Informasi Kontak</h2>
+<table class="bordered" style="width: 100%;">
+  <thead>
+    <tr><th colspan="2">PT PRIMALINK — Tim Teknis</th></tr>
+  </thead>
+  <tbody>
+    <tr><td style="width: 30%; font-weight: bold;">Perusahaan</td><td>PT PRIMALINK</td></tr>
+    <tr><td style="font-weight: bold;">Peran</td><td>Technology Solutions Partner</td></tr>
+    <tr><td style="font-weight: bold;">Lingkup</td><td>Instalasi, Konfigurasi, dan Pemeliharaan Database Server</td></tr>
+  </tbody>
+</table>
+
+<br><br>
+<div class="page-footer">
+  <p class="no-indent">Dokumen ini bersifat <strong>RAHASIA</strong> dan hanya untuk penggunaan internal PT Terminal Petikemas Surabaya dan PT PRIMALINK.</p>
+  <p class="no-indent">TPS-PRIMALINK/DB/2026-001 | Versi 1.0 | 12 Februari 2026</p>
+</div>
+
+</body>
+</html>
