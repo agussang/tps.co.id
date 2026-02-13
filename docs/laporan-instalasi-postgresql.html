@@ -439,9 +439,10 @@
     <li class="section"><span>2.3 Topologi Jaringan</span></li>
 
     <li class="chapter"><span>BAB III &mdash; INSTALASI POSTGRESQL</span><span class="toc-page">5</span></li>
-    <li class="section"><span>3.1 Persiapan Sistem Operasi</span></li>
-    <li class="section"><span>3.2 Instalasi PostgreSQL 16</span></li>
-    <li class="section"><span>3.3 Verifikasi Instalasi</span></li>
+    <li class="section"><span>3.1 Login ke Server Database</span></li>
+    <li class="section"><span>3.2 Persiapan Sistem Operasi</span></li>
+    <li class="section"><span>3.3 Instalasi PostgreSQL 16</span></li>
+    <li class="section"><span>3.4 Verifikasi Instalasi</span></li>
 
     <li class="chapter"><span>BAB IV &mdash; KONFIGURASI DATABASE</span><span class="toc-page">7</span></li>
     <li class="section"><span>4.1 Konfigurasi Koneksi (postgresql.conf)</span></li>
@@ -625,63 +626,94 @@ Kedua server berada dalam satu segmen jaringan internal TPS (subnet 172.19.154.0
 <!-- ==================== BAB III ==================== -->
 <h1 class="chapter">BAB III<br>INSTALASI POSTGRESQL</h1>
 
-<h2>3.1 Persiapan Sistem Operasi</h2>
+<h2>3.1 Login ke Server Database</h2>
 <p>
-Sebelum melakukan instalasi PostgreSQL, dilakukan persiapan pada sistem operasi server database (172.19.154.92) yang meliputi update paket sistem dan instalasi dependensi yang dibutuhkan.
+Langkah pertama adalah login ke server database (172.19.154.92) melalui SSH. Buka aplikasi terminal (misalnya: PuTTY di Windows, atau Terminal di Mac/Linux).
 </p>
 
 <div class="step">
   <span class="step-number">1</span>
-  <span class="step-title">Update Sistem Operasi</span>
-  <pre>sudo apt update && sudo apt upgrade -y</pre>
-  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini memperbarui daftar paket dan menginstall seluruh update keamanan yang tersedia untuk Ubuntu 24.04 LTS.</p>
+  <span class="step-title">Login ke Server via SSH</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut di terminal, lalu tekan <strong>Enter</strong>:</p>
+  <pre>ssh root@172.19.154.92</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika diminta password, masukkan password server lalu tekan <strong>Enter</strong>. (Password tidak akan terlihat saat diketik — ini normal.)</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul pertanyaan <code>Are you sure you want to continue connecting (yes/no)?</code>, ketik <strong>yes</strong> lalu tekan <strong>Enter</strong>.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda berhasil login jika tampilan berubah menjadi: <code>root@tpswebsitedb:~#</code></p>
 </div>
+
+<h2>3.2 Persiapan Sistem Operasi</h2>
+<p>
+Sebelum melakukan instalasi PostgreSQL, dilakukan persiapan pada sistem operasi server yang meliputi update paket sistem dan instalasi dependensi yang dibutuhkan.
+</p>
 
 <div class="step">
   <span class="step-number">2</span>
-  <span class="step-title">Instalasi Dependensi</span>
-  <pre>sudo apt install -y wget curl gnupg2 lsb-release</pre>
-  <p class="no-indent" style="font-size: 10.5pt;">Paket-paket ini diperlukan untuk mengunduh dan memverifikasi repository PostgreSQL.</p>
+  <span class="step-title">Update Sistem Operasi</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>. Tunggu hingga proses selesai (bisa memakan waktu 1-5 menit):</p>
+  <pre>sudo apt update && sudo apt upgrade -y</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini memperbarui daftar paket dan menginstall seluruh update keamanan yang tersedia untuk Ubuntu 24.04 LTS. Proses selesai jika muncul kembali tampilan <code>root@tpswebsitedb:~#</code>.</p>
 </div>
 
-<h2>3.2 Instalasi PostgreSQL 16</h2>
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Instalasi Dependensi</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo apt install -y wget curl gnupg2 lsb-release</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Paket-paket ini diperlukan untuk proses instalasi selanjutnya.</p>
+</div>
+
+<h2>3.3 Instalasi PostgreSQL 16</h2>
 <p>
 PostgreSQL versi 16 dipilih karena merupakan versi stabil terbaru yang tersedia di repository resmi Ubuntu 24.04 LTS, dengan dukungan jangka panjang dan fitur-fitur terbaru yang dibutuhkan oleh sistem CMS.
 </p>
 
 <div class="step">
-  <span class="step-number">3</span>
+  <span class="step-number">4</span>
   <span class="step-title">Instalasi PostgreSQL dari Repository Ubuntu</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>. Tunggu hingga proses instalasi selesai:</p>
   <pre>sudo apt install -y postgresql postgresql-contrib</pre>
-  <p class="no-indent" style="font-size: 10.5pt;">Paket <code>postgresql</code> berisi server database, sedangkan <code>postgresql-contrib</code> berisi ekstensi tambahan termasuk <code>uuid-ossp</code> yang dibutuhkan untuk generate UUID.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Paket <code>postgresql</code> berisi server database, sedangkan <code>postgresql-contrib</code> berisi ekstensi tambahan yang dibutuhkan.</p>
 </div>
 
 <div class="step">
-  <span class="step-number">4</span>
+  <span class="step-number">5</span>
   <span class="step-title">Mengaktifkan Autostart Service</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik dua perintah berikut satu per satu, tekan <strong>Enter</strong> setelah masing-masing perintah:</p>
   <pre>sudo systemctl enable postgresql
 sudo systemctl start postgresql</pre>
-  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini memastikan PostgreSQL otomatis berjalan ketika server di-restart.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah pertama memastikan PostgreSQL otomatis berjalan ketika server di-restart. Perintah kedua menjalankan PostgreSQL sekarang.</p>
 </div>
 
-<h2>3.3 Verifikasi Instalasi</h2>
+<h2>3.4 Verifikasi Instalasi</h2>
 <p>
 Setelah instalasi selesai, dilakukan verifikasi untuk memastikan PostgreSQL terinstall dengan benar dan berjalan dengan normal.
 </p>
 
 <div class="step">
-  <span class="step-number">5</span>
-  <span class="step-title">Verifikasi Versi dan Status</span>
-  <pre>psql --version
-# Output: psql (PostgreSQL) 16.11 (Ubuntu 16.11-0ubuntu0.24.04.1)
+  <span class="step-number">6</span>
+  <span class="step-title">Cek Versi PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>psql --version</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul output seperti ini (versi bisa sedikit berbeda):</p>
+  <pre>psql (PostgreSQL) 16.11 (Ubuntu 16.11-0ubuntu0.24.04.1)</pre>
+</div>
 
-sudo systemctl status postgresql
-# Output: Active: active (exited) ✓
+<div class="step">
+  <span class="step-number">7</span>
+  <span class="step-title">Cek Status Service PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo systemctl status postgresql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul tulisan <code>Active: active</code> berwarna hijau. Tekan huruf <strong>q</strong> untuk keluar dari tampilan status.</p>
+</div>
 
-pg_lsclusters
-# Output:
-# Ver Cluster Port Status Owner    Data directory
-# 16  main    5432 online postgres /var/lib/postgresql/16/main</pre>
+<div class="step">
+  <span class="step-number">8</span>
+  <span class="step-title">Cek Cluster PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>pg_lsclusters</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul output seperti ini — pastikan Status adalah <strong>online</strong> dan Port adalah <strong>5432</strong>:</p>
+  <pre>Ver Cluster Port Status Owner    Data directory
+16  main    5432 online postgres /var/lib/postgresql/16/main</pre>
 </div>
 
 <table>
@@ -703,20 +735,62 @@ pg_lsclusters
 
 <h2>4.1 Konfigurasi Koneksi (postgresql.conf)</h2>
 <p>
-File konfigurasi utama PostgreSQL perlu diubah agar server database dapat menerima koneksi dari application server. Secara default, PostgreSQL hanya menerima koneksi dari localhost.
+File konfigurasi utama PostgreSQL perlu diubah agar server database dapat menerima koneksi dari application server. Secara default, PostgreSQL hanya menerima koneksi dari localhost (komputer sendiri). Kita perlu mengubahnya agar application server (172.19.154.93) juga bisa terhubung.
 </p>
-
-<p class="no-indent"><strong>File:</strong> <code>/etc/postgresql/16/main/postgresql.conf</code></p>
 
 <div class="step">
   <span class="step-number">1</span>
-  <span class="step-title">Mengubah Listen Address</span>
-  <pre># Sebelum (default - hanya localhost)
-listen_addresses = 'localhost'
+  <span class="step-title">Buka File Konfigurasi dengan Editor Nano</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong> untuk membuka file konfigurasi:</p>
+  <pre>sudo nano /etc/postgresql/16/main/postgresql.conf</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">File akan terbuka di editor <strong>nano</strong>. Anda akan melihat banyak baris teks. Gunakan tombol panah <strong>↑ ↓</strong> untuk scroll ke atas/bawah.</p>
+</div>
 
-# Sesudah (menerima koneksi dari semua interface)
-listen_addresses = '*'</pre>
-  <p class="no-indent" style="font-size: 10.5pt;">Parameter <code>listen_addresses = '*'</code> memungkinkan PostgreSQL menerima koneksi TCP dari network interface manapun. Keamanan tetap dijaga melalui konfigurasi <code>pg_hba.conf</code> yang membatasi IP yang diizinkan.</p>
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Cari Baris listen_addresses</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Tekan <strong>Ctrl+W</strong> (tombol Ctrl dan W bersamaan) untuk membuka fitur pencarian. Ketik:</p>
+  <pre>listen_addresses</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Lalu tekan <strong>Enter</strong>. Kursor akan berpindah ke baris yang berisi <code>listen_addresses</code>. Anda akan melihat baris seperti ini:</p>
+  <pre>#listen_addresses = 'localhost'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tanda <code>#</code> di depan artinya baris ini dinonaktifkan (komentar).</p>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Ubah Nilai listen_addresses</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Lakukan perubahan berikut pada baris tersebut:</p>
+  <ol>
+    <li>Hapus tanda <code>#</code> di depan baris (tekan tombol <strong>Delete</strong> atau <strong>Backspace</strong>).</li>
+    <li>Ganti <code>localhost</code> menjadi <code>*</code> (tanda bintang).</li>
+  </ol>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>Sebelum:</strong></p>
+  <pre>#listen_addresses = 'localhost'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>Sesudah:</strong></p>
+  <pre>listen_addresses = '*'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tanda <code>*</code> artinya PostgreSQL menerima koneksi dari semua alamat IP. Keamanan tetap terjaga karena kita akan membatasi IP yang diizinkan di langkah berikutnya.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Simpan File dan Keluar dari Editor</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Setelah selesai mengedit, lakukan langkah berikut untuk menyimpan:</p>
+  <ol>
+    <li>Tekan <strong>Ctrl+O</strong> (tombol Ctrl dan huruf O bersamaan) untuk menyimpan file.</li>
+    <li>Akan muncul pertanyaan nama file — langsung tekan <strong>Enter</strong> untuk konfirmasi.</li>
+    <li>Tekan <strong>Ctrl+X</strong> (tombol Ctrl dan huruf X bersamaan) untuk keluar dari editor nano.</li>
+  </ol>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda akan kembali ke tampilan terminal normal (<code>root@tpswebsitedb:~#</code>).</p>
+</div>
+
+<div class="info-box">
+  <strong>Tips Editor Nano:</strong><br>
+  &bull; <strong>Ctrl+W</strong> = Cari teks<br>
+  &bull; <strong>Ctrl+O</strong> = Simpan file (lalu tekan Enter)<br>
+  &bull; <strong>Ctrl+X</strong> = Keluar dari editor<br>
+  &bull; <strong>Panah ↑ ↓ ← →</strong> = Navigasi kursor<br>
+  &bull; <strong>Ctrl+K</strong> = Hapus satu baris<br>
+  &bull; Menu shortcut terlihat di bagian bawah layar editor (simbol <code>^</code> artinya tombol Ctrl)
 </div>
 
 <table>
@@ -734,78 +808,150 @@ listen_addresses = '*'</pre>
 
 <h2>4.2 Konfigurasi Autentikasi (pg_hba.conf)</h2>
 <p>
-File <code>pg_hba.conf</code> (Host-Based Authentication) mengontrol siapa yang boleh terhubung ke database, dari mana, dan dengan metode autentikasi apa. Konfigurasi ini merupakan lapisan keamanan utama pada level database.
+File <code>pg_hba.conf</code> (Host-Based Authentication) mengontrol siapa yang boleh terhubung ke database, dari mana, dan dengan metode autentikasi apa. Kita perlu menambahkan izin agar application server (172.19.154.93) boleh terhubung.
 </p>
 
-<p class="no-indent"><strong>File:</strong> <code>/etc/postgresql/16/main/pg_hba.conf</code></p>
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Buka File pg_hba.conf dengan Editor Nano</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo nano /etc/postgresql/16/main/pg_hba.conf</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">File akan terbuka di editor nano.</p>
+</div>
 
 <div class="step">
-  <span class="step-number">2</span>
-  <span class="step-title">Menambahkan Akses untuk Application Server</span>
-  <pre># Koneksi lokal (default)
-local   all   postgres                      peer
-local   all   all                           peer
-host    all   all       127.0.0.1/32        scram-sha-256
-host    all   all       ::1/128             scram-sha-256
+  <span class="step-number">6</span>
+  <span class="step-title">Scroll ke Bagian Paling Bawah File</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Tekan <strong>Ctrl+End</strong> (atau tekan tombol panah <strong>↓</strong> berulang kali) sampai Anda berada di baris paling bawah file. Anda akan melihat baris-baris seperti ini di dekat bagian bawah:</p>
+  <pre># IPv4 local connections:
+host    all             all             127.0.0.1/32            scram-sha-256
+# IPv6 local connections:
+host    all             all             ::1/128                 scram-sha-256</pre>
+</div>
 
-# Tambahan: akses dari Application Server
-host    all   all       172.19.154.93/32    scram-sha-256</pre>
+<div class="step">
+  <span class="step-number">7</span>
+  <span class="step-title">Tambahkan Baris Baru di Paling Bawah</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Pindahkan kursor ke baris paling akhir, lalu tekan <strong>Enter</strong> untuk membuat baris baru. Ketik baris berikut <strong>persis seperti ini</strong> (perhatikan spasi antara setiap kolom):</p>
+  <pre># Akses dari Application Server TPS
+host    all    all    172.19.154.93/32    scram-sha-256</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Baris ini mengizinkan application server (IP 172.19.154.93) untuk terhubung ke database.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">8</span>
+  <span class="step-title">Simpan File dan Keluar</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Sama seperti sebelumnya:</p>
+  <ol>
+    <li>Tekan <strong>Ctrl+O</strong> untuk menyimpan, lalu tekan <strong>Enter</strong>.</li>
+    <li>Tekan <strong>Ctrl+X</strong> untuk keluar dari editor.</li>
+  </ol>
 </div>
 
 <div class="info-box">
-  <strong>Penjelasan Konfigurasi:</strong><br>
-  &bull; <code>host</code> — Koneksi melalui TCP/IP<br>
+  <strong>Penjelasan Konfigurasi yang Ditambahkan:</strong><br>
+  &bull; <code>host</code> — Koneksi melalui jaringan TCP/IP<br>
   &bull; <code>all all</code> — Berlaku untuk semua database dan semua user<br>
-  &bull; <code>172.19.154.93/32</code> — Hanya IP application server yang diizinkan (subnet mask /32 = exact match)<br>
-  &bull; <code>scram-sha-256</code> — Metode autentikasi terenkripsi (paling aman yang tersedia)
+  &bull; <code>172.19.154.93/32</code> — Hanya IP application server yang diizinkan (/32 artinya hanya IP ini saja, bukan range)<br>
+  &bull; <code>scram-sha-256</code> — Metode autentikasi terenkripsi (paling aman yang tersedia di PostgreSQL)
 </div>
 
 <h2>4.3 Konfigurasi User dan Password</h2>
 <p>
-Untuk keamanan, password user <code>postgres</code> (superuser) di-set dengan password yang kuat menggunakan metode autentikasi <code>scram-sha-256</code>.
+Untuk keamanan, password user <code>postgres</code> (user utama database) perlu di-set dengan password yang kuat.
 </p>
 
 <div class="step">
-  <span class="step-number">3</span>
+  <span class="step-number">9</span>
   <span class="step-title">Set Password User postgres</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut <strong>dalam satu baris</strong> lalu tekan <strong>Enter</strong>:</p>
   <pre>sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'TpsDB2026Secure';"</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul output: <code>ALTER ROLE</code></p>
 </div>
 
 <div class="warning-box">
-  <strong>Catatan Keamanan:</strong> Password yang tercantum dalam dokumen ini bersifat rahasia. Distribusi dokumen ini harus dibatasi kepada personel yang berwenang saja. Disarankan untuk mengganti password secara berkala sesuai kebijakan keamanan TPS.
+  <strong>Catatan Keamanan:</strong> Password <code>TpsDB2026Secure</code> yang tercantum dalam dokumen ini bersifat rahasia. Distribusi dokumen ini harus dibatasi kepada personel yang berwenang saja. Disarankan untuk mengganti password secara berkala sesuai kebijakan keamanan TPS.
 </div>
 
 <h2>4.4 Pembuatan Database</h2>
 <p>
-Database <code>tps_web</code> dibuat untuk menyimpan seluruh data sistem CMS website. Ekstensi <code>uuid-ossp</code> diaktifkan karena sistem CMS menggunakan UUID sebagai primary key.
+Database <code>tps_web</code> dibuat untuk menyimpan seluruh data sistem CMS website. Ekstensi <code>uuid-ossp</code> diaktifkan karena sistem CMS menggunakan UUID sebagai primary key (identitas unik setiap data).
 </p>
 
 <div class="step">
-  <span class="step-number">4</span>
-  <span class="step-title">Membuat Database dan Ekstensi</span>
-  <pre>sudo -u postgres psql
+  <span class="step-number">10</span>
+  <span class="step-title">Masuk ke PostgreSQL Console</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo -u postgres psql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tampilan akan berubah menjadi <code>postgres=#</code> — ini artinya Anda sudah masuk ke dalam console PostgreSQL.</p>
+</div>
 
--- Membuat database
-CREATE DATABASE tps_web;
+<div class="step">
+  <span class="step-number">11</span>
+  <span class="step-title">Buat Database tps_web</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut di console PostgreSQL lalu tekan <strong>Enter</strong>:</p>
+  <pre>CREATE DATABASE tps_web;</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul output: <code>CREATE DATABASE</code></p>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>PENTING:</strong> Jangan lupa tanda titik koma (<code>;</code>) di akhir perintah. Perintah SQL di PostgreSQL harus diakhiri dengan <code>;</code></p>
+</div>
 
--- Beralih ke database baru
-\c tps_web
+<div class="step">
+  <span class="step-number">12</span>
+  <span class="step-title">Pindah ke Database tps_web</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>\c tps_web</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul pesan: <code>You are now connected to database "tps_web" as user "postgres".</code></p>
+  <p class="no-indent" style="font-size: 10.5pt;">Tampilan berubah menjadi <code>tps_web=#</code></p>
+</div>
 
--- Mengaktifkan ekstensi UUID
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+<div class="step">
+  <span class="step-number">13</span>
+  <span class="step-title">Aktifkan Ekstensi UUID</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>CREATE EXTENSION IF NOT EXISTS "uuid-ossp";</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul output: <code>CREATE EXTENSION</code></p>
+</div>
 
--- Verifikasi
-\dx
-# Output: uuid-ossp | 1.1 | public | generate universally unique identifiers</pre>
+<div class="step">
+  <span class="step-number">14</span>
+  <span class="step-title">Verifikasi Ekstensi Terinstall</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>\dx</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul daftar yang menampilkan <code>uuid-ossp</code>:</p>
+  <pre>                          List of installed extensions
+    Name     | Version |   Schema   |         Description
+-------------+---------+------------+--------------------------------------
+ plpgsql     | 1.0     | pg_catalog | PL/pgSQL procedural language
+ uuid-ossp   | 1.1     | public     | generate universally unique identifiers</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">15</span>
+  <span class="step-title">Keluar dari Console PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong> untuk keluar dari console PostgreSQL:</p>
+  <pre>\q</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda akan kembali ke tampilan terminal normal (<code>root@tpswebsitedb:~#</code>).</p>
 </div>
 
 <h2>4.5 Restart dan Validasi Service</h2>
+<p>
+Setelah semua konfigurasi selesai, PostgreSQL perlu di-restart agar perubahan diterapkan.
+</p>
 
 <div class="step">
-  <span class="step-number">5</span>
-  <span class="step-title">Restart PostgreSQL untuk Menerapkan Konfigurasi</span>
-  <pre>sudo systemctl restart postgresql
-sudo systemctl status postgresql</pre>
+  <span class="step-number">16</span>
+  <span class="step-title">Restart PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo systemctl restart postgresql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tidak ada output jika berhasil — itu normal.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">17</span>
+  <span class="step-title">Pastikan PostgreSQL Berjalan Normal</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo systemctl status postgresql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Pastikan muncul tulisan <code>Active: active</code>. Tekan huruf <strong>q</strong> untuk keluar dari tampilan status.</p>
 </div>
 
 <table>
@@ -830,14 +976,29 @@ sudo systemctl status postgresql</pre>
 
 <h2>5.1 Persiapan File Backup</h2>
 <p>
-Data dari database production existing perlu dimigrasikan ke server database baru. File backup (dump) disiapkan dari database production dan ditransfer ke server database baru.
+Data dari database production existing perlu dimigrasikan ke server database baru. File backup (dump) dalam format SQL perlu ditransfer ke server database terlebih dahulu.
 </p>
 
 <div class="step">
   <span class="step-number">1</span>
   <span class="step-title">Transfer File Backup ke Server</span>
-  <pre># Transfer backup file ke server database
-scp tps_web_backup.sql root@172.19.154.92:/tmp/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini dijalankan <strong>dari komputer Anda (bukan dari server)</strong>. Buka terminal baru dan ketik:</p>
+  <pre>scp tps_web_backup.sql root@172.19.154.92:/tmp/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Penjelasan perintah:</p>
+  <ul style="font-size: 10.5pt;">
+    <li><code>scp</code> = Secure Copy — perintah untuk menyalin file melalui SSH</li>
+    <li><code>tps_web_backup.sql</code> = nama file backup yang akan ditransfer (file ini harus ada di folder Anda saat ini)</li>
+    <li><code>root@172.19.154.92:/tmp/</code> = tujuan: folder <code>/tmp/</code> di server database</li>
+  </ul>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika diminta password, masukkan password server lalu tekan <strong>Enter</strong>. Tunggu hingga transfer selesai (ditandai dengan progress bar 100%).</p>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Pastikan File Sudah Ada di Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Kembali ke terminal yang login ke server database (172.19.154.92). Ketik perintah berikut untuk memastikan file sudah ada:</p>
+  <pre>ls -lh /tmp/tps_web_backup.sql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul informasi file beserta ukurannya. Jika muncul <code>No such file or directory</code>, berarti transfer belum berhasil — ulangi langkah 1.</p>
 </div>
 
 <h2>5.2 Proses Restore</h2>
@@ -846,13 +1007,18 @@ Proses restore dilakukan menggunakan tool <code>psql</code> yang membaca file SQ
 </p>
 
 <div class="step">
-  <span class="step-number">2</span>
-  <span class="step-title">Restore Database dari Backup</span>
-  <pre># Restore menggunakan psql
-sudo -u postgres psql tps_web &lt; /tmp/tps_web_backup.sql
-
-# Atau menggunakan pg_restore untuk format custom
-# sudo -u postgres pg_restore -d tps_web /tmp/tps_web_backup.dump</pre>
+  <span class="step-number">3</span>
+  <span class="step-title">Restore Database dari File Backup</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut di terminal server database lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo -u postgres psql tps_web &lt; /tmp/tps_web_backup.sql</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Penjelasan perintah:</p>
+  <ul style="font-size: 10.5pt;">
+    <li><code>sudo -u postgres</code> = jalankan sebagai user postgres (user database)</li>
+    <li><code>psql tps_web</code> = buka console PostgreSQL di database tps_web</li>
+    <li><code>&lt; /tmp/tps_web_backup.sql</code> = baca dan jalankan isi file backup</li>
+  </ul>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>Proses ini akan memakan waktu beberapa menit</strong> tergantung ukuran database. Anda akan melihat banyak output berupa perintah SQL yang dijalankan. Tunggu sampai kembali ke tampilan <code>root@tpswebsitedb:~#</code>.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul beberapa pesan <code>ERROR</code> atau <code>NOTICE</code>, itu biasanya normal (misalnya: tabel sudah ada). Yang penting tidak ada pesan <code>FATAL</code>.</p>
 </div>
 
 <h2>5.3 Verifikasi Data</h2>
@@ -861,19 +1027,42 @@ Setelah proses restore selesai, dilakukan verifikasi menyeluruh terhadap seluruh
 </p>
 
 <div class="step">
-  <span class="step-number">3</span>
-  <span class="step-title">Verifikasi Jumlah Tabel dan Record</span>
-  <pre>-- Cek jumlah tabel
-\dt
-# Output: 16 tables
+  <span class="step-number">4</span>
+  <span class="step-title">Masuk ke Console PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo -u postgres psql tps_web</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tampilan berubah menjadi <code>tps_web=#</code></p>
+</div>
 
--- Cek jumlah record per tabel
-SELECT count(*) FROM content;          -- 17.773 records
-SELECT count(*) FROM file;             -- 5.645 records
-SELECT count(*) FROM structure;        -- 302 records
-SELECT count(*) FROM logs;             -- 3.403 records
-SELECT count(*) FROM "user";           -- 9 records
-SELECT count(*) FROM role;             -- 4 records</pre>
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Cek Jumlah Tabel</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>\dt</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul daftar 16 tabel. Jika tabel muncul, berarti restore berhasil.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">6</span>
+  <span class="step-title">Cek Jumlah Data di Tabel Utama</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah-perintah berikut <strong>satu per satu</strong>, tekan <strong>Enter</strong> setelah masing-masing:</p>
+  <pre>SELECT count(*) FROM content;</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Hasil yang diharapkan: <strong>17.773</strong> (jumlah konten website)</p>
+  <pre>SELECT count(*) FROM file;</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Hasil yang diharapkan: <strong>5.645</strong> (jumlah file/media)</p>
+  <pre>SELECT count(*) FROM structure;</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Hasil yang diharapkan: <strong>302</strong> (jumlah definisi struktur)</p>
+  <pre>SELECT count(*) FROM "user";</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Hasil yang diharapkan: <strong>9</strong> (jumlah user admin)</p>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>PENTING:</strong> Pada perintah terakhir, kata <code>user</code> harus diapit tanda kutip ganda (<code>"user"</code>) karena <code>user</code> adalah kata khusus di PostgreSQL.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">7</span>
+  <span class="step-title">Keluar dari Console PostgreSQL</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>\q</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda akan kembali ke tampilan terminal normal.</p>
 </div>
 
 <h2>5.4 Struktur Tabel</h2>
@@ -965,10 +1154,44 @@ Metode autentikasi yang digunakan adalah <code>scram-sha-256</code>, yang merupa
 Sebagai lapisan keamanan tambahan, disarankan untuk mengkonfigurasi firewall menggunakan UFW (Uncomplicated Firewall) pada server database untuk membatasi port yang dapat diakses.
 </p>
 
-<pre># Konfigurasi firewall (rekomendasi)
-sudo ufw allow from 172.19.154.93 to any port 5432
-sudo ufw allow ssh
-sudo ufw enable</pre>
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Izinkan Akses Database dari Application Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo ufw allow from 172.19.154.93 to any port 5432</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini mengizinkan application server (172.19.154.93) mengakses port database (5432).</p>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Izinkan Akses SSH (Agar Tidak Terkunci)</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo ufw allow ssh</pre>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>PENTING:</strong> Pastikan perintah ini dijalankan <strong>sebelum</strong> mengaktifkan firewall, agar Anda tidak terkunci dari server.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Aktifkan Firewall</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo ufw enable</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Akan muncul pertanyaan: <code>Command may disrupt existing SSH connections. Proceed with operation (y|n)?</code></p>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik <strong>y</strong> lalu tekan <strong>Enter</strong> untuk mengaktifkan firewall.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Verifikasi Status Firewall</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>sudo ufw status</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul output seperti ini:</p>
+  <pre>Status: active
+
+To                         Action      From
+--                         ------      ----
+5432                       ALLOW       172.19.154.93
+22/tcp                     ALLOW       Anywhere</pre>
+</div>
 
 <!-- ==================== BAB VII ==================== -->
 <h1 class="chapter">BAB VII<br>INTEGRASI DENGAN APPLICATION SERVER</h1>
@@ -1008,38 +1231,62 @@ datasource db {
 }</pre>
 
 <h2>7.3 Pengujian Koneksi</h2>
+<p>
+Pengujian koneksi dilakukan <strong>dari application server (172.19.154.93)</strong>, bukan dari database server. Buka terminal baru dan login ke application server.
+</p>
 
 <div class="step">
   <span class="step-number">1</span>
-  <span class="step-title">Test Koneksi dari Application Server ke Database</span>
-  <pre># Test konektivitas jaringan
-ping -c 3 172.19.154.92
-# PING 172.19.154.92: 3 packets transmitted, 3 received, 0% packet loss
-# rtt avg: 0.171 ms
-
-# Test port PostgreSQL
-nc -zv 172.19.154.92 5432
-# Connection to 172.19.154.92 5432 port [tcp/postgresql] succeeded!</pre>
+  <span class="step-title">Login ke Application Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Buka terminal baru, ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>ssh root@172.19.154.93</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Masukkan password server jika diminta.</p>
 </div>
 
 <div class="step">
   <span class="step-number">2</span>
-  <span class="step-title">Test Query dari Application Server</span>
-  <pre># Query langsung dari application server
-PGPASSWORD=TpsDB2026Secure psql -h 172.19.154.92 -U postgres -d tps_web \
-  -c "SELECT count(*) FROM content;"
-#  count
-# -------
-#  17773</pre>
+  <span class="step-title">Test Koneksi Jaringan ke Database Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>ping -c 3 172.19.154.92</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul output seperti ini (artinya jaringan terhubung):</p>
+  <pre>PING 172.19.154.92: 3 packets transmitted, 3 received, 0% packet loss
+rtt avg: 0.171 ms</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul <code>100% packet loss</code>, berarti jaringan bermasalah — hubungi tim jaringan TPS.</p>
 </div>
 
 <div class="step">
   <span class="step-number">3</span>
+  <span class="step-title">Test Port Database Terbuka</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>nc -zv 172.19.154.92 5432</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul:</p>
+  <pre>Connection to 172.19.154.92 5432 port [tcp/postgresql] succeeded!</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul <code>Connection refused</code>, berarti PostgreSQL belum berjalan atau konfigurasi <code>pg_hba.conf</code> belum benar. Kembali ke BAB IV dan periksa ulang konfigurasi.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Test Query Database dari Application Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut <strong>dalam satu baris</strong> lalu tekan <strong>Enter</strong>:</p>
+  <pre>PGPASSWORD=TpsDB2026Secure psql -h 172.19.154.92 -U postgres -d tps_web -c "SELECT count(*) FROM content;"</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Penjelasan perintah:</p>
+  <ul style="font-size: 10.5pt;">
+    <li><code>PGPASSWORD=TpsDB2026Secure</code> = password database</li>
+    <li><code>-h 172.19.154.92</code> = alamat server database</li>
+    <li><code>-U postgres</code> = login sebagai user postgres</li>
+    <li><code>-d tps_web</code> = akses database tps_web</li>
+    <li><code>-c "SELECT ..."</code> = jalankan query SQL</li>
+  </ul>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul jumlah konten (contoh: 17773). Ini membuktikan application server bisa mengakses database.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">5</span>
   <span class="step-title">Test Koneksi dari Dalam Docker Container</span>
-  <pre># Test dari dalam container aplikasi
-docker exec tps-app sh -c \
-  'timeout 3 bash -c "echo > /dev/tcp/172.19.154.92/5432" && echo DB_REACHABLE'
-# Output: DB_REACHABLE</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika Docker container sudah berjalan, ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>docker exec tps-app sh -c 'timeout 3 bash -c "echo > /dev/tcp/172.19.154.92/5432" && echo DB_REACHABLE'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika berhasil, akan muncul: <code>DB_REACHABLE</code></p>
+  <p class="no-indent" style="font-size: 10.5pt;">Langkah ini bisa dilewati jika Docker container belum diinstall — pengujian di langkah 4 sudah cukup untuk membuktikan koneksi database berfungsi.</p>
 </div>
 
 <!-- ==================== BAB VIII ==================== -->

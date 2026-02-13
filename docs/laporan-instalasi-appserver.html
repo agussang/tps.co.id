@@ -278,12 +278,16 @@
     <li class="section"><span>2.3 Teknologi yang Digunakan</span></li>
 
     <li class="chapter"><span>BAB III &mdash; INSTALASI DAN KONFIGURASI</span></li>
-    <li class="section"><span>3.1 Instalasi Docker Engine</span></li>
-    <li class="section"><span>3.2 Konfigurasi Docker Compose</span></li>
-    <li class="section"><span>3.3 Pembuatan Docker Image</span></li>
-    <li class="section"><span>3.4 Konfigurasi Volume Mount</span></li>
-    <li class="section"><span>3.5 Migrasi File Upload</span></li>
-    <li class="section"><span>3.6 Verifikasi Deployment</span></li>
+    <li class="section"><span>3.1 Login ke Application Server</span></li>
+    <li class="section"><span>3.2 Instalasi Docker Engine</span></li>
+    <li class="section"><span>3.3 Persiapan Direktori Aplikasi</span></li>
+    <li class="section"><span>3.4 Membuat File Dockerfile</span></li>
+    <li class="section"><span>3.5 Membuat File Docker Compose</span></li>
+    <li class="section"><span>3.6 Konfigurasi Volume Mount</span></li>
+    <li class="section"><span>3.7 Transfer Source Code ke Server</span></li>
+    <li class="section"><span>3.8 Migrasi File Upload</span></li>
+    <li class="section"><span>3.9 Build dan Jalankan Container</span></li>
+    <li class="section"><span>3.10 Verifikasi Deployment</span></li>
 
     <li class="chapter"><span>BAB IV &mdash; KENDALA DAN PENYELESAIAN</span></li>
     <li class="section"><span>4.1 Prisma Client Initialization Failure</span></li>
@@ -429,69 +433,102 @@ Gambar 2.1 — Arsitektur Application Server dan Koneksi Database
 <!-- ==================== BAB III ==================== -->
 <h1 class="chapter">BAB III<br>INSTALASI DAN KONFIGURASI</h1>
 
-<h2>3.1 Instalasi Docker Engine</h2>
+<div class="warning-box">
+  <strong>PRASYARAT:</strong> Sebelum memulai instalasi Application Server, pastikan <strong>PostgreSQL Database Server sudah terinstall dan berjalan</strong> di server 172.19.154.92. Lihat dokumen <em>TPS-PRIMALINK/DB/2026-001 (Laporan Instalasi PostgreSQL)</em> untuk panduan instalasi database.
+</div>
+
+<h2>3.1 Login ke Application Server</h2>
 <p>
-Docker Engine diinstall pada server untuk menjalankan aplikasi CMS dalam lingkungan container yang terisolasi. Pendekatan containerisasi dipilih untuk memudahkan deployment, menjaga konsistensi environment, dan memungkinkan rollback jika terjadi masalah.
+Langkah pertama adalah login ke application server (172.19.154.93) melalui SSH. Buka aplikasi terminal (misalnya: PuTTY di Windows, atau Terminal di Mac/Linux).
 </p>
 
 <div class="step">
   <span class="step-number">1</span>
-  <span class="step-title">Instalasi Docker</span>
-  <pre># Install Docker menggunakan script resmi
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Verifikasi instalasi
-docker --version
-# Docker version 29.2.1, build a5c7197
-
-# Enable Docker service
-sudo systemctl enable docker
-sudo systemctl start docker</pre>
+  <span class="step-title">Login ke Server via SSH</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut di terminal, lalu tekan <strong>Enter</strong>:</p>
+  <pre>ssh root@172.19.154.93</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika diminta password, masukkan password server lalu tekan <strong>Enter</strong>. (Password tidak akan terlihat saat diketik — ini normal.)</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul pertanyaan <code>Are you sure you want to continue connecting (yes/no)?</code>, ketik <strong>yes</strong> lalu tekan <strong>Enter</strong>.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda berhasil login jika tampilan berubah menjadi: <code>root@tpswebsiteapp:~#</code></p>
 </div>
 
-<h2>3.2 Konfigurasi Docker Compose</h2>
+<h2>3.2 Instalasi Docker Engine</h2>
 <p>
-Docker Compose digunakan untuk mendefinisikan dan menjalankan container aplikasi beserta seluruh konfigurasinya (environment variables, volume mounts, health check, networking).
+Docker Engine diinstall pada server untuk menjalankan aplikasi CMS dalam lingkungan container yang terisolasi. Container seperti "kotak" yang berisi aplikasi beserta semua kebutuhannya, sehingga aplikasi berjalan konsisten di mana saja.
 </p>
 
-<p class="no-indent"><strong>File:</strong> <code>/opt/tps-app/docker-compose.yml</code></p>
-<pre>services:
-  tps-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: tps-app
-    restart: unless-stopped
-    ports:
-      - "3300:3300"
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:***@172.19.154.92:5432/tps_web
-      - PORT=3300
-    volumes:
-      # Source code mounts (synced via deploy.sh)
-      - /opt/tps-app/pkgs:/app/pkgs
-      - /opt/tps-app/app/srv:/app/app/srv
-      - /opt/tps-app/app/db:/app/app/db
-      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
-      # Data mounts
-      - /opt/tps-data/uploads:/data/files
-      - /opt/tps-data/logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s</pre>
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Download Script Instalasi Docker</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>curl -fsSL https://get.docker.com -o get-docker.sh</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini mendownload script instalasi Docker resmi dari internet. Tidak ada output jika berhasil.</p>
+</div>
 
-<h2>3.3 Pembuatan Docker Image</h2>
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Jalankan Script Instalasi Docker</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>. <strong>Tunggu hingga proses selesai</strong> (bisa memakan waktu 2-5 menit):</p>
+  <pre>sudo sh get-docker.sh</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda akan melihat banyak output berupa proses download dan instalasi. Proses selesai jika muncul kembali tampilan <code>root@tpswebsiteapp:~#</code>.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Verifikasi Instalasi Docker</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>docker --version</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul output seperti ini (versi bisa sedikit berbeda):</p>
+  <pre>Docker version 29.2.1, build a5c7197</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Aktifkan Docker Autostart</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik dua perintah berikut satu per satu, tekan <strong>Enter</strong> setelah masing-masing:</p>
+  <pre>sudo systemctl enable docker
+sudo systemctl start docker</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah pertama memastikan Docker otomatis berjalan ketika server di-restart. Perintah kedua menjalankan Docker sekarang.</p>
+</div>
+
+<h2>3.3 Persiapan Direktori Aplikasi</h2>
 <p>
-Docker image dibuat berdasarkan base image <code>oven/bun:1.1.20-debian</code> yang menyediakan runtime Bun.js. Proses build menginstall seluruh dependencies (247 npm packages) dan generate Prisma client.
+Sebelum membuat container, kita perlu menyiapkan direktori-direktori yang akan digunakan oleh aplikasi.
 </p>
 
-<p class="no-indent"><strong>File:</strong> <code>/opt/tps-app/Dockerfile</code></p>
-<pre>FROM oven/bun:1.1.20-debian
+<div class="step">
+  <span class="step-number">6</span>
+  <span class="step-title">Buat Direktori Aplikasi dan Data</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>mkdir -p /opt/tps-app /opt/tps-data/uploads /opt/tps-data/logs</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Penjelasan direktori:</p>
+  <ul style="font-size: 10.5pt;">
+    <li><code>/opt/tps-app</code> — Tempat source code aplikasi</li>
+    <li><code>/opt/tps-data/uploads</code> — Tempat file upload (gambar, dokumen, dll)</li>
+    <li><code>/opt/tps-data/logs</code> — Tempat log aplikasi</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-number">7</span>
+  <span class="step-title">Pindah ke Direktori Aplikasi</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>cd /opt/tps-app</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tampilan akan berubah menjadi <code>root@tpswebsiteapp:/opt/tps-app#</code></p>
+</div>
+
+<h2>3.4 Membuat File Dockerfile</h2>
+<p>
+Dockerfile adalah "resep" untuk membuat Docker image — berisi instruksi langkah demi langkah untuk menyiapkan lingkungan aplikasi.
+</p>
+
+<div class="step">
+  <span class="step-number">8</span>
+  <span class="step-title">Buat File Dockerfile</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong> untuk membuka editor:</p>
+  <pre>nano /opt/tps-app/Dockerfile</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">File akan terbuka (kosong). <strong>Salin dan tempelkan (paste)</strong> seluruh isi berikut ke dalam editor:</p>
+  <pre>FROM oven/bun:1.1.20-debian
 
 RUN apt-get update && apt-get install -y curl git openssl \
     && rm -rf /var/lib/apt/lists/*
@@ -511,6 +548,12 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:3300/ || exit 1
 
 CMD ["bun", "run", "prod"]</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Setelah selesai paste:</p>
+  <ol style="font-size: 10.5pt;">
+    <li>Tekan <strong>Ctrl+O</strong> untuk menyimpan, lalu tekan <strong>Enter</strong>.</li>
+    <li>Tekan <strong>Ctrl+X</strong> untuk keluar dari editor.</li>
+  </ol>
+</div>
 
 <table>
   <caption>Tabel 3.1 — Informasi Docker Image</caption>
@@ -523,9 +566,68 @@ CMD ["bun", "run", "prod"]</pre>
   </tbody>
 </table>
 
-<h2>3.4 Konfigurasi Volume Mount</h2>
+<h2>3.5 Membuat File Docker Compose</h2>
 <p>
-Volume mount dikonfigurasi agar source code pada host langsung digunakan oleh container. Dengan pendekatan ini, perubahan kode cukup di-sync ke host lalu restart container — tidak perlu rebuild Docker image.
+Docker Compose adalah file konfigurasi yang mendefinisikan bagaimana container dijalankan — termasuk port, environment variables, volume mounts, dan health check.
+</p>
+
+<div class="step">
+  <span class="step-number">9</span>
+  <span class="step-title">Buat File docker-compose.yml</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong> untuk membuka editor:</p>
+  <pre>nano /opt/tps-app/docker-compose.yml</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">File akan terbuka (kosong). <strong>Salin dan tempelkan (paste)</strong> seluruh isi berikut ke dalam editor:</p>
+  <pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      # Source code mounts (synced via deploy.sh)
+      - /opt/tps-app/pkgs:/app/pkgs
+      - /opt/tps-app/app/srv:/app/app/srv
+      - /opt/tps-app/app/db:/app/app/db
+      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
+      # Data mounts
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Setelah selesai paste:</p>
+  <ol style="font-size: 10.5pt;">
+    <li>Tekan <strong>Ctrl+O</strong> untuk menyimpan, lalu tekan <strong>Enter</strong>.</li>
+    <li>Tekan <strong>Ctrl+X</strong> untuk keluar dari editor.</li>
+  </ol>
+</div>
+
+<div class="warning-box">
+  <strong>PENTING:</strong> Pada baris <code>DATABASE_URL</code>, pastikan password (<code>TpsDB2026Secure</code>) dan IP database (<code>172.19.154.92</code>) sesuai dengan konfigurasi yang dibuat saat instalasi PostgreSQL. Jika password berbeda, ganti sesuai password yang Anda set.
+</div>
+
+<div class="info-box">
+  <strong>Tips Editor Nano:</strong><br>
+  &bull; <strong>Ctrl+O</strong> = Simpan file (lalu tekan Enter)<br>
+  &bull; <strong>Ctrl+X</strong> = Keluar dari editor<br>
+  &bull; <strong>Ctrl+W</strong> = Cari teks<br>
+  &bull; <strong>Panah ↑ ↓ ← →</strong> = Navigasi kursor<br>
+  &bull; Di terminal, <strong>paste</strong> biasanya menggunakan <strong>Ctrl+Shift+V</strong> (Linux) atau <strong>klik kanan</strong> (PuTTY di Windows)
+</div>
+
+<h2>3.6 Konfigurasi Volume Mount</h2>
+<p>
+Volume mount menghubungkan direktori di server host dengan direktori di dalam container. Dengan cara ini, perubahan kode di server langsung terlihat oleh aplikasi di dalam container tanpa perlu rebuild image.
 </p>
 
 <table class="bordered">
@@ -545,18 +647,124 @@ Volume mount dikonfigurasi agar source code pada host langsung digunakan oleh co
   <strong>Catatan:</strong> <code>node_modules</code> (247 packages) tetap berada di dalam Docker image dan <strong>tidak</strong> di-mount dari host. Hal ini memastikan dependencies selalu konsisten dan tidak perlu install Bun/npm pada host server.
 </div>
 
-<h2>3.5 Migrasi File Upload</h2>
+<h2>3.7 Transfer Source Code ke Server</h2>
 <p>
-File upload dari production existing (total 4.7 GB) dimigrasikan ke direktori <code>/opt/tps-data/uploads/</code> pada server.
+Source code aplikasi perlu ditransfer dari komputer developer ke server. Proses ini dilakukan menggunakan script <code>deploy.sh</code> atau secara manual menggunakan <code>rsync</code> / <code>scp</code>.
 </p>
-<pre># Transfer file backup ke server
-scp files_backup.tar.gz root@172.19.154.93:/opt/tps-data/
 
-# Extract file backup
-cd /opt/tps-data
+<div class="step">
+  <span class="step-number">10</span>
+  <span class="step-title">Transfer Source Code (dari komputer developer)</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini dijalankan <strong>dari komputer developer (bukan dari server)</strong>. Buka terminal baru di komputer Anda, pindah ke folder project, lalu jalankan:</p>
+  <pre>rsync -az tps-core/tps/pkgs/ root@172.19.154.93:/opt/tps-app/pkgs/
+rsync -az tps-core/tps/app/srv/ root@172.19.154.93:/opt/tps-app/app/srv/
+rsync -az tps-core/tps/app/db/ root@172.19.154.93:/opt/tps-app/app/db/
+rsync -az tps-core/tps/app/web/deploy/ root@172.19.154.93:/opt/tps-app/app/web/deploy/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik setiap baris satu per satu, tekan <strong>Enter</strong> setelah masing-masing. Jika diminta password, masukkan password server. Tunggu setiap transfer selesai sebelum mengetik perintah berikutnya.</p>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>Atau</strong>, jika script deploy.sh sudah tersedia, cukup jalankan:</p>
+  <pre>./deploy.sh --sync-only</pre>
+</div>
+
+<h2>3.8 Migrasi File Upload</h2>
+<p>
+File upload dari production existing (total 4.7 GB, berisi gambar, dokumen, dll) perlu dimigrasikan ke server baru.
+</p>
+
+<div class="step">
+  <span class="step-number">11</span>
+  <span class="step-title">Transfer File Upload ke Server (dari komputer developer)</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini dijalankan <strong>dari komputer developer</strong>:</p>
+  <pre>scp files_backup.tar.gz root@172.19.154.93:/opt/tps-data/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">File <code>files_backup.tar.gz</code> harus ada di folder Anda saat ini. Transfer bisa memakan waktu lama (tergantung kecepatan jaringan dan ukuran file).</p>
+</div>
+
+<div class="step">
+  <span class="step-number">12</span>
+  <span class="step-title">Extract File Upload di Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Kembali ke terminal server (172.19.154.93). Ketik perintah berikut satu per satu:</p>
+  <pre>cd /opt/tps-data
 tar xzf files_backup.tar.gz -C uploads/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Penjelasan:</p>
+  <ul style="font-size: 10.5pt;">
+    <li><code>cd /opt/tps-data</code> = pindah ke direktori data</li>
+    <li><code>tar xzf</code> = extract file .tar.gz</li>
+    <li><code>-C uploads/</code> = extract ke dalam folder uploads</li>
+  </ul>
+  <p class="no-indent" style="font-size: 10.5pt;">Proses extract bisa memakan waktu beberapa menit. Tunggu sampai kembali ke tampilan <code>root@tpswebsiteapp:~#</code></p>
+</div>
 
-<h2>3.6 Verifikasi Deployment</h2>
+<div class="step">
+  <span class="step-number">13</span>
+  <span class="step-title">Verifikasi File Upload</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>du -sh /opt/tps-data/uploads/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul ukuran sekitar <strong>4.7G</strong> (atau sesuai ukuran file upload asli).</p>
+</div>
+
+<h2>3.9 Build dan Jalankan Container</h2>
+<p>
+Setelah semua file siap, kita dapat membuat Docker image dan menjalankan container aplikasi.
+</p>
+
+<div class="step">
+  <span class="step-number">14</span>
+  <span class="step-title">Build Docker Image</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Pastikan Anda berada di direktori <code>/opt/tps-app</code>. Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>cd /opt/tps-app
+docker compose build</pre>
+  <p class="no-indent" style="font-size: 10.5pt;"><strong>Proses ini akan memakan waktu 5-15 menit</strong> tergantung kecepatan server dan koneksi internet (untuk download base image dan dependencies). Anda akan melihat banyak output berupa proses download dan instalasi.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Proses selesai jika muncul pesan seperti: <code>Successfully built ...</code> atau <code>Successfully tagged ...</code></p>
+</div>
+
+<div class="step">
+  <span class="step-number">15</span>
+  <span class="step-title">Jalankan Container</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>docker compose up -d</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Parameter <code>-d</code> artinya container berjalan di background (tidak menampilkan log terus-menerus). Jika berhasil, akan muncul pesan: <code>Container tps-app Started</code></p>
+</div>
+
+<div class="step">
+  <span class="step-number">16</span>
+  <span class="step-title">Tunggu Container Siap (Health Check)</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Tunggu sekitar <strong>40 detik</strong> agar container selesai startup, lalu cek status:</p>
+  <pre>docker ps</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul output yang menunjukkan container <code>tps-app</code> dengan status <strong>Up ... (healthy)</strong>:</p>
+  <pre>CONTAINER ID   IMAGE           STATUS                    PORTS
+abcd1234...    tps-app-tps-app Up 45 seconds (healthy)   0.0.0.0:3300->3300/tcp</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika status masih <code>(health: starting)</code>, tunggu 30 detik lagi lalu jalankan <code>docker ps</code> lagi.</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika status <code>(unhealthy)</code>, lihat log error dengan perintah: <code>docker logs tps-app</code></p>
+</div>
+
+<h2>3.10 Verifikasi Deployment</h2>
+<p>
+Setelah container berjalan, lakukan verifikasi untuk memastikan semua komponen berfungsi dengan baik.
+</p>
+
+<div class="step">
+  <span class="step-number">17</span>
+  <span class="step-title">Test Akses Homepage</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul angka: <strong>200</strong> (artinya homepage berhasil diakses).</p>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda juga bisa mengakses dari browser komputer lain di jaringan yang sama dengan membuka: <code>http://172.19.154.93:3300/</code></p>
+</div>
+
+<div class="step">
+  <span class="step-number">18</span>
+  <span class="step-title">Cek Volume Mount</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>docker inspect tps-app --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{"\n"}}{{end}}'</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Harus muncul 6 baris mount yang menunjukkan koneksi antara direktori host dan container.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">19</span>
+  <span class="step-title">Cek Log Aplikasi (Opsional)</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Untuk melihat log aplikasi secara real-time, ketik:</p>
+  <pre>docker logs -f tps-app</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Log akan terus berjalan. Tekan <strong>Ctrl+C</strong> untuk berhenti melihat log (container tetap berjalan).</p>
+</div>
 
 <table class="bordered">
   <caption>Tabel 3.3 — Checklist Verifikasi Deployment</caption>
@@ -738,6 +946,38 @@ Gambar 5.1 — Workflow Deployment Saat Ini (Tanpa Internet)
 Script deployment otomatis telah dibuat untuk menyederhanakan proses. Script ini melakukan sinkronisasi 4 direktori source code, restart container, dan verifikasi health check.
 </p>
 
+<div class="info-box">
+  <strong>Catatan:</strong> Script ini dijalankan dari <strong>komputer developer</strong> (bukan dari server). Pastikan Anda berada di folder project <code>tps-core/tps/</code> sebelum menjalankan script.
+</div>
+
+<p class="no-indent"><strong>Cara menjalankan deploy script:</strong></p>
+
+<p class="no-indent"><strong>Langkah 1:</strong> Buka Terminal di komputer developer Anda, lalu masuk ke folder project:</p>
+<pre>cd tps-core/tps</pre>
+
+<p class="no-indent"><strong>Langkah 2:</strong> Jalankan script deploy sesuai kebutuhan:</p>
+
+<pre># Deploy lengkap (sync code + restart container):
+./deploy.sh
+
+# Hanya sync code tanpa restart (jika hanya update konten):
+./deploy.sh --sync-only
+
+# Hanya restart container (jika tidak ada perubahan code):
+./deploy.sh --restart</pre>
+
+<p class="no-indent"><strong>Langkah 3:</strong> Tunggu proses selesai. Script akan menampilkan status untuk setiap tahap:</p>
+
+<pre># Contoh output yang normal:
+sending incremental file list   ← rsync sedang mengirim file
+...
+tps-app                         ← container berhasil di-restart
+HTTP 200                        ← website bisa diakses (berhasil!)</pre>
+
+<div class="info-box">
+  <strong>Isi script deploy.sh (untuk referensi):</strong>
+</div>
+
 <pre>#!/bin/bash
 # Usage:
 #   ./deploy.sh              # Sync + restart
@@ -755,6 +995,13 @@ ssh root@172.19.154.93 "docker restart tps-app"
 
 # 3. Health check & smoke test
 # → Verifikasi container Up (healthy) dan homepage HTTP 200</pre>
+
+<div class="warning-box">
+  <strong>Jika deploy gagal:</strong><br>
+  • <strong>"Permission denied"</strong> → Pastikan SSH key sudah terdaftar di server (lihat BAB III bagian 3.1)<br>
+  • <strong>"Connection refused"</strong> → Pastikan server menyala dan bisa diakses via jaringan<br>
+  • <strong>"rsync: command not found"</strong> → Install rsync: <code>sudo apt install rsync</code> (di komputer developer)
+</div>
 
 <h2>5.3 Keterbatasan Tanpa Akses Internet</h2>
 
