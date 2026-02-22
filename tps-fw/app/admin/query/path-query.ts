@@ -212,7 +212,7 @@ const flattenPathQuery = (
 
   if (opt.sort) {
     const [col, order] = Object.entries(opt.sort)[0];
-    result = orderBy(result, col, order).filter((e) => !!e[col]);
+    result = orderBy(result, col, order);
   }
 
   return result;

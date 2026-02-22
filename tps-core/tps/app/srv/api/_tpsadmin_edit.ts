@@ -467,7 +467,8 @@ const renderEditPage = (
     // Special handling for domestics/international fields - format as number with thousand separator
     if ((fieldName === "domestics" || fieldName === "international") &&
         (field.path.includes("throughput") || field.path.includes("annual_throughput"))) {
-      const numValue = fieldValue ? parseInt(fieldValue.toString().replace(/[^\d]/g, "")) : "";
+      const rawValue = fieldValue ? fieldValue.toString().replace(/[^\d]/g, "") : "";
+      const numValue = rawValue ? parseInt(rawValue) : "";
       const formattedValue = numValue ? numValue.toLocaleString("id-ID") : "";
       return `
         <div class="space-y-1.5">
@@ -483,7 +484,7 @@ const renderEditPage = (
                    data-field="${fieldName}"
                    oninput="formatNumberInput(this)"
                    placeholder="0">
-            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="${escapeHtml(fieldValue.toString())}">
+            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="${rawValue}">
             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">TEUs</span>
           </div>
         </div>
@@ -618,7 +619,8 @@ const renderEditPage = (
 
     if (field.type === "number") {
       // Format number with thousand separator for display
-      const numValue = fieldValue ? parseInt(fieldValue.toString().replace(/[^\d]/g, "")) : "";
+      const rawNumValue = fieldValue ? fieldValue.toString().replace(/[^\d]/g, "") : "";
+      const numValue = rawNumValue ? parseInt(rawNumValue) : "";
       const formattedValue = numValue ? numValue.toLocaleString("id-ID") : "";
       return `
         <div class="space-y-1.5">
@@ -634,7 +636,7 @@ const renderEditPage = (
                    data-field="${fieldName}"
                    oninput="formatNumberInput(this)"
                    placeholder="0">
-            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="${escapeHtml(fieldValue.toString())}">
+            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="${rawNumValue}">
           </div>
         </div>
       `;

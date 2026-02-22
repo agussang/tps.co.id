@@ -651,10 +651,13 @@ const renderAddPage = (
 
       showToast('Mengupload file...', 'loading');
 
+      const formData = new FormData();
+      formData.append('file', file);
+
       try {
         const res = await fetch('/_upload?to=' + fieldName.replace(/\\./g, '/'), {
           method: 'POST',
-          body: file
+          body: formData
         });
         const result = await res.json();
 
@@ -764,7 +767,22 @@ const renderAddPage = (
             window.location.href = '/backend/tpsadmin/list/' + structureId;
           }, 1000);
         } else {
-          showToast('Gagal menyimpan: ' + JSON.stringify(result.errors || 'Unknown error'), 'error');
+          // Show specific field errors if available
+          var errorMsg = '';
+          if (result.errors && typeof result.errors === 'object') {
+            var msgs = [];
+            for (var key in result.errors) {
+              if (Array.isArray(result.errors[key])) {
+                msgs.push(result.errors[key].join(', '));
+              } else {
+                msgs.push(key + ': ' + result.errors[key]);
+              }
+            }
+            errorMsg = msgs.join('; ');
+          } else {
+            errorMsg = result.message || 'Unknown error';
+          }
+          showToast('Gagal menyimpan: ' + errorMsg, 'error');
         }
       } catch (e) {
         console.error('Save error:', e);
