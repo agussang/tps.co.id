@@ -128,12 +128,8 @@ export const _ = {
       res = new Response("NOT FOUND", { status: 404 });
     }
 
-    // Extract filename from path - files stored with dash before extension (e.g., "name-pdf")
-    const base = basename(path);
-    const lastDash = base.lastIndexOf("-");
-    const fname = lastDash > 0
-      ? base.substring(0, lastDash) + "." + base.substring(lastDash + 1)
-      : base;
+    // Use basename for filename - files already stored with proper extension (e.g., "name.pdf")
+    const fname = basename(path);
     const ctype = mime.getType(fname);
     if (ctype) {
       res.headers.set("content-disposition", `inline; filename="${fname}"`);
