@@ -226,6 +226,16 @@ declare module "app/srv/api/_tpsadmin_list" {
         }): Promise<Response>;
     };
 }
+declare module "app/srv/api/_api_seed_test_page" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
 declare module "app/srv/api/_tpsadmin_pages" {
     export const _: {
         url: string;
@@ -1047,6 +1057,13 @@ declare module "app/srv/exports" {
         path: string;
         args: string[];
         handler: Promise<typeof import("app/srv/api/_tpsadmin_list")>;
+    };
+    export const _api_seed_test_page: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_seed_test_page")>;
     };
     export const _tpsadmin_pages: {
         name: string;

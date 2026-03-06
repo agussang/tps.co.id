@@ -145,6 +145,13 @@ export const _tpsadmin_list = {
   args: ["this"],
   handler: import("./api/_tpsadmin_list")
 }
+export const _api_seed_test_page = {
+  name: "_api_seed_test_page",
+  url: "/backend/api/seed-test-page",
+  path: "app/srv/api/_api_seed_test_page.ts",
+  args: ["this"],
+  handler: import("./api/_api_seed_test_page")
+}
 export const _tpsadmin_pages = {
   name: "_tpsadmin_pages",
   url: "/backend/tpsadmin/pages",

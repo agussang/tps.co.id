@@ -12,23 +12,18 @@ services:
       - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
       - PORT=3300
     volumes:
-      # Source code mounts (synced via deploy.sh)
-      - /opt/tps-app/pkgs:/app/pkgs
-      - /opt/tps-app/app/srv:/app/app/srv
+      # Source code (langsung dari path Git repository, tanpa symlink)
+      - /opt/tps-app/tps-core/tps/pkgs:/app/pkgs
+      - /opt/tps-app/tps-core/tps/app/srv:/app/app/srv
+      - /opt/tps-app/tps-core/tps/app/web/deploy:/app/app/web/deploy
+      # Database config (terpisah dari Git, berisi .env rahasia)
       - /opt/tps-app/app/db:/app/app/db
-      - /opt/tps-app/app/web/deploy:/app/app/web/deploy
-      # Data mounts
+      # Data
       - /opt/tps-data/uploads:/data/files
       - /opt/tps-data/logs:/app/logs
-    networks:
-      - tps-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3300/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-networks:
-  tps-network:
-    driver: bridge

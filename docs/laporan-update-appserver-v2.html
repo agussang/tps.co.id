@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Update Konfigurasi Application Server dan Deployment System (v2.0) - TPS CMS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: A4;
+    margin: 2.5cm 3cm 2.5cm 3cm;
+  }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2.5cm 3cm;
+  }
+
+  .cover-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 85vh;
+    text-align: center;
+    page-break-after: always;
+  }
+  .cover-page .doc-type {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #0475BC;
+    margin-bottom: 30px;
+    border-top: 3px solid #0475BC;
+    border-bottom: 3px solid #0475BC;
+    padding: 10px 30px;
+  }
+  .cover-page h1 {
+    font-size: 22pt;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    color: #0a0a0a;
+  }
+  .cover-page .subtitle {
+    font-size: 14pt;
+    color: #444;
+    margin-bottom: 60px;
+  }
+  .cover-page .meta-table {
+    width: 70%;
+    border-collapse: collapse;
+    margin-bottom: 60px;
+    font-size: 11pt;
+  }
+  .cover-page .meta-table td {
+    padding: 8px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  .cover-page .meta-table td:first-child {
+    font-weight: bold;
+    width: 40%;
+    color: #333;
+  }
+  .cover-page .prepared-for {
+    margin-top: 50px;
+    padding: 20px;
+    border: 2px solid #0475BC;
+    border-radius: 8px;
+  }
+  .cover-page .prepared-for .label {
+    font-size: 10pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .cover-page .prepared-for .name {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+  .cover-page .company-info {
+    margin-top: 40px;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+  .cover-page .company-info .company-name {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #0475BC;
+  }
+
+  .toc { page-break-after: always; }
+  .toc h2 { text-align: center; font-size: 16pt; margin-bottom: 30px; color: #0a0a0a; }
+  .toc-list { list-style: none; }
+  .toc-list li { padding: 6px 0; border-bottom: 1px dotted #ccc; display: flex; justify-content: space-between; }
+  .toc-list li.chapter { font-weight: bold; margin-top: 12px; font-size: 12pt; }
+  .toc-list li.section { padding-left: 25px; font-size: 11pt; }
+  .toc-list li.subsection { padding-left: 50px; font-size: 10.5pt; color: #444; }
+  .toc-page { font-weight: normal; color: #666; }
+
+  h1.chapter {
+    font-size: 18pt; font-weight: bold;
+    margin-top: 40px; margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #0475BC;
+    color: #0a0a0a;
+    page-break-before: always;
+  }
+  h1.chapter:first-of-type { page-break-before: auto; }
+  h2 { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 12px; color: #1a1a1a; }
+  h3 { font-size: 12pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #333; }
+
+  p { text-align: justify; margin-bottom: 12px; text-indent: 1.27cm; }
+  p.no-indent { text-indent: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10.5pt; }
+  table th { background: #0475BC; color: white; padding: 10px 12px; text-align: left; font-weight: bold; font-size: 10pt; }
+  table td { padding: 8px 12px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  table tr:nth-child(even) { background: #f8f9fa; }
+  table.bordered td, table.bordered th { border: 1px solid #ccc; }
+  table caption { caption-side: bottom; font-size: 10pt; color: #666; font-style: italic; padding-top: 8px; }
+
+  pre {
+    background: #f4f4f4; border: 1px solid #ddd; border-left: 4px solid #0475BC;
+    padding: 12px 16px; margin: 12px 0;
+    font-family: 'Courier New', monospace; font-size: 9.5pt; line-height: 1.5;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  code {
+    font-family: 'Courier New', monospace; font-size: 10pt;
+    background: #f0f0f0; padding: 2px 5px; border-radius: 3px;
+  }
+
+  .info-box {
+    background: #e8f4fd; border: 1px solid #b8d9f0; border-left: 4px solid #0475BC;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+  .warning-box {
+    background: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #ff9800;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+  .danger-box {
+    background: #fdecea; border: 1px solid #f5c6cb; border-left: 4px solid #dc3545;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+  .success-box {
+    background: #e8f5e9; border: 1px solid #a5d6a7; border-left: 4px solid #4caf50;
+    padding: 12px 16px; margin: 15px 0; font-size: 11pt;
+  }
+
+  ol, ul { margin: 10px 0 10px 35px; }
+  li { margin-bottom: 6px; }
+
+  .diagram {
+    background: #fafafa; border: 2px solid #ddd; border-radius: 8px;
+    padding: 20px; margin: 20px 0; text-align: center;
+    font-family: 'Courier New', monospace; font-size: 10pt; line-height: 1.6;
+  }
+
+  .step {
+    margin: 15px 0; padding: 12px 16px;
+    border-left: 3px solid #0475BC; background: #fafbfc;
+  }
+  .step-number {
+    display: inline-block; background: #0475BC; color: white;
+    width: 28px; height: 28px; line-height: 28px;
+    text-align: center; border-radius: 50%; font-weight: bold; font-size: 11pt; margin-right: 10px;
+  }
+  .step-title { font-weight: bold; font-size: 11pt; }
+
+  .page-footer {
+    font-size: 9pt; color: #999; text-align: center;
+    margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd;
+  }
+
+  .highlight-red { color: #dc3545; font-weight: bold; }
+  .highlight-blue { color: #0475BC; font-weight: bold; }
+  .highlight-green { color: #4caf50; font-weight: bold; }
+
+  .status-pass { color: #4caf50; font-weight: bold; }
+  .status-fail { color: #dc3545; font-weight: bold; }
+  .status-resolved { color: #4caf50; font-weight: bold; }
+
+  .comparison-old { background: #fdecea; }
+  .comparison-new { background: #e8f5e9; }
+
+  @media print {
+    body { padding: 0; max-width: none; }
+    h1.chapter { page-break-before: always; }
+    table, pre, .step, .diagram { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-page">
+  <div class="doc-type">Laporan Teknis &mdash; Update</div>
+
+  <h1>Update Konfigurasi Application Server,<br>Deployment System via Git,<br>dan Hasil Pengujian Konektivitas</h1>
+
+  <p class="subtitle">Sistem CMS Website &mdash; PT Terminal Petikemas Surabaya</p>
+
+  <table class="meta-table">
+    <tr><td>Nomor Dokumen</td><td>TPS-PRIMALINK/APP/2026-003</td></tr>
+    <tr><td>Versi</td><td>2.0</td></tr>
+    <tr><td>Tanggal</td><td>06 Maret 2026</td></tr>
+    <tr><td>Klasifikasi</td><td>Rahasia / Internal</td></tr>
+    <tr><td>Status</td><td>Final</td></tr>
+    <tr><td>Dokumen Terkait</td><td>TPS-PRIMALINK/APP/2026-002 (Laporan Instalasi v1.0)</td></tr>
+  </table>
+
+  <div class="prepared-for">
+    <div class="label">Dipersiapkan untuk</div>
+    <div class="name">PT Terminal Petikemas Surabaya</div>
+  </div>
+
+  <div class="company-info">
+    <div class="company-name">PT PRIMALINK</div>
+    <p class="no-indent">Technology Solutions Partner</p>
+  </div>
+</div>
+
+<!-- ==================== LEMBAR PENGESAHAN ==================== -->
+<div style="page-break-after: always;">
+  <h2 style="text-align: center; font-size: 16pt; margin-top: 40px; margin-bottom: 40px;">LEMBAR PENGESAHAN</h2>
+
+  <table class="bordered" style="width: 100%; margin-bottom: 30px;">
+    <tr>
+      <td style="width: 30%; font-weight: bold;">Judul Dokumen</td>
+      <td>Laporan Update Konfigurasi Application Server, Deployment System via Git, dan Hasil Pengujian Konektivitas untuk Sistem CMS Website PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr><td style="font-weight: bold;">Nomor Dokumen</td><td>TPS-PRIMALINK/APP/2026-003</td></tr>
+    <tr><td style="font-weight: bold;">Versi</td><td>2.0</td></tr>
+    <tr><td style="font-weight: bold;">Referensi</td><td>TPS-PRIMALINK/APP/2026-002 (Laporan Instalasi Awal, 12 Februari 2026)</td></tr>
+  </table>
+
+  <table class="bordered" style="width: 100%; text-align: center;">
+    <tr>
+      <th style="width: 33%;">Disiapkan Oleh</th>
+      <th style="width: 33%;">Diperiksa Oleh</th>
+      <th style="width: 34%;">Disetujui Oleh</th>
+    </tr>
+    <tr style="height: 100px;"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+      <td><strong>Tim Teknis</strong><br>PT PRIMALINK</td>
+      <td><strong>Project Manager</strong><br>PT PRIMALINK</td>
+      <td><strong>PIC IT</strong><br>PT Terminal Petikemas Surabaya</td>
+    </tr>
+    <tr>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+      <td>Tanggal: ___/___/2026</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top: 40px;">Riwayat Perubahan Dokumen</h3>
+  <table class="bordered">
+    <thead><tr><th>Versi</th><th>Tanggal</th><th>Perubahan</th><th>Penulis</th></tr></thead>
+    <tbody>
+      <tr><td>1.0</td><td>12 Feb 2026</td><td>Laporan instalasi awal (TPS-PRIMALINK/APP/2026-002)</td><td>Tim Teknis</td></tr>
+      <tr><td>2.0</td><td>06 Mar 2026</td><td>Update: akses internet tersedia, deployment via Git, pengujian konektivitas, perubahan docker-compose</td><td>Tim Teknis</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== DAFTAR ISI ==================== -->
+<div class="toc">
+  <h2>DAFTAR ISI</h2>
+  <ul class="toc-list">
+    <li class="chapter"><span>BAB I &mdash; PENDAHULUAN</span></li>
+    <li class="section"><span>1.1 Latar Belakang</span></li>
+    <li class="section"><span>1.2 Tujuan Dokumen</span></li>
+    <li class="section"><span>1.3 Ruang Lingkup</span></li>
+    <li class="section"><span>1.4 Perubahan dari Versi Sebelumnya</span></li>
+
+    <li class="chapter"><span>BAB II &mdash; PENGUJIAN KONEKTIVITAS SERVER</span></li>
+    <li class="section"><span>2.1 Metodologi Pengujian</span></li>
+    <li class="section"><span>2.2 Hasil Pengujian Koneksi Internet</span></li>
+    <li class="section"><span>2.3 Hasil Pengujian Koneksi Internal (LAN)</span></li>
+    <li class="section"><span>2.4 Hasil Pengujian Docker dan Container</span></li>
+    <li class="section"><span>2.5 Hasil Pengujian Layanan Website</span></li>
+    <li class="section"><span>2.6 Konfigurasi Jaringan Server</span></li>
+    <li class="section"><span>2.7 Kapasitas Server</span></li>
+    <li class="section"><span>2.8 Ringkasan Pengujian</span></li>
+
+    <li class="chapter"><span>BAB III &mdash; PERUBAHAN SISTEM DEPLOYMENT</span></li>
+    <li class="section"><span>3.1 Perbandingan Workflow: Sebelum dan Sesudah</span></li>
+    <li class="section"><span>3.2 Setup Git Repository di Server</span></li>
+    <li class="section"><span>3.3 Perubahan Docker Compose</span></li>
+    <li class="section"><span>3.4 Konfigurasi Database (app/db)</span></li>
+    <li class="section"><span>3.5 Prosedur Deployment Baru (via Git Pull)</span></li>
+    <li class="section"><span>3.6 Prosedur Recovery Server (dari Nol)</span></li>
+    <li class="section"><span>3.7 Troubleshooting</span></li>
+
+    <li class="chapter"><span>BAB IV &mdash; PANDUAN OPERASIONAL</span></li>
+    <li class="section"><span>4.1 Deployment Perubahan Kode (Rutin)</span></li>
+    <li class="section"><span>4.2 Update Dependencies (Berkala)</span></li>
+    <li class="section"><span>4.3 Rebuild Docker Image</span></li>
+    <li class="section"><span>4.4 Backup Database</span></li>
+    <li class="section"><span>4.5 Monitoring Kesehatan Server</span></li>
+
+    <li class="chapter"><span>BAB V &mdash; KESIMPULAN DAN STATUS REKOMENDASI</span></li>
+    <li class="section"><span>5.1 Kesimpulan</span></li>
+    <li class="section"><span>5.2 Status Rekomendasi dari Laporan Sebelumnya</span></li>
+    <li class="section"><span>5.3 Rekomendasi Lanjutan</span></li>
+
+    <li class="chapter"><span>LAMPIRAN</span></li>
+    <li class="section"><span>A &mdash; Docker Compose Terbaru (Lengkap)</span></li>
+    <li class="section"><span>B &mdash; Script Pengujian Konektivitas</span></li>
+    <li class="section"><span>C &mdash; Prosedur Deployment Ringkas (Cheat Sheet)</span></li>
+    <li class="section"><span>D &mdash; Prosedur Recovery dari Nol (Disaster Recovery)</span></li>
+  </ul>
+</div>
+
+<!-- ==================== BAB I ==================== -->
+<h1 class="chapter">BAB I<br>PENDAHULUAN</h1>
+
+<h2>1.1 Latar Belakang</h2>
+<p>
+Pada laporan sebelumnya (TPS-PRIMALINK/APP/2026-002, tertanggal 12 Februari 2026), telah didokumentasikan proses instalasi application server beserta kendala yang dihadapi. Salah satu kendala utama yang ditemukan pada saat itu adalah <strong>tidak tersedianya akses internet pada server</strong> (172.19.154.93), sehingga proses deployment harus dilakukan secara manual menggunakan <code>rsync</code> melalui SSH dari komputer developer.
+</p>
+<p>
+Berdasarkan pengujian yang dilakukan pada tanggal <strong>6 Maret 2026</strong>, ditemukan bahwa server telah memiliki <strong>akses internet penuh</strong>. Perubahan kondisi ini membuka peluang untuk menyederhanakan proses deployment menggunakan Git secara langsung di server, menggantikan mekanisme <code>rsync</code> manual yang sebelumnya digunakan.
+</p>
+<p>
+Selain perubahan metode deployment, dokumen ini juga mendokumentasikan perubahan pada file <code>docker-compose.yml</code> agar volume mount mengarah langsung ke path Git repository. Pendekatan ini menghilangkan kebutuhan symbolic link (symlink) yang sebelumnya digunakan, sehingga proses recovery server menjadi lebih cepat dan sederhana.
+</p>
+
+<h2>1.2 Tujuan Dokumen</h2>
+<p class="no-indent">Dokumen ini disusun dengan tujuan:</p>
+<ol>
+  <li>Mendokumentasikan hasil pengujian konektivitas server secara menyeluruh (internet, LAN, Docker, dan layanan website).</li>
+  <li>Menjelaskan perubahan sistem deployment dari <code>rsync</code> manual menjadi <code>git pull</code> langsung di server.</li>
+  <li>Mendokumentasikan perubahan konfigurasi <code>docker-compose.yml</code> yang disesuaikan dengan struktur direktori Git repository.</li>
+  <li>Menyediakan prosedur recovery server yang cepat dan jelas untuk skenario disaster recovery.</li>
+  <li>Menyediakan panduan operasional yang jelas dan lengkap untuk pengelolaan server ke depan.</li>
+</ol>
+
+<h2>1.3 Ruang Lingkup</h2>
+<p class="no-indent">Ruang lingkup dokumen ini meliputi:</p>
+<ol>
+  <li>Pengujian konektivitas server (20 test case).</li>
+  <li>Konfigurasi Git repository di server untuk deployment.</li>
+  <li>Perubahan <code>docker-compose.yml</code> dan struktur volume mount.</li>
+  <li>Prosedur recovery server dari nol (disaster recovery).</li>
+  <li>Panduan deployment, maintenance, dan troubleshooting.</li>
+</ol>
+
+<h2>1.4 Perubahan dari Versi Sebelumnya</h2>
+
+<table class="bordered">
+  <caption>Tabel 1.1 &mdash; Ringkasan Perubahan dari Laporan v1.0</caption>
+  <thead><tr><th style="width: 30%;">Aspek</th><th style="width: 35%;">v1.0 (12 Feb 2026)</th><th style="width: 35%;">v2.0 (06 Mar 2026)</th></tr></thead>
+  <tbody>
+    <tr class="comparison-old">
+      <td><strong>Akses Internet</strong></td>
+      <td>Tidak tersedia (timeout)</td>
+      <td class="comparison-new"><strong>Tersedia</strong> (semua test PASS)</td>
+    </tr>
+    <tr>
+      <td><strong>Metode Deployment</strong></td>
+      <td><code>rsync</code> manual dari PC developer</td>
+      <td class="comparison-new"><code>git pull</code> langsung di server</td>
+    </tr>
+    <tr>
+      <td><strong>Source Code di Server</strong></td>
+      <td>Salinan file via rsync</td>
+      <td class="comparison-new">Git repository (clone dari GitHub)</td>
+    </tr>
+    <tr>
+      <td><strong>Docker Compose Volumes</strong></td>
+      <td>Mount dari <code>/opt/tps-app/</code> + symlink</td>
+      <td class="comparison-new">Mount langsung dari path Git repo (<code>tps-core/tps/</code>)</td>
+    </tr>
+    <tr>
+      <td><strong>Ketergantungan Deploy</strong></td>
+      <td>PC developer harus tersedia</td>
+      <td class="comparison-new">Cukup akses ke server (SSH/AnyDesk)</td>
+    </tr>
+    <tr>
+      <td><strong>Recovery dari Nol</strong></td>
+      <td>Rsync manual + buat symlink + konfigurasi</td>
+      <td class="comparison-new"><code>git clone</code> + <code>docker compose up</code> (4 langkah)</td>
+    </tr>
+    <tr>
+      <td><strong>OS Version</strong></td>
+      <td>Ubuntu 24.04.3 LTS</td>
+      <td class="comparison-new">Ubuntu 24.04.4 LTS (updated)</td>
+    </tr>
+    <tr>
+      <td><strong>Disk Terpakai</strong></td>
+      <td>24 GB (12%)</td>
+      <td class="comparison-new">25 GB (14%)</td>
+    </tr>
+    <tr>
+      <td><strong>Upload Data</strong></td>
+      <td>4.7 GB</td>
+      <td class="comparison-new">9.3 GB</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ==================== BAB II ==================== -->
+<h1 class="chapter">BAB II<br>PENGUJIAN KONEKTIVITAS SERVER</h1>
+
+<h2>2.1 Metodologi Pengujian</h2>
+<p>
+Pengujian konektivitas dilakukan pada tanggal <strong>6 Maret 2026 pukul 03:23 WIB</strong> langsung di server 172.19.154.93 menggunakan script pengujian otomatis. Script menjalankan 20 test case yang mencakup 6 kategori: koneksi internet, koneksi internal (LAN), Docker &amp; container, layanan website, konfigurasi jaringan, dan kapasitas server.
+</p>
+<p>
+Setiap test case menghasilkan status <strong>[PASS]</strong> (berhasil) atau <strong>[FAIL]</strong> (gagal), serta informasi detail untuk keperluan diagnosis.
+</p>
+
+<h2>2.2 Hasil Pengujian Koneksi Internet</h2>
+
+<div class="success-box">
+  <strong>HASIL:</strong> Seluruh 8 pengujian koneksi internet <strong>BERHASIL (PASS)</strong>. Server telah memiliki akses internet penuh ke seluruh layanan yang dibutuhkan.
+</div>
+
+<table class="bordered">
+  <caption>Tabel 2.1 &mdash; Hasil Pengujian Koneksi Internet</caption>
+  <thead><tr><th>No</th><th>Test Case</th><th>Metode</th><th>Hasil</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>1a</td><td>DNS Resolution (google.com)</td><td><code>nslookup</code></td><td>Resolved</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1b</td><td>Ping Google DNS (8.8.8.8)</td><td><code>ping -c 3</code></td><td>Reply received</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1c</td><td>Ping Cloudflare DNS (1.1.1.1)</td><td><code>ping -c 3</code></td><td>Reply received</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1d</td><td>HTTP ke google.com</td><td><code>curl HTTPS</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1e</td><td>HTTP ke github.com</td><td><code>curl HTTPS</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1f</td><td>Ubuntu Package Repository</td><td><code>curl HTTP</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1g</td><td>Docker Hub (hub.docker.com)</td><td><code>curl HTTPS</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>1h</td><td>NPM Registry (registry.npmjs.org)</td><td><code>curl HTTPS</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+  </tbody>
+</table>
+
+<div class="info-box">
+  <strong>Perubahan dari laporan sebelumnya:</strong> Pada laporan v1.0 (12 Februari 2026), seluruh pengujian koneksi internet menghasilkan <strong>TIMEOUT (HTTP 000)</strong>. Pada pengujian terkini (6 Maret 2026), seluruh koneksi <strong>BERHASIL</strong>. Hal ini mengindikasikan bahwa akses internet telah diaktifkan pada server setelah laporan sebelumnya disampaikan.
+</div>
+
+<h2>2.3 Hasil Pengujian Koneksi Internal (LAN)</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.2 &mdash; Hasil Pengujian Koneksi Internal</caption>
+  <thead><tr><th>No</th><th>Test Case</th><th>Metode</th><th>Hasil</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>2a</td><td>Ping Database Server (172.19.154.92)</td><td><code>ping -c 3</code></td><td>Reply received</td><td class="status-pass">PASS</td></tr>
+    <tr><td>2b</td><td>Port PostgreSQL (172.19.154.92:5432)</td><td><code>TCP connect</code></td><td>Port open</td><td class="status-pass">PASS</td></tr>
+    <tr><td>2c</td><td>PostgreSQL Query Test</td><td><code>psql SELECT 1</code></td><td>Query successful</td><td class="status-pass">PASS</td></tr>
+    <tr><td>2d</td><td>Ping Gateway (172.19.155.2)</td><td><code>ping -c 3</code></td><td>Reply received</td><td class="status-pass">PASS</td></tr>
+  </tbody>
+</table>
+
+<h2>2.4 Hasil Pengujian Docker dan Container</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.3 &mdash; Hasil Pengujian Docker</caption>
+  <thead><tr><th>No</th><th>Test Case</th><th>Hasil</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>3a</td><td>Docker Daemon</td><td>Running</td><td class="status-pass">PASS</td></tr>
+    <tr><td>3b</td><td>Container tps-app</td><td>Running</td><td class="status-pass">PASS</td></tr>
+    <tr><td>3c</td><td>Port 3300 Accessible</td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+  </tbody>
+</table>
+
+<p class="no-indent"><strong>Docker Container Logs (5 baris terakhir):</strong></p>
+<pre>Server to get profile IG
+0             result_00
+9             result_01
+10            result_1
+10            result_2</pre>
+<p class="no-indent" style="font-size: 10pt; color: #666; font-style: italic;">Log menunjukkan server berjalan normal dan memproses data Instagram feed.</p>
+
+<h2>2.5 Hasil Pengujian Layanan Website</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.4 &mdash; Hasil Pengujian Layanan Website</caption>
+  <thead><tr><th>No</th><th>Test Case</th><th>URL</th><th>Hasil</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>4a</td><td>Homepage</td><td><code>/</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>4b</td><td>Admin Login Page</td><td><code>/backend/tpsadmin</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>4c</td><td>Static File Serving</td><td><code>/_file/layout/header/...</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+    <tr><td>4d</td><td>WSDL Jadwal Kapal</td><td><code>tps.co.id:9090/WSCBS/Vessel</code></td><td>Accessible</td><td class="status-pass">PASS</td></tr>
+    <tr><td>4e</td><td>Halaman Karir</td><td><code>/karir</code></td><td>HTTP 200</td><td class="status-pass">PASS</td></tr>
+  </tbody>
+</table>
+
+<h2>2.6 Konfigurasi Jaringan Server</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.5 &mdash; Konfigurasi Jaringan</caption>
+  <thead><tr><th style="width: 30%;">Parameter</th><th>Nilai</th></tr></thead>
+  <tbody>
+    <tr><td>Hostname</td><td><code>tpswebsiteapp</code></td></tr>
+    <tr><td>IP Address (LAN)</td><td>172.19.154.93/16 (interface <code>ens160</code>)</td></tr>
+    <tr><td>IP Address (Docker bridge)</td><td>172.17.0.1/16 (<code>docker0</code>), 172.18.0.1/16 (<code>br-f8947408a58c</code>)</td></tr>
+    <tr><td>Default Gateway</td><td>172.19.155.2 (via <code>ens160</code>, static route)</td></tr>
+    <tr><td>DNS Resolver</td><td>127.0.0.53 (systemd-resolved)</td></tr>
+    <tr><td>DNS Search Domain</td><td><code>tps.co.id</code></td></tr>
+    <tr><td>Firewall (OUTPUT)</td><td>ACCEPT (tidak ada pembatasan outbound)</td></tr>
+    <tr><td>HTTP Proxy</td><td>Tidak di-set</td></tr>
+    <tr><td>HTTPS Proxy</td><td>Tidak di-set</td></tr>
+  </tbody>
+</table>
+
+<h2>2.7 Kapasitas Server</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.6 &mdash; Kapasitas Server (per 6 Maret 2026)</caption>
+  <thead><tr><th style="width: 30%;">Parameter</th><th>Nilai</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>Sistem Operasi</td><td>Ubuntu 24.04.4 LTS</td><td>Updated dari 24.04.3</td></tr>
+    <tr><td>Total Disk</td><td>195 GB (LVM)</td><td>&mdash;</td></tr>
+    <tr><td>Disk Terpakai</td><td>25 GB (14%)</td><td>Sisa 161 GB tersedia</td></tr>
+    <tr><td>Total RAM</td><td>7.8 GB</td><td>&mdash;</td></tr>
+    <tr><td>RAM Terpakai</td><td>1.2 GB</td><td>6.6 GB tersedia</td></tr>
+    <tr><td>Swap</td><td>4.0 GB</td><td>Tidak terpakai (0B used)</td></tr>
+    <tr><td>Aplikasi (<code>/opt/tps-app/</code>)</td><td>87 MB</td><td>Source code + Docker config</td></tr>
+    <tr><td>Data Upload (<code>/opt/tps-data/</code>)</td><td>9.3 GB</td><td>File gambar, dokumen, media</td></tr>
+  </tbody>
+</table>
+
+<h2>2.8 Ringkasan Pengujian</h2>
+
+<table class="bordered">
+  <caption>Tabel 2.7 &mdash; Ringkasan Seluruh Pengujian</caption>
+  <thead><tr><th>Kategori</th><th>Jumlah Test</th><th>PASS</th><th>FAIL</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Koneksi Internet</td><td>8</td><td>8</td><td>0</td><td class="status-pass">PASS</td></tr>
+    <tr><td>Koneksi Internal (LAN)</td><td>4</td><td>4</td><td>0</td><td class="status-pass">PASS</td></tr>
+    <tr><td>Docker &amp; Container</td><td>3</td><td>3</td><td>0</td><td class="status-pass">PASS</td></tr>
+    <tr><td>Layanan Website</td><td>5</td><td>5</td><td>0</td><td class="status-pass">PASS</td></tr>
+    <tr style="font-weight: bold; background: #e8f5e9;">
+      <td><strong>TOTAL</strong></td><td><strong>20</strong></td><td><strong>20</strong></td><td><strong>0</strong></td><td class="status-pass"><strong>SEMUA PASS</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="success-box">
+  <strong>KESIMPULAN PENGUJIAN:</strong> Seluruh 20 test case <strong>BERHASIL (PASS)</strong>. Server dalam kondisi sehat, koneksi internet dan internal berfungsi normal, Docker container berjalan stabil, dan seluruh layanan website dapat diakses.
+</div>
+
+
+<!-- ==================== BAB III ==================== -->
+<h1 class="chapter">BAB III<br>PERUBAHAN SISTEM DEPLOYMENT</h1>
+
+<h2>3.1 Perbandingan Workflow: Sebelum dan Sesudah</h2>
+<p>
+Dengan tersedianya akses internet, sistem deployment telah diubah dari mekanisme <code>rsync</code> manual menjadi <code>git pull</code> langsung di server. Selain itu, konfigurasi <code>docker-compose.yml</code> diubah agar volume mount mengarah langsung ke path di dalam Git repository, tanpa memerlukan symbolic link (symlink). Pendekatan ini mempercepat proses recovery server karena cukup <code>git clone</code> + <code>docker compose up</code> tanpa langkah tambahan.
+</p>
+
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+ SEBELUMNYA (rsync + symlink)                SEKARANG (git pull, tanpa symlink)
+ ====================================        ====================================
+
+ Developer PC        Server                  Developer PC        Server
+ ┌──────────┐  SSH   ┌──────────┐            ┌──────────┐        ┌──────────┐
+ │ git repo │──────▶ │ /opt/    │            │ git repo │        │ git repo │
+ │          │ rsync  │ tps-app/ │            │          │        │ /opt/    │
+ │          │ manual │ + symlink│            │          │        │ tps-app/ │
+ └──────────┘        └──────────┘            └──────────┘        └──────────┘
+      │                                           │  git push         ▲ git pull
+      │ git push                                  ▼                   │
+ ┌──────────┐                                ┌──────────┐────────────┘
+ │  GitHub  │ ← Tidak bisa                   │  GitHub  │  Server akses
+ │          │   diakses server               │          │  langsung
+ └──────────┘                                └──────────┘
+</pre>
+</div>
+<p class="no-indent" style="text-align: center; font-style: italic; font-size: 10pt; color: #666;">
+Gambar 3.1 &mdash; Perbandingan Workflow Deployment
+</p>
+
+<table class="bordered">
+  <caption>Tabel 3.1 &mdash; Perbandingan Detail Proses Deployment</caption>
+  <thead><tr><th style="width: 25%;">Aspek</th><th style="width: 37%;">Sebelumnya (rsync + symlink)</th><th style="width: 38%;">Sekarang (git pull)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Prasyarat</strong></td>
+      <td>PC developer harus menyala dan terhubung ke jaringan TPS</td>
+      <td>Cukup akses ke server (SSH atau AnyDesk)</td>
+    </tr>
+    <tr>
+      <td><strong>Langkah Deploy</strong></td>
+      <td>4 perintah rsync + buat symlink + restart</td>
+      <td>1 perintah git pull + restart</td>
+    </tr>
+    <tr>
+      <td><strong>Docker Compose</strong></td>
+      <td>Volume mount ke path symlink</td>
+      <td>Volume mount langsung ke path Git repo</td>
+    </tr>
+    <tr>
+      <td><strong>Recovery dari Nol</strong></td>
+      <td>Rsync + buat symlink + konfigurasi manual</td>
+      <td><code>git clone</code> + buat .env + <code>docker compose up</code></td>
+    </tr>
+    <tr>
+      <td><strong>Estimasi Waktu Deploy</strong></td>
+      <td>5&ndash;10 menit</td>
+      <td>1&ndash;2 menit</td>
+    </tr>
+    <tr>
+      <td><strong>Estimasi Waktu Recovery</strong></td>
+      <td>30&ndash;60 menit</td>
+      <td>10&ndash;15 menit</td>
+    </tr>
+    <tr>
+      <td><strong>Version Control</strong></td>
+      <td>Hanya di PC developer</td>
+      <td>Tersedia di server (git log, git diff)</td>
+    </tr>
+    <tr>
+      <td><strong>Rollback</strong></td>
+      <td>Manual rsync versi lama</td>
+      <td><code>git checkout &lt;commit&gt;</code> + restart</td>
+    </tr>
+    <tr>
+      <td><strong>Single Point of Failure</strong></td>
+      <td class="highlight-red">Ya (PC developer)</td>
+      <td class="highlight-green">Tidak (siapapun bisa deploy)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3.2 Setup Git Repository di Server</h2>
+<p>
+Git repository telah di-clone langsung ke server dari GitHub. Berikut adalah langkah-langkah yang telah dilakukan dan dapat diulangi jika diperlukan setup ulang.
+</p>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Login ke Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Login ke server melalui <strong>AnyDesk</strong> (remote desktop) atau SSH:</p>
+  <pre>ssh root@172.19.154.93</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Anda berhasil login jika tampilan berubah menjadi: <code>root@tpswebsiteapp:~#</code></p>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Clone Repository dari GitHub</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>. Proses clone akan memakan waktu beberapa menit tergantung kecepatan internet.</p>
+  <pre>cd /opt
+git clone https://github.com/agussang/tps.co.id.git tps-app</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah ini mengunduh seluruh repository ke folder <code>/opt/tps-app</code>.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Verifikasi Git Repository</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut untuk memastikan repository berhasil di-clone:</p>
+  <pre>cd /opt/tps-app
+git status
+git log --oneline -5</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Perintah pertama menunjukkan branch aktif (seharusnya <code>main</code>). Perintah kedua menunjukkan 5 commit terakhir.</p>
+</div>
+
+<h2>3.3 Perubahan Docker Compose</h2>
+<p>
+Perubahan utama pada <code>docker-compose.yml</code> adalah pada bagian <strong>volumes</strong>. Volume mount yang sebelumnya mengarah ke path <code>/opt/tps-app/pkgs</code> (memerlukan symlink) kini langsung mengarah ke path di dalam Git repository: <code>/opt/tps-app/tps-core/tps/pkgs</code>. Dengan pendekatan ini, tidak diperlukan symlink dan proses setup/recovery server menjadi lebih sederhana.
+</p>
+
+<h3>Perbandingan Volume Mount</h3>
+
+<table class="bordered">
+  <caption>Tabel 3.2 &mdash; Perubahan Volume Mount pada docker-compose.yml</caption>
+  <thead><tr><th style="width: 15%;">Komponen</th><th style="width: 42%;">Sebelumnya (via symlink)</th><th style="width: 43%;">Sekarang (langsung ke Git path)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Server Framework</td>
+      <td class="comparison-old"><code>/opt/tps-app/pkgs</code></td>
+      <td class="comparison-new"><code>/opt/tps-app/tps-core/tps/pkgs</code></td>
+    </tr>
+    <tr>
+      <td>SSR API</td>
+      <td class="comparison-old"><code>/opt/tps-app/app/srv</code></td>
+      <td class="comparison-new"><code>/opt/tps-app/tps-core/tps/app/srv</code></td>
+    </tr>
+    <tr>
+      <td>Database Config</td>
+      <td><code>/opt/tps-app/app/db</code></td>
+      <td><code>/opt/tps-app/app/db</code> (tetap sama, terpisah dari Git)</td>
+    </tr>
+    <tr>
+      <td>Prasi Bundle</td>
+      <td class="comparison-old"><code>/opt/tps-app/app/web/deploy</code></td>
+      <td class="comparison-new"><code>/opt/tps-app/tps-core/tps/app/web/deploy</code></td>
+    </tr>
+    <tr>
+      <td>File Upload</td>
+      <td><code>/opt/tps-data/uploads</code></td>
+      <td><code>/opt/tps-data/uploads</code> (tetap sama)</td>
+    </tr>
+    <tr>
+      <td>Logs</td>
+      <td><code>/opt/tps-data/logs</code></td>
+      <td><code>/opt/tps-data/logs</code> (tetap sama)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Docker Compose Terbaru</h3>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Update File docker-compose.yml</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Buka file docker-compose.yml dengan editor:</p>
+  <pre>nano /opt/tps-app/docker-compose.yml</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Ganti seluruh isinya dengan konfigurasi berikut:</p>
+  <pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      # Source code (langsung dari path Git repository)
+      - /opt/tps-app/tps-core/tps/pkgs:/app/pkgs
+      - /opt/tps-app/tps-core/tps/app/srv:/app/app/srv
+      - /opt/tps-app/tps-core/tps/app/web/deploy:/app/app/web/deploy
+      # Database config (terpisah dari Git, berisi .env)
+      - /opt/tps-app/app/db:/app/app/db
+      # Data (file upload dan logs)
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Simpan file (<strong>Ctrl+O</strong>, Enter) dan keluar (<strong>Ctrl+X</strong>).</p>
+</div>
+
+<div class="info-box">
+  <strong>Mengapa volume mount langsung ke path Git?</strong>
+  <ul style="margin-top: 8px;">
+    <li><strong>Tidak perlu symlink</strong> &mdash; mengurangi kompleksitas dan potensi error.</li>
+    <li><strong>Recovery cepat</strong> &mdash; setelah <code>git clone</code>, Docker Compose langsung bisa dijalankan tanpa konfigurasi tambahan.</li>
+    <li><strong>Git pull langsung berlaku</strong> &mdash; perubahan dari <code>git pull</code> otomatis terlihat oleh container karena Docker langsung membaca file dari path Git.</li>
+  </ul>
+</div>
+
+<h3>Diagram Alur Data</h3>
+
+<div class="diagram">
+<pre style="background: none; border: none; text-align: left; margin: 0; padding: 0;">
+/opt/tps-app/                                        Git Repository Root
+│
+├── tps-core/tps/                                    Source Code (dari Git)
+│   ├── pkgs/  ──────────────── volume ──▶ /app/pkgs             (container)
+│   ├── app/srv/ ────────────── volume ──▶ /app/app/srv          (container)
+│   └── app/web/deploy/ ────── volume ──▶ /app/app/web/deploy   (container)
+│
+├── app/db/                                          Database Config (LOKAL)
+│   ├── .env  (DATABASE_URL)
+│   ├── db.ts (export PrismaClient)       volume ──▶ /app/app/db             (container)
+│   └── prisma/schema.prisma
+│
+├── docker-compose.yml                               Docker Config
+└── Dockerfile
+
+/opt/tps-data/                                       Data (diluar Git)
+├── uploads/ ────────────────── volume ──▶ /data/files           (container)
+└── logs/ ───────────────────── volume ──▶ /app/logs             (container)
+</pre>
+</div>
+<p class="no-indent" style="text-align: center; font-style: italic; font-size: 10pt; color: #666;">
+Gambar 3.2 &mdash; Struktur Direktori dan Volume Mount (Tanpa Symlink)
+</p>
+
+<h2>3.4 Konfigurasi Database (app/db)</h2>
+<p>
+Direktori <code>/opt/tps-app/app/db/</code> merupakan satu-satunya direktori yang <strong>tidak diambil dari Git repository</strong>. Direktori ini berisi konfigurasi database yang bersifat rahasia dan spesifik untuk lingkungan server.
+</p>
+
+<div class="danger-box">
+  <strong>PENTING:</strong> Direktori <code>app/db</code> berisi file <code>.env</code> dengan kredensial database yang <strong>tidak boleh disimpan di Git</strong>. Direktori ini harus dibuat manual dan di-backup secara terpisah.
+</div>
+
+<div class="step">
+  <span class="step-number">5</span>
+  <span class="step-title">Buat Direktori dan File Database Config</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut satu per satu:</p>
+  <pre># Buat direktori
+mkdir -p /opt/tps-app/app/db/prisma
+
+# Buat file .env (kredensial database)
+cat > /opt/tps-app/app/db/.env &lt;&lt; 'EOF'
+DATABASE_URL="postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web"
+EOF
+
+# Buat file db.ts (export PrismaClient)
+cat > /opt/tps-app/app/db/db.ts &lt;&lt; 'EOF'
+export { PrismaClient } from "@prisma/client";
+EOF
+
+# Copy schema Prisma dari Git repository
+cp /opt/tps-app/tps-core/tps/app/db/prisma/schema.prisma \
+   /opt/tps-app/app/db/prisma/</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">6</span>
+  <span class="step-title">Generate Prisma Client di dalam Container</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Setelah container berjalan, generate Prisma client:</p>
+  <pre>docker exec tps-app bash -c "cd /app/app/db && bunx prisma generate --schema=prisma/schema.prisma"</pre>
+</div>
+
+<table class="bordered">
+  <caption>Tabel 3.3 &mdash; Isi Direktori app/db</caption>
+  <thead><tr><th>File</th><th>Fungsi</th><th>Sumber</th></tr></thead>
+  <tbody>
+    <tr><td><code>.env</code></td><td>Kredensial database (<code>DATABASE_URL</code>)</td><td>Dibuat manual (rahasia, tidak di Git)</td></tr>
+    <tr><td><code>db.ts</code></td><td>Export PrismaClient untuk server</td><td>Dibuat manual</td></tr>
+    <tr><td><code>prisma/schema.prisma</code></td><td>Schema database (tabel, relasi)</td><td>Copy dari Git repo</td></tr>
+  </tbody>
+</table>
+
+<h2>3.5 Prosedur Deployment Baru (via Git Pull)</h2>
+
+<div class="success-box">
+  <strong>RINGKASAN:</strong> Deployment kini hanya memerlukan <strong>2 perintah</strong> yang dijalankan di server:
+  <pre style="margin-top: 8px; background: none; border: none; padding: 0;">cd /opt/tps-app && git pull origin main && docker restart tps-app</pre>
+</div>
+
+<h3>Prosedur Lengkap (Langkah demi Langkah)</h3>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Login ke Server</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Buka <strong>AnyDesk</strong> dan hubungkan ke server, lalu buka terminal. Atau gunakan SSH:</p>
+  <pre>ssh root@172.19.154.93</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Masuk ke Direktori Aplikasi dan Tarik Perubahan Terbaru</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>cd /opt/tps-app
+git pull origin main</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Output yang normal:</p>
+  <pre>remote: Enumerating objects: 15, done.
+remote: Counting objects: 100% (15/15), done.
+Updating abc1234..def5678
+Fast-forward
+ tps-core/tps/app/srv/api/_frontend.ts | 5 ++---
+ tps-core/tps/pkgs/server/create.ts    | 2 +-
+ 2 files changed, 3 insertions(+), 4 deletions(-)</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Jika muncul <code>Already up to date.</code>, artinya tidak ada perubahan baru. Tidak perlu restart container.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Restart Container</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut lalu tekan <strong>Enter</strong>:</p>
+  <pre>docker restart tps-app</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tunggu sekitar <strong>15&ndash;20 detik</strong> agar container selesai startup.</p>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Verifikasi</span>
+  <p class="no-indent" style="font-size: 10.5pt;">Ketik perintah berikut untuk memastikan container berjalan normal:</p>
+  <pre># Cek status container
+docker ps --filter name=tps-app
+
+# Cek homepage
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Container harus berstatus <strong>Up</strong> dan homepage mengembalikan kode <strong>200</strong>.</p>
+</div>
+
+<h2>3.6 Prosedur Recovery Server (dari Nol)</h2>
+<p>
+Salah satu keuntungan utama dari pendekatan tanpa symlink adalah <strong>proses recovery yang sangat cepat</strong>. Jika server perlu di-setup ulang dari nol (misalnya setelah reinstall OS atau migrasi server), seluruh proses dapat dilakukan dalam <strong>4 langkah utama</strong>.
+</p>
+
+<div class="success-box">
+  <strong>RECOVERY HANYA 4 LANGKAH:</strong>
+  <ol style="margin-top: 8px;">
+    <li>Install Docker</li>
+    <li>Clone Git repository</li>
+    <li>Buat konfigurasi database (<code>app/db</code>)</li>
+    <li>Jalankan <code>docker compose up</code></li>
+  </ol>
+  <p class="no-indent" style="margin-top: 8px;"><strong>Estimasi waktu: 10&ndash;15 menit</strong> (dengan koneksi internet).</p>
+</div>
+
+<h3>Langkah Recovery Lengkap</h3>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Install Docker Engine</span>
+  <pre>curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo systemctl enable docker
+sudo systemctl start docker</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Clone Repository dan Buat Direktori Data</span>
+  <pre>cd /opt
+git clone https://github.com/agussang/tps.co.id.git tps-app
+mkdir -p /opt/tps-data/uploads /opt/tps-data/logs</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">Buat Konfigurasi Database</span>
+  <pre>mkdir -p /opt/tps-app/app/db/prisma
+
+cat > /opt/tps-app/app/db/.env &lt;&lt; 'EOF'
+DATABASE_URL="postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web"
+EOF
+
+cat > /opt/tps-app/app/db/db.ts &lt;&lt; 'EOF'
+export { PrismaClient } from "@prisma/client";
+EOF
+
+cp /opt/tps-app/tps-core/tps/app/db/prisma/schema.prisma \
+   /opt/tps-app/app/db/prisma/</pre>
+</div>
+
+<div class="step">
+  <span class="step-number">4</span>
+  <span class="step-title">Build dan Jalankan Container</span>
+  <pre>cd /opt/tps-app
+docker compose build
+docker compose up -d</pre>
+  <p class="no-indent" style="font-size: 10.5pt;">Tunggu 40 detik untuk startup, lalu verifikasi:</p>
+  <pre>docker ps --filter name=tps-app
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/</pre>
+</div>
+
+<div class="warning-box">
+  <strong>CATATAN RECOVERY:</strong>
+  <ul>
+    <li><strong>File upload (9.3 GB)</strong> harus di-restore terpisah ke <code>/opt/tps-data/uploads/</code> dari backup.</li>
+    <li><strong>Database</strong> berada di server terpisah (172.19.154.92) sehingga tidak terpengaruh oleh recovery application server.</li>
+    <li>Jika Prisma perlu di-generate ulang: <code>docker exec tps-app bash -c "cd /app/app/db && bunx prisma generate --schema=prisma/schema.prisma"</code></li>
+  </ul>
+</div>
+
+<h2>3.7 Troubleshooting</h2>
+
+<table class="bordered">
+  <caption>Tabel 3.4 &mdash; Panduan Troubleshooting</caption>
+  <thead><tr><th style="width: 30%;">Masalah</th><th style="width: 35%;">Kemungkinan Penyebab</th><th style="width: 35%;">Solusi</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>git pull</code> gagal: <em>"fatal: not a git repository"</em></td>
+      <td>Belum berada di direktori yang benar</td>
+      <td><code>cd /opt/tps-app</code> lalu ulangi</td>
+    </tr>
+    <tr>
+      <td><code>git pull</code> gagal: <em>"Connection refused"</em></td>
+      <td>Internet tidak tersedia atau GitHub down</td>
+      <td>Cek koneksi: <code>curl -s https://github.com</code></td>
+    </tr>
+    <tr>
+      <td><code>git pull</code> gagal: <em>"Merge conflict"</em></td>
+      <td>Ada file yang diubah manual di server</td>
+      <td><code>git stash && git pull origin main && git stash pop</code><br>Atau jika perubahan lokal tidak penting: <code>git checkout -- . && git pull origin main</code></td>
+    </tr>
+    <tr>
+      <td>Container crash setelah restart</td>
+      <td>Error di kode baru</td>
+      <td>Cek log: <code>docker logs tps-app --tail 30</code></td>
+    </tr>
+    <tr>
+      <td>Container crash: <em>"db.config is undefined"</em></td>
+      <td>File <code>db.ts</code> tidak ada</td>
+      <td><pre style="margin: 4px 0;">echo 'export { PrismaClient } from "@prisma/client";' \
+  > /opt/tps-app/app/db/db.ts
+docker restart tps-app</pre></td>
+    </tr>
+    <tr>
+      <td>Homepage 404 atau error</td>
+      <td>Cache belum dibersihkan</td>
+      <td><code>curl http://localhost:3300/clear-cache/</code></td>
+    </tr>
+    <tr>
+      <td>Schema database berubah</td>
+      <td>Ada migration baru di Git</td>
+      <td><pre style="margin: 4px 0;">cp tps-core/tps/app/db/prisma/schema.prisma \
+   app/db/prisma/
+docker exec tps-app bash -c \
+  "cd /app/app/db && bunx prisma generate \
+   --schema=prisma/schema.prisma"
+docker restart tps-app</pre></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ==================== BAB IV ==================== -->
+<h1 class="chapter">BAB IV<br>PANDUAN OPERASIONAL</h1>
+
+<h2>4.1 Deployment Perubahan Kode (Rutin)</h2>
+<p>
+Prosedur ini dilakukan setiap kali ada perubahan kode dari developer yang perlu diterapkan ke server produksi.
+</p>
+
+<table class="bordered">
+  <caption>Tabel 4.1 &mdash; Checklist Deployment Rutin</caption>
+  <thead><tr><th>No</th><th>Langkah</th><th>Perintah</th><th>Catatan</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Login ke server</td><td>AnyDesk atau <code>ssh root@172.19.154.93</code></td><td>Pastikan sudah terkoneksi</td></tr>
+    <tr><td>2</td><td>Masuk direktori</td><td><code>cd /opt/tps-app</code></td><td>&mdash;</td></tr>
+    <tr><td>3</td><td>Pull kode terbaru</td><td><code>git pull origin main</code></td><td>Pastikan output "Fast-forward" atau "Already up to date"</td></tr>
+    <tr><td>4</td><td>Restart container</td><td><code>docker restart tps-app</code></td><td>Tunggu 15&ndash;20 detik</td></tr>
+    <tr><td>5</td><td>Verifikasi container</td><td><code>docker ps --filter name=tps-app</code></td><td>Status harus "Up"</td></tr>
+    <tr><td>6</td><td>Verifikasi website</td><td><code>curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/</code></td><td>Harus mengembalikan "200"</td></tr>
+  </tbody>
+</table>
+
+<h2>4.2 Update Dependencies (Berkala)</h2>
+<p>
+Prosedur ini dilakukan jika ada perubahan pada file <code>package.json</code> (penambahan atau update library). Prosedur ini memerlukan rebuild Docker image karena <code>node_modules</code> disimpan di dalam image, bukan di volume mount.
+</p>
+
+<pre># Langkah lengkap
+cd /opt/tps-app
+git pull origin main
+docker compose build --no-cache
+docker compose up -d</pre>
+
+<div class="warning-box">
+  <strong>PENTING:</strong> Proses <code>docker compose build</code> memerlukan <strong>akses internet</strong> dan memakan waktu <strong>5&ndash;15 menit</strong>. Pastikan koneksi internet tersedia sebelum menjalankan perintah ini.
+</div>
+
+<h2>4.3 Rebuild Docker Image</h2>
+<p>
+Rebuild Docker image diperlukan dalam situasi berikut:
+</p>
+<ul>
+  <li>Ada perubahan pada <code>package.json</code> (dependencies baru/update).</li>
+  <li>Ada perubahan pada <code>Dockerfile</code>.</li>
+  <li>Perlu update base image Bun (security patch).</li>
+</ul>
+
+<pre># Rebuild dan restart (satu perintah)
+cd /opt/tps-app && docker compose build --no-cache && docker compose up -d</pre>
+
+<h2>4.4 Backup Database</h2>
+<p>
+Backup database disarankan dilakukan secara berkala (minimal mingguan) untuk keperluan disaster recovery. Database berada di server terpisah (172.19.154.92), sehingga tidak terpengaruh oleh masalah pada application server.
+</p>
+
+<pre># Backup database (jalankan di server 172.19.154.93)
+PGPASSWORD=TpsDB2026Secure pg_dump \
+  -h 172.19.154.92 -U postgres -d tps_web \
+  --no-owner --no-acl \
+  > /opt/tps-data/backup_$(date +%Y%m%d_%H%M%S).sql</pre>
+
+<div class="info-box">
+  <strong>Catatan:</strong> File backup disimpan di <code>/opt/tps-data/</code>. Pastikan direktori ini di-backup ke lokasi terpisah (external storage atau cloud) secara berkala.
+</div>
+
+<h2>4.5 Monitoring Kesehatan Server</h2>
+<p>
+Untuk memeriksa kesehatan server secara menyeluruh, gunakan script pengujian konektivitas yang telah disediakan (lihat Lampiran B).
+</p>
+
+<pre># Jalankan pengujian konektivitas lengkap
+bash /tmp/test-koneksi-server.sh</pre>
+
+<p class="no-indent">Untuk pemeriksaan cepat sehari-hari, gunakan perintah berikut:</p>
+
+<pre># Cek container status
+docker ps --filter name=tps-app
+
+# Cek homepage
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/
+
+# Cek log (10 baris terakhir)
+docker logs tps-app --tail 10
+
+# Cek disk usage
+df -h / /opt/tps-data</pre>
+
+
+<!-- ==================== BAB V ==================== -->
+<h1 class="chapter">BAB V<br>KESIMPULAN DAN STATUS REKOMENDASI</h1>
+
+<h2>5.1 Kesimpulan</h2>
+<ol>
+  <li><strong>Akses internet telah tersedia</strong> pada server application (172.19.154.93). Seluruh 20 pengujian konektivitas menghasilkan status PASS, mencakup koneksi internet, koneksi internal, Docker, dan layanan website.</li>
+  <li><strong>Sistem deployment telah disederhanakan</strong> dari mekanisme <code>rsync</code> manual menjadi <code>git pull</code> langsung di server, mengurangi waktu deployment dari 5&ndash;10 menit menjadi 1&ndash;2 menit, serta menghilangkan ketergantungan pada komputer developer.</li>
+  <li><strong>Docker Compose telah diperbarui</strong> agar volume mount mengarah langsung ke path di dalam Git repository (<code>tps-core/tps/</code>), tanpa memerlukan symbolic link. Pendekatan ini menyederhanakan proses recovery server menjadi hanya 4 langkah (<code>install Docker</code> &rarr; <code>git clone</code> &rarr; <code>buat app/db</code> &rarr; <code>docker compose up</code>), dengan estimasi waktu 10&ndash;15 menit.</li>
+  <li><strong>Server dalam kondisi sehat:</strong> disk tersedia 161 GB (86%), RAM tersedia 6.6 GB (85%), container berjalan stabil, dan seluruh layanan website berfungsi normal.</li>
+  <li><strong>Direktori <code>app/db</code> tetap terpisah</strong> dari Git repository karena berisi kredensial database. Direktori ini merupakan satu-satunya komponen yang perlu dibuat manual saat recovery.</li>
+</ol>
+
+<h2>5.2 Status Rekomendasi dari Laporan Sebelumnya</h2>
+<p>
+Berikut adalah status tindak lanjut atas rekomendasi yang diberikan pada laporan v1.0 (TPS-PRIMALINK/APP/2026-002):
+</p>
+
+<table class="bordered">
+  <caption>Tabel 5.1 &mdash; Status Rekomendasi Sebelumnya</caption>
+  <thead><tr><th>No</th><th>Rekomendasi (v1.0)</th><th>Status</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Memberikan akses internet terbatas pada server</td>
+      <td class="status-resolved">TERLAKSANA</td>
+      <td>Server telah memiliki akses internet penuh (diverifikasi 6 Maret 2026). Firewall OUTPUT policy ACCEPT tanpa pembatasan domain.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Setup CI/CD pipeline (GitHub Actions)</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>Sudah dimungkinkan dengan tersedianya internet. Saat ini deployment menggunakan <code>git pull</code> manual. CI/CD dapat diterapkan sebagai peningkatan berikutnya.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Automated backup database</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>Prosedur backup manual telah didokumentasikan. Otomatisasi menggunakan <code>cron</code> dapat diterapkan.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Monitoring dan alerting</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>Sudah dimungkinkan dengan tersedianya internet. Dapat menggunakan UptimeRobot atau layanan serupa.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>SSL/TLS certificate</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>Sudah dimungkinkan. Let's Encrypt memerlukan domain publik yang mengarah ke server.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Upgrade Prisma ORM</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>Sudah dimungkinkan dengan tersedianya internet. Perlu testing menyeluruh sebelum upgrade.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Scheduled security updates</td>
+      <td style="color: #ff9800; font-weight: bold;">TERBUKA</td>
+      <td>OS sudah terupdate ke 24.04.4 LTS. Jadwal update berkala dapat dikonfigurasi.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.3 Rekomendasi Lanjutan</h2>
+
+<table class="bordered">
+  <caption>Tabel 5.2 &mdash; Rekomendasi Lanjutan</caption>
+  <thead><tr><th>No</th><th>Rekomendasi</th><th>Prioritas</th><th>Justifikasi</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Automatisasi backup database menggunakan cron</strong></td>
+      <td class="highlight-red">HIGH</td>
+      <td>Menambahkan <code>cron job</code> untuk backup harian otomatis. Risiko kehilangan data sangat tinggi tanpa backup terjadwal.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>Setup CI/CD pipeline</strong></td>
+      <td style="color: #ff9800; font-weight: bold;">MEDIUM</td>
+      <td>Dengan tersedianya internet, GitHub Actions dapat dikonfigurasi untuk auto-deploy saat push ke branch <code>main</code>. Menghilangkan kebutuhan login manual ke server.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Konfigurasi unattended-upgrades</strong></td>
+      <td style="color: #ff9800; font-weight: bold;">MEDIUM</td>
+      <td>Mengaktifkan auto-update untuk security patches Ubuntu agar server selalu mendapat patch keamanan terbaru.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>Monitoring uptime</strong></td>
+      <td style="color: #ff9800; font-weight: bold;">MEDIUM</td>
+      <td>Mendaftarkan URL website ke layanan monitoring (UptimeRobot atau serupa) untuk deteksi dini jika website down.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ==================== LAMPIRAN ==================== -->
+<h1 class="chapter">LAMPIRAN</h1>
+
+<h2>Lampiran A &mdash; Docker Compose Terbaru (Lengkap)</h2>
+<pre>services:
+  tps-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tps-app
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:***@172.19.154.92:5432/tps_web
+      - PORT=3300
+    volumes:
+      # Source code (langsung dari path Git repository)
+      - /opt/tps-app/tps-core/tps/pkgs:/app/pkgs
+      - /opt/tps-app/tps-core/tps/app/srv:/app/app/srv
+      - /opt/tps-app/tps-core/tps/app/web/deploy:/app/app/web/deploy
+      # Database config (terpisah, berisi .env rahasia)
+      - /opt/tps-app/app/db:/app/app/db
+      # Data
+      - /opt/tps-data/uploads:/data/files
+      - /opt/tps-data/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3300/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s</pre>
+
+<h2>Lampiran B &mdash; Script Pengujian Konektivitas</h2>
+<p class="no-indent">Script ini tersedia di repository Git (<code>test-koneksi-server.sh</code>) dan dapat dijalankan kapan saja untuk memeriksa kondisi server:</p>
+<pre>#!/bin/bash
+# Test Konektivitas Server TPS
+# Jalankan di server 172.19.154.93
+
+# Ringkasan test (20 test case):
+# 1. Koneksi Internet (8 test)
+#    - DNS, Ping, HTTP ke Google, GitHub, Ubuntu repo,
+#      Docker Hub, NPM Registry
+# 2. Koneksi Internal (4 test)
+#    - Ping DB server, PostgreSQL port & query, Gateway
+# 3. Docker & Container (3 test)
+#    - Daemon, container status, port 3300
+# 4. Layanan Website (5 test)
+#    - Homepage, admin, static files, WSDL, karir page
+# 5. Konfigurasi Jaringan (info)
+# 6. Disk & Resources (info)
+
+# Hasil tersimpan di /tmp/laporan-koneksi-YYYYMMDD_HHMMSS.txt
+# File lengkap: test-koneksi-server.sh di root repository</pre>
+
+<h2>Lampiran C &mdash; Prosedur Deployment Ringkas (Cheat Sheet)</h2>
+<p class="no-indent">Referensi cepat untuk operasional sehari-hari:</p>
+
+<table class="bordered">
+  <thead><tr><th style="width: 35%;">Situasi</th><th>Perintah di Server</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Deploy perubahan kode</strong><br>(paling umum)</td>
+      <td><pre>cd /opt/tps-app
+git pull origin main
+docker restart tps-app</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Deploy + update dependencies</strong><br>(jika package.json berubah)</td>
+      <td><pre>cd /opt/tps-app
+git pull origin main
+docker compose build --no-cache
+docker compose up -d</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Deploy + update schema database</strong><br>(jika schema.prisma berubah)</td>
+      <td><pre>cd /opt/tps-app
+git pull origin main
+cp tps-core/tps/app/db/prisma/schema.prisma \
+   app/db/prisma/
+docker restart tps-app
+docker exec tps-app bash -c \
+  "cd /app/app/db && bunx prisma generate \
+   --schema=prisma/schema.prisma"
+docker restart tps-app</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Rollback ke versi sebelumnya</strong><br>(jika deploy bermasalah)</td>
+      <td><pre>cd /opt/tps-app
+git log --oneline -5
+git checkout &lt;commit-hash&gt;
+docker restart tps-app</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Clear cache</strong><br>(tanpa restart)</td>
+      <td><pre>curl http://localhost:3300/clear-cache/</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Cek status / troubleshoot</strong></td>
+      <td><pre>docker ps --filter name=tps-app
+docker logs tps-app --tail 20
+curl -o /dev/null -w "%{http_code}" \
+  http://localhost:3300/</pre></td>
+    </tr>
+    <tr>
+      <td><strong>Backup database</strong></td>
+      <td><pre>PGPASSWORD=TpsDB2026Secure pg_dump \
+  -h 172.19.154.92 -U postgres -d tps_web \
+  --no-owner --no-acl \
+  > /opt/tps-data/backup_$(date +%Y%m%d).sql</pre></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Lampiran D &mdash; Prosedur Recovery dari Nol (Disaster Recovery)</h2>
+<p class="no-indent">Prosedur ini digunakan jika server perlu di-setup ulang sepenuhnya (misalnya setelah reinstall OS atau migrasi ke server baru).</p>
+
+<div class="warning-box">
+  <strong>PRASYARAT:</strong>
+  <ul>
+    <li>Server memiliki akses internet</li>
+    <li>Database server (172.19.154.92) sudah berjalan dan dapat diakses</li>
+    <li>Backup file upload tersedia (untuk restore ke <code>/opt/tps-data/uploads/</code>)</li>
+  </ul>
+</div>
+
+<pre># ============================================
+# PROSEDUR RECOVERY DARI NOL
+# Estimasi waktu: 10-15 menit
+# ============================================
+
+# LANGKAH 1: Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo systemctl enable docker && sudo systemctl start docker
+
+# LANGKAH 2: Clone Repository
+cd /opt
+git clone https://github.com/agussang/tps.co.id.git tps-app
+mkdir -p /opt/tps-data/uploads /opt/tps-data/logs
+
+# LANGKAH 3: Buat Konfigurasi Database
+mkdir -p /opt/tps-app/app/db/prisma
+
+cat > /opt/tps-app/app/db/.env &lt;&lt; 'EOF'
+DATABASE_URL="postgresql://postgres:TpsDB2026Secure@172.19.154.92:5432/tps_web"
+EOF
+
+cat > /opt/tps-app/app/db/db.ts &lt;&lt; 'EOF'
+export { PrismaClient } from "@prisma/client";
+EOF
+
+cp /opt/tps-app/tps-core/tps/app/db/prisma/schema.prisma \
+   /opt/tps-app/app/db/prisma/
+
+# LANGKAH 4: Build dan Jalankan
+cd /opt/tps-app
+docker compose build
+docker compose up -d
+
+# LANGKAH 5: Verifikasi (setelah 40 detik)
+sleep 40
+docker ps --filter name=tps-app
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/
+
+# LANGKAH 6 (opsional): Restore file upload dari backup
+# scp backup-server:/path/to/files_backup.tar.gz /opt/tps-data/
+# cd /opt/tps-data && tar xzf files_backup.tar.gz -C uploads/</pre>
+
+<br><br>
+<div class="page-footer">
+  <p class="no-indent">Dokumen ini bersifat <strong>RAHASIA</strong> dan hanya untuk penggunaan internal PT Terminal Petikemas Surabaya dan PT PRIMALINK.</p>
+  <p class="no-indent">TPS-PRIMALINK/APP/2026-003 | Versi 2.0 | 06 Maret 2026</p>
+</div>
+
+</body>
+</html>
