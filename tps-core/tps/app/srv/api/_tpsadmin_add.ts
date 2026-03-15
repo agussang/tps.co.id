@@ -309,16 +309,35 @@ const renderAddPage = (
     }
 
     if (smartType === "textarea") {
-      return `
-        <div class="space-y-1.5">
-          <label class="flex items-center text-sm font-medium text-gray-700">
-            ${escapeHtml(field.title)}${requiredStar}
-          </label>
-          <div id="editor-${fieldName}" class="quill-editor border rounded-lg overflow-hidden" data-field="${fieldName}">
+      // Check if this is a richtext field (content, description) vs plain textarea (address, etc.)
+      const lastPart = (field.path || "").split(".").pop() || "";
+      const isRichtext = ["content", "description", "footer_description"].includes(lastPart) ||
+        /description|deskripsi|content|konten|body|detail|keterangan|isi/i.test(fieldName);
+
+      if (isRichtext) {
+        return `
+          <div class="space-y-1.5">
+            <label class="flex items-center text-sm font-medium text-gray-700">
+              ${escapeHtml(field.title)}${requiredStar}
+            </label>
+            <div id="editor-${fieldName}" class="quill-editor border rounded-lg overflow-hidden" data-field="${fieldName}">
+            </div>
+            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="">
           </div>
-          <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="">
-        </div>
-      `;
+        `;
+      } else {
+        return `
+          <div class="space-y-1.5">
+            <label class="flex items-center text-sm font-medium text-gray-700">
+              ${escapeHtml(field.title)}${requiredStar}
+            </label>
+            <textarea name="${fieldName}" id="input-${fieldName}" rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="Masukkan ${escapeHtml(field.title).toLowerCase()}..."
+            ></textarea>
+          </div>
+        `;
+      }
     }
 
     if (smartType === "file") {

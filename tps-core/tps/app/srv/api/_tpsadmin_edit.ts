@@ -523,19 +523,40 @@ const renderEditPage = (
     }
 
     if (field.type === "textarea") {
-      // Encode richtext content as base64 to prevent HTML parser issues
-      // (raw HTML with <script> tags would break the page's own <script> block)
-      const encodedContent = Buffer.from(fieldValue || "").toString("base64");
-      return `
-        <div class="space-y-1.5">
-          <label class="flex items-center text-sm font-medium text-gray-700">
-            ${escapeHtml(field.title)}${requiredStar}
-          </label>
-          <div id="editor-${fieldName}" class="quill-editor border rounded-lg overflow-hidden" data-field="${fieldName}" data-content="${encodedContent}">
+      // Determine if this field needs richtext (Quill) or plain textarea
+      // Fields named "content", "description", or "footer_description" use richtext
+      // Other textarea fields (address, etc.) use plain textarea
+      const lastPart = (field.path || "").split(".").pop() || "";
+      const isRichtext = ["content", "description", "footer_description"].includes(lastPart);
+
+      if (isRichtext) {
+        // Encode richtext content as base64 to prevent HTML parser issues
+        // (raw HTML with <script> tags would break the page's own <script> block)
+        const encodedContent = Buffer.from(fieldValue || "").toString("base64");
+        return `
+          <div class="space-y-1.5">
+            <label class="flex items-center text-sm font-medium text-gray-700">
+              ${escapeHtml(field.title)}${requiredStar}
+            </label>
+            <div id="editor-${fieldName}" class="quill-editor border rounded-lg overflow-hidden" data-field="${fieldName}" data-content="${encodedContent}">
+            </div>
+            <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="">
           </div>
-          <input type="hidden" name="${fieldName}" id="input-${fieldName}" value="">
-        </div>
-      `;
+        `;
+      } else {
+        // Plain textarea for non-richtext fields (address, etc.)
+        return `
+          <div class="space-y-1.5">
+            <label class="flex items-center text-sm font-medium text-gray-700">
+              ${escapeHtml(field.title)}${requiredStar}
+            </label>
+            <textarea name="${fieldName}" id="input-${fieldName}" rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="Masukkan ${escapeHtml(field.title).toLowerCase()}..."
+            >${escapeHtml(fieldValue || "")}</textarea>
+          </div>
+        `;
+      }
     }
 
     if (field.type === "file") {
