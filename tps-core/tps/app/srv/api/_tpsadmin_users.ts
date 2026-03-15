@@ -20,6 +20,8 @@ interface User {
   name: string | null;
   active: boolean;
   last_login: Date | null;
+  created_at: Date | null;
+  deactivated_at: Date | null;
   role: { id: number; name: string };
 }
 
@@ -63,6 +65,8 @@ const getUsers = async (): Promise<User[]> => {
       name: true,
       active: true,
       last_login: true,
+      created_at: true,
+      deactivated_at: true,
       role: { select: { id: true, name: true } },
     },
     orderBy: { id: "asc" },
@@ -154,6 +158,8 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Role</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tgl Aktif</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tgl Nonaktif</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Last Login</th>
                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Aksi</th>
               </tr>
@@ -191,6 +197,8 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
                       ${u.active ? "Aktif" : "Nonaktif"}
                     </span>
                   </td>
+                  <td class="px-4 py-3 text-sm text-gray-500">${formatDate(u.created_at)}</td>
+                  <td class="px-4 py-3 text-sm text-gray-500">${formatDate(u.deactivated_at)}</td>
                   <td class="px-4 py-3 text-sm text-gray-500">${formatDate(u.last_login)}</td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">

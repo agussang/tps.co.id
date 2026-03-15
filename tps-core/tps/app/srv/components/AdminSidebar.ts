@@ -181,6 +181,7 @@ export function AdminSidebar({
         <div class="p-3">
           <!-- Dashboard -->
           <a href="/backend/tpsadmin/dashboard"
+             ${isActive("dashboard") ? 'data-sidebar-active' : ''}
              class="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 ${isActive("dashboard") ? activeClass : inactiveClass}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -228,6 +229,7 @@ export function AdminSidebar({
                              ? "bg-blue-100 text-[#0475BC] font-medium"
                              : "text-gray-600 hover:bg-gray-50"
                          }"
+                         ${currentStructureId === s.id ? 'data-sidebar-active' : ''}
                          data-structure-id="${s.id}"
                          data-sort-idx="${s.sortIdx}">
                         <span class="truncate">${escapeHtml(s.title)}</span>
@@ -250,6 +252,7 @@ export function AdminSidebar({
                          ? "bg-blue-100 text-[#0475BC] font-medium"
                          : "text-gray-600 hover:bg-gray-50"
                      }"
+                     ${currentStructureId === s.id ? 'data-sidebar-active' : ''}
                      data-structure-id="${s.id}"
                      data-sort-idx="${s.sortIdx}">
                     <div class="flex items-center gap-2">
@@ -270,6 +273,7 @@ export function AdminSidebar({
 
           <!-- Dynamic Pages -->
           <a href="/backend/tpsadmin/pages"
+             ${isActive("pages") ? 'data-sidebar-active' : ''}
              class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("pages") ? activeClass : inactiveClass}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -279,6 +283,7 @@ export function AdminSidebar({
 
           <!-- Folders -->
           <a href="/backend/tpsadmin/folders"
+             ${isActive("folders") ? 'data-sidebar-active' : ''}
              class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("folders") ? activeClass : inactiveClass}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
@@ -290,6 +295,7 @@ export function AdminSidebar({
           ${isSuperAdmin ? `
             <div class="text-xs font-semibold text-gray-400 uppercase mt-6 mb-2 px-3">Administrasi</div>
             <a href="/backend/tpsadmin/user"
+               ${isActive("users") ? 'data-sidebar-active' : ''}
                class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("users") ? activeClass : inactiveClass}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
@@ -297,6 +303,7 @@ export function AdminSidebar({
               <span class="font-medium">Kelola User</span>
             </a>
             <a href="/backend/tpsadmin/role"
+               ${isActive("roles") ? 'data-sidebar-active' : ''}
                class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("roles") ? activeClass : inactiveClass}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -427,12 +434,26 @@ export function AdminSidebar({
           });
         }
 
+        // Scroll sidebar to show active item
+        function scrollToActiveItem() {
+          var activeItem = document.querySelector('[data-sidebar-active]');
+          if (activeItem) {
+            var nav = document.querySelector('#admin-sidebar nav');
+            if (nav) {
+              var itemTop = activeItem.getBoundingClientRect().top;
+              var navRect = nav.getBoundingClientRect();
+              if (itemTop > navRect.bottom || itemTop < navRect.top) {
+                activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              }
+            }
+          }
+        }
+
         // Initialize everything
         function init() {
-          console.log('[Sidebar] Initializing...');
           initFolderStates();
           setupFolderToggleListeners();
-          console.log('[Sidebar] Initialization complete');
+          setTimeout(scrollToActiveItem, 100);
         }
 
         // Run init when DOM is ready

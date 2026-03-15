@@ -105,7 +105,15 @@ export const _ = {
         if (username !== undefined) updateData.username = username;
         if (name !== undefined) updateData.name = name || null;
         if (roleId !== undefined) updateData.id_role = roleId;
-        if (active !== undefined) updateData.active = active;
+        if (active !== undefined) {
+          updateData.active = active;
+          // Set deactivated_at when deactivating, clear when activating
+          if (!active) {
+            updateData.deactivated_at = new Date();
+          } else {
+            updateData.deactivated_at = null;
+          }
+        }
         if (password) updateData.password = await hashPassword(password);
 
         await g.db.user.update({
@@ -159,6 +167,7 @@ export const _ = {
             password: await hashPassword(password),
             id_role: roleId || 4, // Default to 'staff' role
             active: active ?? true,
+            created_at: new Date(),
           },
         });
 

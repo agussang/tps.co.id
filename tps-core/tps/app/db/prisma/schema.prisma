@@ -178,9 +178,10 @@ model user {
   raw          String?
   last_login   DateTime?      @db.Timestamp(6)
   description  String?
-  created_at   DateTime?      @db.Timestamp(6)
-  password     String?
-  role         role           @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_at      DateTime?      @db.Timestamp(6)
+  password        String?
+  deactivated_at  DateTime?      @db.Timestamp(6)
+  role            role           @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user_session user_session[]
 }
 
