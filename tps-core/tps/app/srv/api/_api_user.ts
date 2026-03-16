@@ -12,6 +12,7 @@ interface UserRequest {
   id?: number | string | null;
   username?: string;
   name?: string | null;
+  email?: string | null;
   password?: string | null;
   roleId?: number;
   active?: boolean;
@@ -87,7 +88,7 @@ export const _ = {
 
     try {
       const body: UserRequest = await req.json();
-      const { id, username, name, password, roleId, active } = body;
+      const { id, username, name, email, password, roleId, active } = body;
 
       if (!g.db) {
         return new Response(JSON.stringify({ status: "error", message: "Database not available" }), {
@@ -108,6 +109,7 @@ export const _ = {
 
         if (username !== undefined) updateData.username = username;
         if (name !== undefined) updateData.name = name || null;
+        if (email !== undefined) updateData.email = email || null;
         if (roleId !== undefined) updateData.id_role = roleId;
         if (active !== undefined) {
           updateData.active = active;
@@ -186,6 +188,7 @@ export const _ = {
           data: {
             username,
             name: name || null,
+            email: email || null,
             password: await hashPassword(password),
             id_role: roleId || 4,
             active: active ?? true,

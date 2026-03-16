@@ -9,6 +9,7 @@
  */
 
 import { g } from "utils/global";
+import { loadRolePermissions, hasPermission } from "../utils/permissions";
 
 interface SaveRequest {
   id: string; // Content ID to update
@@ -28,7 +29,7 @@ const getSessionUser = async (sessionId: string) => {
       where: { id: sessionId },
       select: {
         user: {
-          select: { id: true, username: true },
+          select: { id: true, username: true, role: { select: { id: true, name: true } } },
         },
       },
     });
@@ -89,6 +90,15 @@ export const _ = {
       if (!content || !content.structure) {
         return new Response(JSON.stringify({ status: "error", message: "Content not found" }), {
           status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Check can_edit permission
+      const permMap = await loadRolePermissions(user.role.id);
+      if (!hasPermission(user.role.name, content.id_structure, "can_edit", permMap)) {
+        return new Response(JSON.stringify({ status: "error", message: "Forbidden - no edit permission" }), {
+          status: 403,
           headers: { "Content-Type": "application/json" },
         });
       }

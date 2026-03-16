@@ -30,13 +30,15 @@ interface FolderGroup {
 }
 
 interface SidebarProps {
-  activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles";
+  activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles" | "activity" | "settings" | "visitors" | "permissions";
   user: {
     username: string;
     role: { name: string };
   };
   currentStructureId?: string;
   structures?: ContentStructure[];
+  /** Structure IDs the user can view (undefined = show all, for superadmin) */
+  viewableStructureIds?: Set<string>;
 }
 
 const escapeHtml = (str: string): string => {
@@ -99,18 +101,24 @@ export function AdminSidebar({
   user,
   currentStructureId,
   structures = [],
+  viewableStructureIds,
 }: SidebarProps): string {
   const isActive = (page: string) => activePage === page;
   const activeClass = "bg-[#0475BC] text-white";
   const inactiveClass = "text-gray-700 hover:bg-gray-100";
   const isSuperAdmin = user.role.name === "superadmin";
 
+  // Filter structures based on view permission (superadmin sees all)
+  const visibleStructures = viewableStructureIds
+    ? structures.filter((s) => viewableStructureIds.has(s.id))
+    : structures;
+
   // Group structures by folder with proper ordering
   const folderGroups: FolderGroup[] = [];
   const noFolderStructures: ContentStructure[] = [];
   const folderMap: Map<string, FolderGroup> = new Map();
 
-  structures.forEach((s) => {
+  visibleStructures.forEach((s) => {
     if (s.folderName && s.folderId) {
       if (!folderMap.has(s.folderId)) {
         const group: FolderGroup = {
@@ -192,7 +200,7 @@ export function AdminSidebar({
           <!-- Content Section Header -->
           <div class="flex items-center justify-between mt-4 mb-2 px-3">
             <span class="text-xs font-semibold text-gray-400 uppercase">Kelola Konten</span>
-            <span class="text-xs text-gray-400">${structures.length} item</span>
+            <span class="text-xs text-gray-400">${visibleStructures.length} item</span>
           </div>
 
           <!-- Content by Folder (Sortable) -->
@@ -317,6 +325,23 @@ export function AdminSidebar({
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <span class="font-medium">Riwayat Aktivitas</span>
+            </a>
+            <a href="/backend/tpsadmin/role-permissions"
+               ${isActive("permissions") ? 'data-sidebar-active' : ''}
+               class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("permissions") ? activeClass : inactiveClass}">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              <span class="font-medium">Hak Akses</span>
+            </a>
+            <a href="/backend/tpsadmin/visitors"
+               ${isActive("visitors") ? 'data-sidebar-active' : ''}
+               class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("visitors") ? activeClass : inactiveClass}">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <span class="font-medium">Statistik Pengunjung</span>
             </a>
             <a href="/backend/tpsadmin/settings"
                ${isActive("settings") ? 'data-sidebar-active' : ''}

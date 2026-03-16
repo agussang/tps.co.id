@@ -18,6 +18,7 @@ interface User {
   id: number;
   username: string;
   name: string | null;
+  email: string | null;
   active: boolean;
   last_login: Date | null;
   created_at: Date | null;
@@ -63,6 +64,7 @@ const getUsers = async (): Promise<User[]> => {
       id: true,
       username: true,
       name: true,
+      email: true,
       active: true,
       last_login: true,
       created_at: true,
@@ -216,7 +218,7 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
                   <td class="px-4 py-3 text-sm text-gray-500">${formatDate(u.last_login)}</td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button onclick="showEditModal(${u.id}, '${escapeHtml(u.username)}', '${escapeHtml(u.name || "")}', ${u.role.id}, ${u.active})"
+                      <button onclick="showEditModal(${u.id}, '${escapeHtml(u.username)}', '${escapeHtml(u.name || "")}', '${escapeHtml(u.email || "")}', ${u.role.id}, ${u.active})"
                               class="p-2 rounded-lg text-gray-500 hover:bg-gray-100" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -277,6 +279,13 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
                  placeholder="Nama Lengkap">
         </div>
 
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="email" name="email"
+                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC] focus:border-[#0475BC]"
+                 placeholder="Email (untuk reset password)">
+        </div>
+
         <div id="passwordField">
           <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <input type="password" id="password" name="password"
@@ -329,6 +338,7 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
       document.getElementById('userId').value = '';
       document.getElementById('username').value = '';
       document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
       document.getElementById('password').value = '';
       document.getElementById('roleId').value = '${roles[0]?.id || 1}';
       document.getElementById('active').checked = true;
@@ -338,11 +348,12 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
       document.getElementById('userModal').classList.add('flex');
     }
 
-    function showEditModal(id, username, name, roleId, active) {
+    function showEditModal(id, username, name, email, roleId, active) {
       document.getElementById('modalTitle').textContent = 'Edit User';
       document.getElementById('userId').value = id;
       document.getElementById('username').value = username;
       document.getElementById('name').value = name;
+      document.getElementById('email').value = email || '';
       document.getElementById('password').value = '';
       document.getElementById('roleId').value = roleId;
       document.getElementById('active').checked = active;
@@ -364,6 +375,7 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
         id: document.getElementById('userId').value || null,
         username: document.getElementById('username').value,
         name: document.getElementById('name').value,
+        email: document.getElementById('email').value || null,
         password: document.getElementById('password').value || null,
         roleId: parseInt(document.getElementById('roleId').value),
         active: document.getElementById('active').checked,

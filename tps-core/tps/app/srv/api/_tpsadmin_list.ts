@@ -8,6 +8,7 @@
 
 import { g } from "utils/global";
 import { AdminSidebar, loadSidebarStructures } from "../components/AdminSidebar";
+import { loadRolePermissions, getPermission, type Permission } from "../utils/permissions";
 
 interface ContentItem {
   id: string;
@@ -364,7 +365,9 @@ const renderListPage = (
   currentPage: number,
   limit: number,
   currentSort: string,
-  currentSortDir: string
+  currentSortDir: string,
+  perm: Permission = { can_view: true, can_add: true, can_edit: true, can_delete: true },
+  viewableStructureIds?: Set<string>
 ): string => {
   const totalPages = Math.ceil(total / limit);
 
@@ -494,6 +497,7 @@ const renderListPage = (
       user: { username: user.username, role: { name: user.role.name } },
       currentStructureId: structure.id,
       structures,
+      viewableStructureIds,
     })}
 
     <!-- Main Content -->
@@ -510,10 +514,11 @@ const renderListPage = (
               : ""
           }
         </div>
+        ${perm.can_add ? `
         <a href="/backend/tpsadmin/add/${structure.id}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-medium">
           <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Add Content
-        </a>
+        </a>` : ""}
       </div>
 
       <!-- Filters -->
@@ -621,12 +626,14 @@ const renderListPage = (
                   <td class="px-4 py-3 text-sm text-gray-500">${formatDate(item.created_at)}</td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">
+                      ${perm.can_edit ? `
                       <a href="/backend/tpsadmin/edit/${item.id}" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                      </a>
+                      </a>` : ""}
+                      ${perm.can_delete ? `
                       <button onclick="deleteContent('${item.id}')" class="p-2 rounded-lg text-red-600 hover:bg-red-50" title="Delete">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                      </button>
+                      </button>` : ""}
                     </div>
                   </td>
                 </tr>
@@ -834,6 +841,27 @@ const renderNotFound = (): string => {
 </html>`;
 };
 
+const renderForbidden = (): string => {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>Akses Ditolak</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/_img/tps-logo.png">
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="text-center">
+    <svg class="w-16 h-16 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Akses Ditolak</h1>
+    <p class="text-gray-600 mb-4">Anda tidak memiliki izin untuk mengakses halaman ini</p>
+    <a href="/backend/tpsadmin/dashboard" class="text-blue-600 hover:underline">Kembali ke Dashboard</a>
+  </div>
+</body>
+</html>`;
+};
+
 export const _ = {
   url: "/backend/tpsadmin/list/:structureId",
   raw: true,
@@ -889,6 +917,27 @@ export const _ = {
       });
     }
 
+    // Load permissions for user's role
+    const permMap = await loadRolePermissions(user.role.id);
+    const perm = getPermission(user.role.name, structureId, permMap);
+
+    // Check can_view permission
+    if (!perm.can_view) {
+      return new Response(renderForbidden(), {
+        status: 403,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Build viewable structure IDs for sidebar
+    let viewableStructureIds: Set<string> | undefined;
+    if (user.role.name !== "superadmin") {
+      viewableStructureIds = new Set<string>();
+      for (const [sid, p] of permMap) {
+        if (p.can_view) viewableStructureIds.add(sid);
+      }
+    }
+
     // Get query params
     const status = url.searchParams.get("status") || "all";
     const search = url.searchParams.get("search") || "";
@@ -935,7 +984,9 @@ export const _ = {
       page,
       limit,
       sortBy,
-      sortDir
+      sortDir,
+      perm,
+      viewableStructureIds
     );
 
     return new Response(html, {

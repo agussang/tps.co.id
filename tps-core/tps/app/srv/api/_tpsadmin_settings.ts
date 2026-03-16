@@ -155,6 +155,53 @@ const renderPage = (user: any, settings: Record<string, string>, structures: any
             </div>
           </div>
 
+          <!-- SMTP Settings (for forgot password email) -->
+          <div class="bg-white rounded-xl border p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-[#0475BC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              Konfigurasi Email (SMTP)
+            </h2>
+            <p class="text-sm text-gray-500 mb-4">Untuk fitur lupa password via email</p>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                  <input type="text" name="smtp_host" value="${escapeHtml(settings.smtp_host || "")}"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC]"
+                         placeholder="smtp.gmail.com">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                  <input type="number" name="smtp_port" value="${escapeHtml(settings.smtp_port || "587")}"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC]"
+                         placeholder="587">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Username</label>
+                  <input type="text" name="smtp_user" value="${escapeHtml(settings.smtp_user || "")}"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC]"
+                         placeholder="user@domain.com">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Password</label>
+                  <input type="password" name="smtp_pass" value="${escapeHtml(settings.smtp_pass || "")}"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC]"
+                         placeholder="********">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email Pengirim (From)</label>
+                <input type="email" name="smtp_from" value="${escapeHtml(settings.smtp_from || "")}"
+                       class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#0475BC]"
+                       placeholder="noreply@tps.co.id">
+              </div>
+            </div>
+          </div>
+
           <!-- Save Button -->
           <div class="flex justify-end">
             <button type="submit" id="saveBtn"
@@ -185,6 +232,11 @@ const renderPage = (user: any, settings: Record<string, string>, structures: any
         password_require_special: document.getElementById('chk_special').checked ? 'true' : 'false',
         password_expiry_days: document.querySelector('[name="password_expiry_days"]').value,
         auto_deactivate_days: document.querySelector('[name="auto_deactivate_days"]').value,
+        smtp_host: document.querySelector('[name="smtp_host"]').value,
+        smtp_port: document.querySelector('[name="smtp_port"]').value,
+        smtp_user: document.querySelector('[name="smtp_user"]').value,
+        smtp_pass: document.querySelector('[name="smtp_pass"]').value,
+        smtp_from: document.querySelector('[name="smtp_from"]').value,
       };
 
       try {

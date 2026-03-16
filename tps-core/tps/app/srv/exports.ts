@@ -19,6 +19,13 @@ export const _api_user_delete = {
   args: ["this"],
   handler: import("./api/_api_user_delete")
 }
+export const _api_settings = {
+  name: "_api_settings",
+  url: "/backend/api/settings",
+  path: "app/srv/api/_api_settings.ts",
+  args: ["this"],
+  handler: import("./api/_api_settings")
+}
 export const _api_role = {
   name: "_api_role",
   url: "/backend/api/role",
@@ -26,12 +33,26 @@ export const _api_role = {
   args: ["this"],
   handler: import("./api/_api_role")
 }
+export const _api_role_permission = {
+  name: "_api_role_permission",
+  url: "/backend/api/role-permission",
+  path: "app/srv/api/_api_role_permission.ts",
+  args: ["this"],
+  handler: import("./api/_api_role_permission")
+}
 export const _backend_session_check = {
   name: "_backend_session_check",
   url: "/backend/api/session-check",
   path: "app/srv/api/_backend_session_check.ts",
   args: ["this"],
   handler: import("./api/_backend_session_check")
+}
+export const _api_reset_password = {
+  name: "_api_reset_password",
+  url: "/backend/api/reset-password",
+  path: "app/srv/api/_api_reset_password.ts",
+  args: ["this"],
+  handler: import("./api/_api_reset_password")
 }
 export const _backend_login = {
   name: "_backend_login",
@@ -53,6 +74,13 @@ export const _backend_logout = {
   path: "app/srv/api/_backend_logout.ts",
   args: ["this"],
   handler: import("./api/_backend_logout")
+}
+export const _tpsadmin_settings = {
+  name: "_tpsadmin_settings",
+  url: "/backend/tpsadmin/settings",
+  path: "app/srv/api/_tpsadmin_settings.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_settings")
 }
 export const _tpsadmin_users = {
   name: "_tpsadmin_users",
@@ -103,6 +131,13 @@ export const _api_nested_item = {
   args: ["this"],
   handler: import("./api/_api_nested_item")
 }
+export const _api_export = {
+  name: "_api_export",
+  url: "/backend/api/export",
+  path: "app/srv/api/_api_export.ts",
+  args: ["this"],
+  handler: import("./api/_api_export")
+}
 export const _karir = {
   name: "_karir",
   url: "/karir",
@@ -123,6 +158,13 @@ export const _api_folder_save = {
   path: "app/srv/api/_api_folder_save.ts",
   args: [],
   handler: import("./api/_api_folder_save")
+}
+export const _tpsadmin_role_permissions = {
+  name: "_tpsadmin_role_permissions",
+  url: "/backend/tpsadmin/role-permissions",
+  path: "app/srv/api/_tpsadmin_role_permissions.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_role_permissions")
 }
 export const _api_role_delete = {
   name: "_api_role_delete",
@@ -152,6 +194,13 @@ export const _api_seed_test_page = {
   args: ["this"],
   handler: import("./api/_api_seed_test_page")
 }
+export const _api_forgot_password = {
+  name: "_api_forgot_password",
+  url: "/backend/api/forgot-password",
+  path: "app/srv/api/_api_forgot_password.ts",
+  args: ["this"],
+  handler: import("./api/_api_forgot_password")
+}
 export const _tpsadmin_pages = {
   name: "_tpsadmin_pages",
   url: "/backend/tpsadmin/pages",
@@ -165,6 +214,13 @@ export const _frontend = {
   path: "app/srv/api/_frontend.ts",
   args: [],
   handler: import("./api/_frontend")
+}
+export const _tpsadmin_reset_password = {
+  name: "_tpsadmin_reset_password",
+  url: "/backend/tpsadmin/reset-password",
+  path: "app/srv/api/_tpsadmin_reset_password.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_reset_password")
 }
 export const _tpsadmin_pages_edit = {
   name: "_tpsadmin_pages_edit",
@@ -186,6 +242,13 @@ export const _api_page_delete = {
   path: "app/srv/api/_api_page_delete.ts",
   args: ["this"],
   handler: import("./api/_api_page_delete")
+}
+export const _tpsadmin_visitors = {
+  name: "_tpsadmin_visitors",
+  url: "/backend/tpsadmin/visitors",
+  path: "app/srv/api/_tpsadmin_visitors.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_visitors")
 }
 export const _tpsadmin_dashboard = {
   name: "_tpsadmin_dashboard",
@@ -221,6 +284,20 @@ export const _api_content_delete = {
   path: "app/srv/api/_api_content_delete.ts",
   args: ["this"],
   handler: import("./api/_api_content_delete")
+}
+export const _tpsadmin_activity = {
+  name: "_tpsadmin_activity",
+  url: "/backend/tpsadmin/activity",
+  path: "app/srv/api/_tpsadmin_activity.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_activity")
+}
+export const _tpsadmin_forgot_password = {
+  name: "_tpsadmin_forgot_password",
+  url: "/backend/tpsadmin/forgot-password",
+  path: "app/srv/api/_tpsadmin_forgot_password.ts",
+  args: ["this"],
+  handler: import("./api/_tpsadmin_forgot_password")
 }
 export const _api_role_menu = {
   name: "_api_role_menu",

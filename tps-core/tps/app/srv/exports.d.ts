@@ -1,3 +1,26 @@
+declare module "app/srv/utils/permissions" {
+    export interface Permission {
+        can_view: boolean;
+        can_add: boolean;
+        can_edit: boolean;
+        can_delete: boolean;
+    }
+    /**
+     * Load all permissions for a role.
+     * Returns Map<structureId, Permission>
+     */
+    export function loadRolePermissions(roleId: number): Promise<Map<string, Permission>>;
+    /**
+     * Get permission for a specific structure.
+     * Superadmin always gets full access.
+     */
+    export function getPermission(roleName: string, structureId: string, permMap: Map<string, Permission>): Permission;
+    /**
+     * Check if user has specific permission on a structure.
+     * Superadmin bypasses all checks.
+     */
+    export function hasPermission(roleName: string, structureId: string, action: keyof Permission, permMap: Map<string, Permission>): boolean;
+}
 declare module "app/srv/api/_tpsadmin_nested" {
     export const _: {
         url: string;
@@ -28,7 +51,27 @@ declare module "app/srv/api/_api_user_delete" {
         }): Promise<Response>;
     };
 }
+declare module "app/srv/api/_api_settings" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
 declare module "app/srv/api/_api_role" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_api_role_permission" {
     export const _: {
         url: string;
         raw: boolean;
@@ -44,6 +87,34 @@ declare module "app/srv/api/_backend_session_check" {
         raw: boolean;
         api(this: {
             req: Request;
+        }): Promise<Response>;
+    };
+}
+declare module "app/srv/utils/password-policy" {
+    export interface PasswordPolicy {
+        min_length: number;
+        require_uppercase: boolean;
+        require_lowercase: boolean;
+        require_number: boolean;
+        require_special: boolean;
+        expiry_days: number;
+        auto_deactivate_days: number;
+    }
+    export function getPasswordPolicy(): Promise<PasswordPolicy>;
+    export function validatePassword(password: string, policy: PasswordPolicy): {
+        valid: boolean;
+        errors: string[];
+    };
+    export function isPasswordExpired(passwordChangedAt: Date | null, expiryDays: number): boolean;
+    export function shouldAutoDeactivate(lastLogin: Date | null, autoDeactivateDays: number): boolean;
+}
+declare module "app/srv/api/_api_reset_password" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
         }): Promise<Response>;
     };
 }
@@ -66,7 +137,7 @@ declare module "app/srv/components/AdminSidebar" {
         folderSortIdx: number;
     }
     interface SidebarProps {
-        activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles";
+        activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles" | "activity" | "settings" | "visitors" | "permissions";
         user: {
             username: string;
             role: {
@@ -75,13 +146,15 @@ declare module "app/srv/components/AdminSidebar" {
         };
         currentStructureId?: string;
         structures?: ContentStructure[];
+        /** Structure IDs the user can view (undefined = show all, for superadmin) */
+        viewableStructureIds?: Set<string>;
     }
     /**
      * Load all content structures grouped by folder
      * This should be called once and passed to AdminSidebar
      */
     export function loadSidebarStructures(): Promise<ContentStructure[]>;
-    export function AdminSidebar({ activePage, user, currentStructureId, structures, }: SidebarProps): string;
+    export function AdminSidebar({ activePage, user, currentStructureId, structures, viewableStructureIds, }: SidebarProps): string;
 }
 declare module "app/srv/api/_tpsadmin_roles" {
     export const _: {
@@ -99,6 +172,16 @@ declare module "app/srv/api/_backend_logout" {
         raw: boolean;
         api(this: {
             req: Request;
+        }): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_tpsadmin_settings" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
         }): Promise<Response>;
     };
 }
@@ -169,6 +252,16 @@ declare module "app/srv/api/_api_nested_item" {
         }): Promise<Response>;
     };
 }
+declare module "app/srv/api/_api_export" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
 declare module "app/srv/api/_karir" {
     export const _: {
         url: string;
@@ -194,6 +287,16 @@ declare module "app/srv/api/_api_folder_save" {
         url: string;
         raw: boolean;
         api(): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_tpsadmin_role_permissions" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
     };
 }
 declare module "app/srv/api/_api_role_delete" {
@@ -236,6 +339,16 @@ declare module "app/srv/api/_api_seed_test_page" {
         }): Promise<Response>;
     };
 }
+declare module "app/srv/api/_api_forgot_password" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
 declare module "app/srv/api/_tpsadmin_pages" {
     export const _: {
         url: string;
@@ -261,6 +374,16 @@ declare module "app/srv/api/_frontend" {
         url: string;
         raw: boolean;
         api(): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_tpsadmin_reset_password" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
     };
 }
 declare module "app/srv/components/html" {
@@ -489,6 +612,16 @@ declare module "app/srv/api/_api_page_delete" {
         }): Promise<Response>;
     };
 }
+declare module "app/srv/api/_tpsadmin_visitors" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
 declare module "app/srv/api/_tpsadmin_dashboard" {
     export const _: {
         url: string;
@@ -594,6 +727,26 @@ declare module "app/srv/api/_dynamic_page" {
     export function serveDynamicPage(url: URL, req: Request): Promise<Response | null>;
 }
 declare module "app/srv/api/_api_content_delete" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_tpsadmin_activity" {
+    export const _: {
+        url: string;
+        raw: boolean;
+        api(this: {
+            req: Request;
+            _url: URL;
+        }): Promise<Response>;
+    };
+}
+declare module "app/srv/api/_tpsadmin_forgot_password" {
     export const _: {
         url: string;
         raw: boolean;
@@ -932,6 +1085,13 @@ declare module "app/srv/exports" {
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_user_delete")>;
     };
+    export const _api_settings: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_settings")>;
+    };
     export const _api_role: {
         name: string;
         url: string;
@@ -939,12 +1099,26 @@ declare module "app/srv/exports" {
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_role")>;
     };
+    export const _api_role_permission: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_role_permission")>;
+    };
     export const _backend_session_check: {
         name: string;
         url: string;
         path: string;
         args: string[];
         handler: Promise<typeof import("app/srv/api/_backend_session_check")>;
+    };
+    export const _api_reset_password: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_reset_password")>;
     };
     export const _backend_login: {
         name: string;
@@ -966,6 +1140,13 @@ declare module "app/srv/exports" {
         path: string;
         args: string[];
         handler: Promise<typeof import("app/srv/api/_backend_logout")>;
+    };
+    export const _tpsadmin_settings: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_settings")>;
     };
     export const _tpsadmin_users: {
         name: string;
@@ -1016,6 +1197,13 @@ declare module "app/srv/exports" {
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_nested_item")>;
     };
+    export const _api_export: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_export")>;
+    };
     export const _karir: {
         name: string;
         url: string;
@@ -1036,6 +1224,13 @@ declare module "app/srv/exports" {
         path: string;
         args: any[];
         handler: Promise<typeof import("app/srv/api/_api_folder_save")>;
+    };
+    export const _tpsadmin_role_permissions: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_role_permissions")>;
     };
     export const _api_role_delete: {
         name: string;
@@ -1065,6 +1260,13 @@ declare module "app/srv/exports" {
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_seed_test_page")>;
     };
+    export const _api_forgot_password: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_api_forgot_password")>;
+    };
     export const _tpsadmin_pages: {
         name: string;
         url: string;
@@ -1078,6 +1280,13 @@ declare module "app/srv/exports" {
         path: string;
         args: any[];
         handler: Promise<typeof import("app/srv/api/_frontend")>;
+    };
+    export const _tpsadmin_reset_password: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_reset_password")>;
     };
     export const _tpsadmin_pages_edit: {
         name: string;
@@ -1099,6 +1308,13 @@ declare module "app/srv/exports" {
         path: string;
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_page_delete")>;
+    };
+    export const _tpsadmin_visitors: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_visitors")>;
     };
     export const _tpsadmin_dashboard: {
         name: string;
@@ -1134,6 +1350,20 @@ declare module "app/srv/exports" {
         path: string;
         args: string[];
         handler: Promise<typeof import("app/srv/api/_api_content_delete")>;
+    };
+    export const _tpsadmin_activity: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_activity")>;
+    };
+    export const _tpsadmin_forgot_password: {
+        name: string;
+        url: string;
+        path: string;
+        args: string[];
+        handler: Promise<typeof import("app/srv/api/_tpsadmin_forgot_password")>;
     };
     export const _api_role_menu: {
         name: string;

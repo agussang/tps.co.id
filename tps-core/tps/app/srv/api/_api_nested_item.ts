@@ -6,6 +6,7 @@
  */
 
 import { g } from "utils/global";
+import { loadRolePermissions, hasPermission } from "../utils/permissions";
 
 // Use crypto.randomUUID() which is built into Bun/Node
 const generateId = (): string => {
@@ -34,6 +35,7 @@ const getSessionUser = async (sessionId: string) => {
           select: {
             id: true,
             username: true,
+            role: { select: { id: true, name: true } },
           },
         },
       },
@@ -79,19 +81,27 @@ export const _ = {
       const body: NestedItemRequest = await req.json();
       const { action, parentId, structureId, itemId } = body;
 
+      // Load permissions
+      const permMap = await loadRolePermissions(user.role.id);
+
       if (action === "create") {
         if (!parentId || !structureId) {
           return jsonResponse({ status: "error", message: "Missing parentId or structureId" }, 400);
         }
 
-        // Verify parent exists
+        // Verify parent exists and get its structure
         const parent = await g.db.content.findFirst({
           where: { id: parentId },
-          select: { id: true },
+          select: { id: true, id_structure: true },
         });
 
         if (!parent) {
           return jsonResponse({ status: "error", message: "Parent content not found" }, 404);
+        }
+
+        // Check can_add permission on parent structure
+        if (!hasPermission(user.role.name, parent.id_structure, "can_add", permMap)) {
+          return jsonResponse({ status: "error", message: "Forbidden - no add permission" }, 403);
         }
 
         // Verify structure exists
@@ -162,14 +172,25 @@ export const _ = {
           return jsonResponse({ status: "error", message: "Missing itemId" }, 400);
         }
 
-        // Verify item exists
+        // Verify item exists and get parent structure for permission check
         const item = await g.db.content.findFirst({
           where: { id: itemId },
-          select: { id: true, id_parent: true },
+          select: { id: true, id_parent: true, id_structure: true },
         });
 
         if (!item) {
           return jsonResponse({ status: "error", message: "Item not found" }, 404);
+        }
+
+        // Get parent content to check permission on parent structure
+        if (item.id_parent) {
+          const parentContent = await g.db.content.findFirst({
+            where: { id: item.id_parent },
+            select: { id_structure: true },
+          });
+          if (parentContent && !hasPermission(user.role.name, parentContent.id_structure, "can_delete", permMap)) {
+            return jsonResponse({ status: "error", message: "Forbidden - no delete permission" }, 403);
+          }
         }
 
         // Delete children first (recursive)

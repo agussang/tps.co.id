@@ -6,6 +6,7 @@
  */
 
 import { g } from "utils/global";
+import { loadRolePermissions, hasPermission } from "../utils/permissions";
 
 interface DeleteRequest {
   id: string; // Content ID to delete
@@ -22,7 +23,7 @@ const getSessionUser = async (sessionId: string) => {
       where: { id: sessionId },
       select: {
         user: {
-          select: { id: true, username: true },
+          select: { id: true, username: true, role: { select: { id: true, name: true } } },
         },
       },
     });
@@ -117,6 +118,15 @@ export const _ = {
       if (!content) {
         return new Response(JSON.stringify({ status: "error", message: "Content not found" }), {
           status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Check can_delete permission
+      const permMap = await loadRolePermissions(user.role.id);
+      if (!hasPermission(user.role.name, content.id_structure, "can_delete", permMap)) {
+        return new Response(JSON.stringify({ status: "error", message: "Forbidden - no delete permission" }), {
+          status: 403,
           headers: { "Content-Type": "application/json" },
         });
       }

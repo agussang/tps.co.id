@@ -388,6 +388,21 @@ export const createServer = async () => {
       const url = new URL(req.url) as URL;
       url.pathname = url.pathname.replace(/\/+/g, "/");
 
+      // Visitor logging - only log page visits (not static assets/API)
+      if (g.db && !url.pathname.startsWith("/_") && !url.pathname.startsWith("/backend/api/") &&
+          !url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map)$/i)) {
+        const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+        try {
+          (g.db as any).$executeRawUnsafe(
+            "INSERT INTO visitor_log (path, ip, user_agent, referer) VALUES ($1, $2, $3, $4)",
+            url.pathname.substring(0, 500),
+            ip.substring(0, 100),
+            (req.headers.get("user-agent") || "").substring(0, 500),
+            (req.headers.get("referer") || "").substring(0, 500)
+          ).catch(() => {});
+        } catch (e) {}
+      }
+
       const prasi = {};
       const index = prodIndex(g.deploy.config.site_id, prasi);
 

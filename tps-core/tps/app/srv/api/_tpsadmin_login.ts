@@ -62,6 +62,9 @@ export const _ = {
           Login
         </button>
       </form>
+      <div class="mt-4 text-center">
+        <a href="/backend/tpsadmin/forgot-password" class="text-sm text-[#0475BC] hover:underline">Lupa Password?</a>
+      </div>
     </div>
     <p class="text-center text-gray-400 text-xs mt-4">PT Terminal Petikemas Surabaya</p>
   </div>

@@ -7,6 +7,7 @@
 
 import { g } from "utils/global";
 import { AdminSidebar, loadSidebarStructures } from "../components/AdminSidebar";
+import { loadRolePermissions } from "../utils/permissions";
 
 interface DashboardStats {
   totalContent: number;
@@ -274,7 +275,8 @@ const renderDashboard = (
   recentContentId: RecentContent[],
   recentContentEn: RecentContent[],
   recentLogs: RecentLog[],
-  structures: ContentStructure[]
+  structures: ContentStructure[],
+  viewableStructureIds?: Set<string>
 ): string => {
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
@@ -305,6 +307,7 @@ const renderDashboard = (
       activePage: "dashboard",
       user: { username: user.username, role: { name: user.role.name } },
       structures,
+      viewableStructureIds,
     })}
 
     <!-- Main Content -->
@@ -582,6 +585,16 @@ export const _ = {
       });
     }
 
+    // Load permissions for sidebar filtering
+    const permMap = await loadRolePermissions(user.role.id);
+    let viewableStructureIds: Set<string> | undefined;
+    if (user.role.name !== "superadmin") {
+      viewableStructureIds = new Set<string>();
+      for (const [sid, p] of permMap) {
+        if (p.can_view) viewableStructureIds.add(sid);
+      }
+    }
+
     // Fetch dashboard data - separate ID and EN content
     const [stats, recentContentId, recentContentEn, recentLogs, structures] = await Promise.all([
       getDashboardStats(),
@@ -592,7 +605,7 @@ export const _ = {
     ]);
 
     // Render dashboard
-    const html = renderDashboard(user, stats, recentContentId, recentContentEn, recentLogs, structures);
+    const html = renderDashboard(user, stats, recentContentId, recentContentEn, recentLogs, structures, viewableStructureIds);
 
     return new Response(html, {
       status: 200,

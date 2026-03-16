@@ -8,6 +8,7 @@
 
 import { g } from "utils/global";
 import { AdminSidebar, loadSidebarStructures } from "../components/AdminSidebar";
+import { loadRolePermissions, hasPermission } from "../utils/permissions";
 
 interface ContentStructure {
   id: string;
@@ -1279,6 +1280,27 @@ const renderNotFound = (): string => {
 </html>`;
 };
 
+const renderForbidden = (): string => {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>Akses Ditolak</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/_img/tps-logo.png">
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="text-center">
+    <svg class="w-16 h-16 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Akses Ditolak</h1>
+    <p class="text-gray-600 mb-4">Anda tidak memiliki izin untuk mengedit konten ini</p>
+    <a href="/backend/tpsadmin/dashboard" class="text-blue-600 hover:underline">Kembali ke Dashboard</a>
+  </div>
+</body>
+</html>`;
+};
+
 export const _ = {
   url: "/backend/tpsadmin/edit/:id",
   raw: true,
@@ -1330,6 +1352,15 @@ export const _ = {
     if (!content) {
       return new Response(renderNotFound(), {
         status: 404,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Check can_edit permission
+    const permMap = await loadRolePermissions(user.role.id);
+    if (!hasPermission(user.role.name, content.structure.id, "can_edit", permMap)) {
+      return new Response(renderForbidden(), {
+        status: 403,
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
