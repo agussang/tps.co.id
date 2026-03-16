@@ -790,6 +790,12 @@ const renderEditPage = (
             <option value="draft" ${content.status === "draft" ? "selected" : ""}>Draft</option>
             <option value="published" ${content.status === "published" ? "selected" : ""}>Published</option>
           </select>
+          ${content.status === "draft" && !content.isNested ? `
+          <div id="draftWarning" style="margin-top:0;padding:8px 12px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;color:#92400E;font-size:13px;display:flex;align-items:center;gap:8px;">
+            <svg style="width:16px;height:16px;flex-shrink:0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.999L13.732 4.001c-.77-1.333-2.694-1.333-3.464 0L3.34 16.001c-.77 1.332.192 2.999 1.732 2.999z"/></svg>
+            <span><b>Draft</b> — tidak tampil di website</span>
+          </div>
+          ` : ''}
           `}
           <button type="button" onclick="saveContent()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-medium">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -1003,6 +1009,21 @@ const renderEditPage = (
         select.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
       } else {
         select.classList.add('bg-yellow-50', 'border-yellow-200', 'text-yellow-700');
+      }
+
+      // Warning saat ubah ke draft
+      var warning = document.getElementById('draftWarning');
+      if (select.value === 'draft') {
+        if (!warning) {
+          warning = document.createElement('div');
+          warning.id = 'draftWarning';
+          warning.style.cssText = 'margin-top:8px;padding:10px 14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;color:#92400E;font-size:13px;display:flex;align-items:flex-start;gap:8px;';
+          warning.innerHTML = '<svg style="width:18px;height:18px;flex-shrink:0;margin-top:1px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.999L13.732 4.001c-.77-1.333-2.694-1.333-3.464 0L3.34 16.001c-.77 1.332.192 2.999 1.732 2.999z"/></svg><span><b>Perhatian:</b> Konten dengan status Draft tidak akan tampil di halaman website. Pastikan status Published jika konten ini harus ditampilkan.</span>';
+          select.parentElement.appendChild(warning);
+        }
+        warning.style.display = 'flex';
+      } else if (warning) {
+        warning.style.display = 'none';
       }
     }
 
