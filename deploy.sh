@@ -11,8 +11,9 @@
 
 set -e
 
-SERVER="root@172.19.154.93"
+SERVER="root@tps.smartmanagement.id"
 REMOTE_APP="/opt/tps-app"
+REMOTE_SRC="$REMOTE_APP/tps-core/tps"
 CONTAINER="tps-app"
 LOCAL_SRC="tps-core/tps"
 
@@ -39,15 +40,15 @@ if [ "$1" = "--restart" ]; then
   exit 0
 fi
 
-# Sync source code (volume-mounted directories)
+# Sync source code (direct paths, no symlinks)
 log "Syncing pkgs/ (server framework)..."
 rsync -az --delete \
   --exclude='node_modules' \
-  "$LOCAL_SRC/pkgs/" "$SERVER:$REMOTE_APP/pkgs/"
+  "$LOCAL_SRC/pkgs/" "$SERVER:$REMOTE_SRC/pkgs/"
 
 log "Syncing app/srv/ (SSR API & components)..."
 rsync -az --delete \
-  "$LOCAL_SRC/app/srv/" "$SERVER:$REMOTE_APP/app/srv/"
+  "$LOCAL_SRC/app/srv/" "$SERVER:$REMOTE_SRC/app/srv/"
 
 log "Syncing app/db/ (Prisma schema)..."
 rsync -az \
@@ -55,9 +56,9 @@ rsync -az \
   --exclude='.env' \
   "$LOCAL_SRC/app/db/" "$SERVER:$REMOTE_APP/app/db/"
 
-log "Syncing app/web/deploy/ (Prasi bundles)..."
+log "Syncing app/web/deploy/ (Prasi bundles .gz)..."
 rsync -az \
-  "$LOCAL_SRC/app/web/deploy/" "$SERVER:$REMOTE_APP/app/web/deploy/"
+  "$LOCAL_SRC/app/web/deploy/" "$SERVER:$REMOTE_SRC/app/web/deploy/"
 
 log "Sync complete!"
 

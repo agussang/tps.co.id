@@ -147,6 +147,25 @@ export const deploy = {
               }
 
               if (await existsAsync(dir(`app/web/server/index.js`))) {
+                // Bridge g.db to Prasi server's db proxy via server_runtime
+                // index.js reads from global.server_runtime[site_id].db
+                if (g.db) {
+                  if (!(global as any).server_runtime) {
+                    (global as any).server_runtime = {};
+                  }
+                  // Find the site UUID from index.js content
+                  const idxContent = await Bun.file(dir(`app/web/server/index.js`)).text();
+                  const uuidMatch = idxContent.match(/server_runtime\["([a-f0-9-]+)"\]/);
+                  if (uuidMatch) {
+                    (global as any).server_runtime[uuidMatch[1]] = { db: g.db };
+                    console.log(`[DB Bridge] server_runtime["${uuidMatch[1]}"] = g.db`);
+                  } else {
+                    console.log("[DB Bridge] No server_runtime UUID found in index.js");
+                  }
+                } else {
+                  console.log("[DB Bridge] g.db is not set, skipping");
+                }
+
                 const res = require(dir(`app/web/server/index.js`));
                 if (res && typeof res.server === "object") {
                   g.deploy.server = res.server;

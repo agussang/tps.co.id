@@ -8,6 +8,14 @@ export const _ = {
     if (typeof g.db !== "undefined") {
       const body = req.params;
 
+      // Map wildcard _ to table name for Prasi client compatibility
+      if (body._ && !body.table) {
+        body.table = body._;
+      }
+      if (!body.params) {
+        body.params = [];
+      }
+
       try {
         const result = await execQuery(body, g.db);
         return result;
