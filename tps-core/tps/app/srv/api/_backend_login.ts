@@ -8,6 +8,11 @@
  */
 
 import { g } from "utils/global";
+import {
+  getPasswordPolicy,
+  isPasswordExpired,
+  shouldAutoDeactivate,
+} from "../utils/password-policy";
 
 // TPS ESS API endpoint
 const TPS_ESS_API = "https://api.tps.co.id/api/ess/signin";
@@ -97,6 +102,19 @@ export const _ = {
 
       console.log("[LOGIN] User found:", user ? { id: user.id, hasPassword: !!user.password, active: user.active } : null);
 
+      // Load password policy for expiry & auto-deactivation checks
+      const policy = await getPasswordPolicy();
+
+      // ===== AUTO-DEACTIVATION CHECK (Item 12) =====
+      if (user && user.active && shouldAutoDeactivate(user.last_login, policy.auto_deactivate_days)) {
+        await g.db.user.update({
+          where: { id: user.id },
+          data: { active: false, deactivated_at: new Date() },
+        });
+        user.active = false;
+        console.log("[LOGIN] User auto-deactivated due to inactivity:", username);
+      }
+
       // ===== AUTH LOKAL (jika user punya password lokal) =====
       if (user && user.password) {
         const hashedInput = await hashPassword(password);
@@ -121,7 +139,23 @@ export const _ = {
             JSON.stringify({
               StatusCode: "402",
               successCode: 402,
-              message: "Akun belum aktif. Hubungi admin untuk aktivasi.",
+              message: "Akun nonaktif. Hubungi admin untuk aktivasi.",
+            }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+
+        // ===== PASSWORD EXPIRY CHECK (Item 11) =====
+        if (isPasswordExpired(user.password_changed_at, policy.expiry_days)) {
+          return new Response(
+            JSON.stringify({
+              StatusCode: "403",
+              successCode: 403,
+              message: "Password sudah kedaluwarsa. Hubungi admin untuk reset password.",
+              password_expired: true,
             }),
             {
               status: 200,

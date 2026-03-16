@@ -138,12 +138,26 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
             <h1 class="text-xl font-semibold text-gray-800">Kelola User</h1>
             <p class="text-sm text-gray-500">${users.length} user terdaftar</p>
           </div>
-          <button onclick="showAddModal()" class="px-4 py-2 bg-[#0475BC] text-white rounded-lg hover:bg-[#0366a3] flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah User
-          </button>
+          <div class="flex items-center gap-2">
+            <div class="relative" id="exportDropdown">
+              <button onclick="toggleExportMenu()" class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export
+              </button>
+              <div id="exportMenu" class="hidden absolute right-0 mt-1 w-40 bg-white border rounded-lg shadow-lg z-20">
+                <a href="/backend/api/export?type=users&format=csv" class="block px-4 py-2 text-sm hover:bg-gray-50">Export Excel (CSV)</a>
+                <a href="/backend/api/export?type=users&format=pdf" target="_blank" class="block px-4 py-2 text-sm hover:bg-gray-50">Export PDF</a>
+              </div>
+            </div>
+            <button onclick="showAddModal()" class="px-4 py-2 bg-[#0475BC] text-white rounded-lg hover:bg-[#0366a3] flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Tambah User
+            </button>
+          </div>
         </div>
       </header>
 
@@ -299,6 +313,17 @@ const renderPage = (user: any, users: User[], roles: Role[], structures: Content
   </div>
 
   <script>
+    function toggleExportMenu() {
+      var menu = document.getElementById('exportMenu');
+      menu.classList.toggle('hidden');
+    }
+    document.addEventListener('click', function(e) {
+      var dd = document.getElementById('exportDropdown');
+      if (dd && !dd.contains(e.target)) {
+        document.getElementById('exportMenu').classList.add('hidden');
+      }
+    });
+
     function showAddModal() {
       document.getElementById('modalTitle').textContent = 'Tambah User';
       document.getElementById('userId').value = '';

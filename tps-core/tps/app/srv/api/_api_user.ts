@@ -6,6 +6,7 @@
  */
 
 import { g } from "utils/global";
+import { getPasswordPolicy, validatePassword } from "../utils/password-policy";
 
 interface UserRequest {
   id?: number | string | null;
@@ -98,6 +99,9 @@ export const _ = {
       // Parse ID
       const userId = id ? (typeof id === "string" ? parseInt(id) : id) : null;
 
+      // Load password policy for validation
+      const policy = await getPasswordPolicy();
+
       if (userId) {
         // Update existing user
         const updateData: any = {};
@@ -107,14 +111,23 @@ export const _ = {
         if (roleId !== undefined) updateData.id_role = roleId;
         if (active !== undefined) {
           updateData.active = active;
-          // Set deactivated_at when deactivating, clear when activating
           if (!active) {
             updateData.deactivated_at = new Date();
           } else {
             updateData.deactivated_at = null;
           }
         }
-        if (password) updateData.password = await hashPassword(password);
+        if (password) {
+          const validation = validatePassword(password, policy);
+          if (!validation.valid) {
+            return new Response(
+              JSON.stringify({ status: "error", message: "Password tidak valid: " + validation.errors.join(", ") }),
+              { status: 400, headers: { "Content-Type": "application/json" } }
+            );
+          }
+          updateData.password = await hashPassword(password);
+          updateData.password_changed_at = new Date();
+        }
 
         await g.db.user.update({
           where: { id: userId },
@@ -148,6 +161,15 @@ export const _ = {
           });
         }
 
+        // Validate password against policy
+        const validation = validatePassword(password, policy);
+        if (!validation.valid) {
+          return new Response(
+            JSON.stringify({ status: "error", message: "Password tidak valid: " + validation.errors.join(", ") }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+
         // Check if username already exists
         const existing = await g.db.user.findFirst({
           where: { username },
@@ -165,9 +187,10 @@ export const _ = {
             username,
             name: name || null,
             password: await hashPassword(password),
-            id_role: roleId || 4, // Default to 'staff' role
+            id_role: roleId || 4,
             active: active ?? true,
             created_at: new Date(),
+            password_changed_at: new Date(),
           },
         });
 
