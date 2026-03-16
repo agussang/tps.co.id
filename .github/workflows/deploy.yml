@@ -1,0 +1,65 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tps-core/tps/pkgs/**'
+      - 'tps-core/tps/app/srv/**'
+      - 'tps-core/tps/app/db/**'
+      - 'tps-core/tps/app/web/deploy/**'
+  workflow_dispatch:
+    inputs:
+      restart:
+        description: 'Restart container after deploy'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >> ~/.ssh/config <<EOF
+          Host tps-server
+            HostName tps.smartmanagement.id
+            User root
+            StrictHostKeyChecking no
+            ProxyCommand cloudflared access ssh --hostname %h
+          EOF
+
+      - name: Pull latest code on server
+        run: |
+          ssh tps-server "cd /opt/tps-app && git pull origin main"
+
+      - name: Clear cache
+        run: |
+          ssh tps-server "curl -s http://localhost:3300/clear-cache/ || true"
+
+      - name: Restart container (if requested)
+        if: github.event.inputs.restart == 'true'
+        run: |
+          ssh tps-server "docker restart tps-app"
+          sleep 15
+          ssh tps-server "docker ps --filter name=tps-app --format '{{.Status}}'"
+
+      - name: Smoke test
+        run: |
+          STATUS=$(ssh tps-server "curl -s -o /dev/null -w '%{http_code}' http://localhost:3300/")
+          echo "Homepage: HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::warning::Homepage returned HTTP $STATUS"
+          fi
