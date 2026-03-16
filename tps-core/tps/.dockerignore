@@ -1,0 +1,11 @@
+node_modules
+.git
+.gitignore
+*.md
+*.log
+.env.local
+.env.development
+.DS_Store
+Thumbs.db
+app/web/deploy/*.gz
+app/srv/tests

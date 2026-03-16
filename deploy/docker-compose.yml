@@ -1,8 +1,8 @@
 services:
   tps-app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../tps-core/tps
+      dockerfile: ../../deploy/Dockerfile
     container_name: tps-app
     restart: unless-stopped
     ports:
