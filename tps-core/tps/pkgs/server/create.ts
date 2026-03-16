@@ -11,6 +11,12 @@ import { prodIndex } from "utils/prod-index";
 import { serveDynamicPage } from "../../app/srv/api/_dynamic_page";
 
 // Standalone login handler with SSO support
+import {
+  getPasswordPolicy,
+  isPasswordExpired,
+  shouldAutoDeactivate,
+} from "../../app/srv/utils/password-policy";
+
 const TPS_ESS_API = "https://api.tps.co.id/api/ess/signin";
 
 async function hashPassword(password: string): Promise<string> {
@@ -80,6 +86,19 @@ async function handleStandaloneLogin(req: Request): Promise<Response> {
 
     console.log("[LOGIN] User found:", user ? { id: user.id, hasPassword: !!user.password, active: user.active } : null);
 
+    // Load password policy
+    const policy = await getPasswordPolicy();
+
+    // ===== AUTO-DEACTIVATION CHECK =====
+    if (user && user.active && shouldAutoDeactivate(user.last_login, policy.auto_deactivate_days)) {
+      await g.db.user.update({
+        where: { id: user.id },
+        data: { active: false, deactivated_at: new Date() },
+      });
+      user.active = false;
+      console.log("[LOGIN] User auto-deactivated due to inactivity:", username);
+    }
+
     // ===== AUTH LOKAL (jika user punya password lokal) =====
     if (user && user.password) {
       const hashedInput = await hashPassword(password);
@@ -100,7 +119,20 @@ async function handleStandaloneLogin(req: Request): Promise<Response> {
           JSON.stringify({
             StatusCode: "402",
             successCode: 402,
-            message: "Akun belum aktif. Hubungi admin untuk aktivasi.",
+            message: "Akun nonaktif. Hubungi admin untuk aktivasi.",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      // ===== PASSWORD EXPIRY CHECK =====
+      if (isPasswordExpired(user.password_changed_at, policy.expiry_days)) {
+        return new Response(
+          JSON.stringify({
+            StatusCode: "403",
+            successCode: 403,
+            message: "Password sudah kedaluwarsa. Hubungi admin untuk reset password.",
+            password_expired: true,
           }),
           { status: 200, headers: { "Content-Type": "application/json" } }
         );
