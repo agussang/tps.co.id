@@ -21,41 +21,24 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Install cloudflared
-        run: |
-          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
-          sudo dpkg -i cloudflared.deb
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "Host tps-server" >> ~/.ssh/config
-          echo "  HostName tps.smartmanagement.id" >> ~/.ssh/config
-          echo "  User root" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
-
       - name: Pull latest code
-        run: ssh tps-server "cd /opt/tps-app && git pull origin main"
+        run: cd /opt/tps-app && git pull origin main
 
       - name: Clear cache
-        run: ssh tps-server "curl -s http://localhost:3300/clear-cache/ || true"
+        run: curl -s http://localhost:3300/clear-cache/ || true
 
       - name: Restart container
         if: inputs.restart == 'true'
         run: |
-          ssh tps-server "docker restart tps-app"
+          docker restart tps-app
           sleep 15
-          ssh tps-server "docker ps --filter name=tps-app --format '{{.Status}}'"
+          docker ps --filter name=tps-app --format '{{.Status}}'
 
       - name: Smoke test
         run: |
-          STATUS=$(ssh tps-server "curl -s -o /dev/null -w '%{http_code}' http://localhost:3300/")
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3300/)
           echo "Homepage: HTTP $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "::warning::Homepage returned HTTP $STATUS"
