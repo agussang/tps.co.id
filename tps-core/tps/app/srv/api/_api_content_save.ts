@@ -301,6 +301,230 @@ export const _ = {
         }
       }
 
+      // Auto-sync throughput to both languages + recalculate annual throughput
+      if (rootPath === "throughput") {
+        const otherLang = lang === "en" ? "en" : (lang === "id" ? "id" : null);
+        // Determine values saved
+        const structByField: Record<string, any> = {};
+        for (const struct of childStructures) {
+          const fn = struct.path?.split(".").pop() || "";
+          if (fn) structByField[fn] = struct;
+        }
+        const savedYear = entry.year || existingByStructure[structByField.year?.id]?.text || "";
+        const savedMonth = entry.month || existingByStructure[structByField.month?.id]?.text || "";
+        const savedDomestics = entry.domestics || existingByStructure[structByField.domestics?.id]?.text || "";
+        const savedInternational = entry.international || existingByStructure[structByField.international?.id]?.text || "";
+
+        // Sync to other language
+        const langs = ["id", "en"];
+        for (const targetLang of langs) {
+          if (targetLang === lang) continue; // skip current language
+
+          // Find existing parent content with same year+month in other language
+          const otherParents = await g.db.content.findMany({
+            where: {
+              id_structure: content.id_structure,
+              lang: targetLang,
+              id_parent: null,
+            },
+            select: {
+              id: true,
+              other_content: {
+                select: { text: true, structure: { select: { path: true } } },
+              },
+            },
+          });
+
+          let matchingParentId: string | null = null;
+          for (const p of otherParents) {
+            const pYear = p.other_content.find((c: any) => c.structure?.path?.endsWith(".year"))?.text;
+            const pMonth = p.other_content.find((c: any) => c.structure?.path?.endsWith(".month"))?.text;
+            if (pYear === savedYear && pMonth === savedMonth) {
+              matchingParentId = p.id;
+              break;
+            }
+          }
+
+          if (matchingParentId) {
+            // Update existing other-language entry
+            const otherChildren = await g.db.content.findMany({
+              where: { id_parent: matchingParentId },
+              select: { id: true, id_structure: true, text: true },
+            });
+            const otherByStruct: Record<string, any> = {};
+            for (const c of otherChildren) {
+              if (c.id_structure) otherByStruct[c.id_structure] = c;
+            }
+
+            for (const [fn, val] of [["domestics", savedDomestics], ["international", savedInternational], ["year", savedYear], ["month", savedMonth]] as const) {
+              const struct = structByField[fn];
+              if (!struct || !val) continue;
+              const existing = otherByStruct[struct.id];
+              if (existing) {
+                if (existing.text !== val) {
+                  updates.push(g.db.content.update({
+                    where: { id: existing.id },
+                    data: { text: val, updated_at: new Date() },
+                  }));
+                }
+              } else {
+                updates.push(g.db.content.create({
+                  data: { id_parent: matchingParentId, id_structure: struct.id, lang: targetLang, status: status, text: val, created_at: new Date(), updated_at: new Date() },
+                }));
+              }
+            }
+            // Also sync parent status
+            updates.push(g.db.content.update({
+              where: { id: matchingParentId },
+              data: { status: status, updated_at: new Date() },
+            }));
+          } else {
+            // Create new parent + children in other language
+            const newParent = await g.db.content.create({
+              data: {
+                id_structure: content.id_structure,
+                lang: targetLang,
+                status: status,
+                created_at: new Date(),
+                updated_at: new Date(),
+              },
+            });
+            for (const [fn, val] of [["domestics", savedDomestics], ["international", savedInternational], ["year", savedYear], ["month", savedMonth]] as const) {
+              const struct = structByField[fn];
+              if (!struct || !val) continue;
+              updates.push(g.db.content.create({
+                data: { id_parent: newParent.id, id_structure: struct.id, lang: targetLang, status: status, text: val, created_at: new Date(), updated_at: new Date() },
+              }));
+            }
+          }
+        }
+
+        // Auto-recalculate annual throughput for this year
+        if (savedYear) {
+          await Promise.all(updates); // Flush pending updates first
+          updates.length = 0;
+
+          // Get annual_throughput structure
+          const annualStruct = await g.db.structure.findFirst({
+            where: { path: "annual_throughput" },
+            select: { id: true },
+          });
+          const annualChildStructs = await g.db.structure.findMany({
+            where: { path: { startsWith: "annual_throughput." } },
+            select: { id: true, path: true },
+          });
+          const annualFieldMap: Record<string, string> = {};
+          for (const s of annualChildStructs) {
+            const fn = s.path?.split(".").pop() || "";
+            if (fn) annualFieldMap[fn] = s.id;
+          }
+
+          if (annualStruct && annualFieldMap.year && annualFieldMap.domestics && annualFieldMap.international) {
+            // Sum all throughput entries for this year (use id lang as primary)
+            const yearParents = await g.db.content.findMany({
+              where: {
+                id_structure: content.id_structure,
+                id_parent: null,
+                OR: [{ lang: "id" }, { lang: "inherited" }],
+                status: "published",
+              },
+              select: {
+                id: true,
+                other_content: {
+                  select: { text: true, structure: { select: { path: true } } },
+                },
+              },
+            });
+
+            let totalDomestics = 0;
+            let totalInternational = 0;
+            for (const p of yearParents) {
+              const pYear = p.other_content.find((c: any) => c.structure?.path?.endsWith(".year"))?.text;
+              if (pYear !== savedYear) continue;
+              const dom = p.other_content.find((c: any) => c.structure?.path?.endsWith(".domestics"))?.text || "0";
+              const intl = p.other_content.find((c: any) => c.structure?.path?.endsWith(".international"))?.text || "0";
+              totalDomestics += parseInt(dom.replace(/[^\d]/g, "")) || 0;
+              totalInternational += parseInt(intl.replace(/[^\d]/g, "")) || 0;
+            }
+
+            // Update or create annual_throughput entries for both languages
+            for (const aLang of ["id", "en"]) {
+              // Find existing annual entry for this year+lang
+              const annualParents = await g.db.content.findMany({
+                where: {
+                  id_structure: annualStruct.id,
+                  lang: aLang,
+                  id_parent: null,
+                  status: "published",
+                },
+                select: {
+                  id: true,
+                  other_content: {
+                    select: { id: true, text: true, id_structure: true, structure: { select: { path: true } } },
+                  },
+                },
+              });
+
+              let annualParentId: string | null = null;
+              let annualChildren: any[] = [];
+              for (const ap of annualParents) {
+                const apYear = ap.other_content.find((c: any) => c.structure?.path?.endsWith(".year"))?.text;
+                if (apYear === savedYear) {
+                  annualParentId = ap.id;
+                  annualChildren = ap.other_content;
+                  break;
+                }
+              }
+
+              const fieldsToUpdate: Record<string, string> = {
+                year: savedYear,
+                domestics: totalDomestics.toString(),
+                international: totalInternational.toString(),
+              };
+
+              if (annualParentId) {
+                // Update existing annual entry
+                for (const [fn, val] of Object.entries(fieldsToUpdate)) {
+                  const structId = annualFieldMap[fn];
+                  if (!structId) continue;
+                  const existing = annualChildren.find((c: any) => c.id_structure === structId);
+                  if (existing) {
+                    if (existing.text !== val) {
+                      updates.push(g.db.content.update({
+                        where: { id: existing.id },
+                        data: { text: val, updated_at: new Date() },
+                      }));
+                    }
+                  } else {
+                    updates.push(g.db.content.create({
+                      data: { id_parent: annualParentId, id_structure: structId, lang: aLang, status: "published", text: val, created_at: new Date(), updated_at: new Date() },
+                    }));
+                  }
+                }
+              } else {
+                // Create new annual entry
+                const newAnnual = await g.db.content.create({
+                  data: {
+                    id_structure: annualStruct.id,
+                    lang: aLang,
+                    status: "published",
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                  },
+                });
+                for (const [fn, val] of Object.entries(fieldsToUpdate)) {
+                  const structId = annualFieldMap[fn];
+                  if (!structId) continue;
+                  updates.push(g.db.content.create({
+                    data: { id_parent: newAnnual.id, id_structure: structId, lang: aLang, status: "published", text: val, created_at: new Date(), updated_at: new Date() },
+                  }));
+                }
+              }
+            }
+          }
+        }
+      }
+
       // Execute all updates
       await Promise.all(updates);
 

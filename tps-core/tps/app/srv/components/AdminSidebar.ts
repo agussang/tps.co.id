@@ -30,7 +30,7 @@ interface FolderGroup {
 }
 
 interface SidebarProps {
-  activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles" | "activity" | "settings" | "visitors" | "permissions";
+  activePage: "dashboard" | "content" | "pages" | "folders" | "users" | "roles" | "activity" | "settings" | "visitors" | "permissions" | "annual-throughput";
   user: {
     username: string;
     role: { name: string };
@@ -82,16 +82,21 @@ export async function loadSidebarStructures(): Promise<ContentStructure[]> {
     ],
   });
 
-  return structures.map((s) => ({
-    id: s.id,
-    path: s.path || "",
-    title: s.title || "Untitled",
-    count: s._count.content,
-    sortIdx: s.sort_idx || 0,
-    folderId: s.id_folder,
-    folderName: s.structure_folder?.name || null,
-    folderSortIdx: s.structure_folder?.sort_idx ?? 999,
-  }));
+  // Hide annual_throughput from sidebar (auto-calculated, not manually editable)
+  const hiddenPaths = ["annual_throughput"];
+
+  return structures
+    .filter((s) => !hiddenPaths.includes(s.path || ""))
+    .map((s) => ({
+      id: s.id,
+      path: s.path || "",
+      title: s.title || "Untitled",
+      count: s._count.content,
+      sortIdx: s.sort_idx || 0,
+      folderId: s.id_folder,
+      folderName: s.structure_folder?.name || null,
+      folderSortIdx: s.structure_folder?.sort_idx ?? 999,
+    }));
 }
 
 export function AdminSidebar({
@@ -285,6 +290,16 @@ export function AdminSidebar({
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
             </svg>
             <span class="font-medium">Dynamic Pages</span>
+          </a>
+
+          <!-- Annual Throughput -->
+          <a href="/backend/tpsadmin/annual-throughput"
+             ${isActive("annual-throughput") ? 'data-sidebar-active' : ''}
+             class="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 ${isActive("annual-throughput") ? activeClass : inactiveClass}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <span class="font-medium">Annual Throughput</span>
           </a>
 
           <!-- Folders -->
