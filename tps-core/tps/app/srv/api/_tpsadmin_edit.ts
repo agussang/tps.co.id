@@ -468,9 +468,8 @@ const renderEditPage = (
     // Special handling for domestics/international fields - format as number with thousand separator
     if ((fieldName === "domestics" || fieldName === "international") &&
         (field.path.includes("throughput") || field.path.includes("annual_throughput"))) {
-      const rawValue = fieldValue ? fieldValue.toString().replace(/[^\d]/g, "") : "";
-      const numValue = rawValue ? parseInt(rawValue) : "";
-      const formattedValue = numValue ? numValue.toLocaleString("id-ID") : "";
+      const rawValue = fieldValue != null && fieldValue !== "" ? fieldValue.toString().replace(/[^\d]/g, "") : "";
+      const formattedValue = rawValue !== "" ? parseInt(rawValue).toLocaleString("id-ID") : "";
       return `
         <div class="space-y-1.5">
           <label class="flex items-center text-sm font-medium text-gray-700">
@@ -641,9 +640,8 @@ const renderEditPage = (
 
     if (field.type === "number") {
       // Format number with thousand separator for display
-      const rawNumValue = fieldValue ? fieldValue.toString().replace(/[^\d]/g, "") : "";
-      const numValue = rawNumValue ? parseInt(rawNumValue) : "";
-      const formattedValue = numValue ? numValue.toLocaleString("id-ID") : "";
+      const rawNumValue = fieldValue != null && fieldValue !== "" ? fieldValue.toString().replace(/[^\d]/g, "") : "";
+      const formattedValue = rawNumValue !== "" ? parseInt(rawNumValue).toLocaleString("id-ID") : "";
       return `
         <div class="space-y-1.5">
           <label class="flex items-center text-sm font-medium text-gray-700">
