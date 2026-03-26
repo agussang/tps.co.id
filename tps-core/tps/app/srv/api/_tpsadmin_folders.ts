@@ -123,7 +123,6 @@ const getUngroupedStructures = async (): Promise<StructureItem[]> => {
   const structures = await g.db.structure.findMany({
     where: {
       parent: null,
-      status: "published",
       id_folder: null,
     },
     orderBy: { sort_idx: "asc" },

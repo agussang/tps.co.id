@@ -60,8 +60,6 @@ export async function loadSidebarStructures(): Promise<ContentStructure[]> {
   const structures = await g.db.structure.findMany({
     where: {
       parent: null,
-      status: "published",
-      // Remove visible filter to show ALL structures
     },
     select: {
       id: true,
