@@ -780,7 +780,20 @@ const renderAddPage = (
         const result = await res.json();
 
         if (result.status === 'ok' && result.id) {
-          // Cache is auto-cleared by API
+          // Auto-generate slug/year/month/day via custom save API
+          try {
+            await fetch('/backend/api/content-save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                id: result.id,
+                status: status,
+                entry: formData,
+                lang: currentLang
+              })
+            });
+          } catch (e2) { console.warn('Auto-generate fields:', e2); }
           showToast('Data tersimpan (status: ' + status + ')', 'success');
           // Redirect to list page
           setTimeout(() => {

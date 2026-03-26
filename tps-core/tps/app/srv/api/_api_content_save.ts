@@ -115,11 +115,10 @@ export const _ = {
         },
       });
 
-      // 2. Get all child structures
+      // 2. Get all child structures (including invisible ones like slug, year, month, day)
       const childStructures = await g.db.structure.findMany({
         where: {
           path: { startsWith: `${structurePath}.` },
-          visible: true,
         },
         select: { id: true, path: true, type: true },
       });
@@ -226,6 +225,79 @@ export const _ = {
           }
 
           updates.push(g.db.content.create({ data: createData }));
+        }
+      }
+
+      // Auto-generate slug, year, month, day for berita structures
+      const beritaPaths = ["press_release", "latest_news"];
+      if (beritaPaths.includes(rootPath)) {
+        const structByField: Record<string, any> = {};
+        for (const struct of childStructures) {
+          const fieldName = struct.path?.split(".").pop() || "";
+          if (fieldName) structByField[fieldName] = struct;
+        }
+
+        const autoFields: Record<string, string> = {};
+
+        // Generate slug from title
+        const titleValue = entry.title || existingByStructure[structByField.title?.id]?.text || "";
+        if (titleValue && structByField.slug) {
+          const slug = titleValue
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/[àáâãäå]/g, "a")
+            .replace(/[èéêë]/g, "e")
+            .replace(/[ìíîï]/g, "i")
+            .replace(/[òóôõö]/g, "o")
+            .replace(/[ùúûü]/g, "u")
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+          if (slug) autoFields.slug = slug;
+        }
+
+        // Extract year, month, day from publish_date
+        const publishDateValue = entry.publish_date || existingByStructure[structByField.publish_date?.id]?.text || "";
+        if (publishDateValue) {
+          const date = new Date(publishDateValue);
+          if (!isNaN(date.getTime())) {
+            autoFields.year = date.getFullYear().toString();
+            autoFields.month = (date.getMonth() + 1).toString();
+            autoFields.day = date.getDate().toString();
+          }
+        }
+
+        // Save auto-generated fields
+        for (const [fieldName, value] of Object.entries(autoFields)) {
+          const struct = structByField[fieldName];
+          if (!struct) continue;
+          const existing = existingByStructure[struct.id];
+          if (existing) {
+            if (existing.text !== value) {
+              updates.push(
+                g.db.content.update({
+                  where: { id: existing.id },
+                  data: { text: value, updated_at: new Date() },
+                })
+              );
+            }
+          } else {
+            updates.push(
+              g.db.content.create({
+                data: {
+                  id_parent: id,
+                  id_structure: struct.id,
+                  lang: lang,
+                  status: status,
+                  text: value,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                },
+              })
+            );
+          }
         }
       }
 
