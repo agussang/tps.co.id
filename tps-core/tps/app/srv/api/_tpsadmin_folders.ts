@@ -79,7 +79,6 @@ const getAllFolders = async (): Promise<FolderItem[]> => {
   const structures = await g.db.structure.findMany({
     where: {
       parent: null,
-      status: "published",
     },
     orderBy: { sort_idx: "asc" },
     select: {

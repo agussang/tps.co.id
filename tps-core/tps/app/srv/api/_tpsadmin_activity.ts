@@ -143,13 +143,13 @@ export const _ = {
           <div class="px-4 py-3 border-b bg-gray-50">
             <h2 class="font-semibold text-gray-700">Riwayat Login</h2>
           </div>
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead class="bg-gray-50 border-b">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Waktu Login</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Session ID</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/4">User</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/4">Nama</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/3">Waktu Login</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/6">Session ID</th>
               </tr>
             </thead>
             <tbody class="divide-y">
@@ -157,10 +157,10 @@ export const _ = {
                 ? `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">Tidak ada data</td></tr>`
                 : loginSessions.map((s: any) => `
                   <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-800">${escapeHtml(s.user.username)}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(s.user.name) || "-"}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-800 truncate">${escapeHtml(s.user.username)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 truncate">${escapeHtml(s.user.name) || "-"}</td>
                     <td class="px-4 py-3 text-sm text-gray-500">${formatDate(s.login_at)}</td>
-                    <td class="px-4 py-3 text-xs text-gray-400 font-mono">${s.id.substring(0, 8)}...</td>
+                    <td class="px-4 py-3 text-xs text-gray-400 font-mono truncate">${s.id.substring(0, 8)}...</td>
                   </tr>
                 `).join("")
               }
@@ -184,19 +184,19 @@ export const _ = {
           <div class="px-4 py-3 border-b bg-gray-50">
             <h2 class="font-semibold text-gray-700">Log Aktivitas</h2>
           </div>
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead class="bg-gray-50 border-b">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Aktivitas</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Waktu</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/5">User</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-3/5">Aktivitas</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-1/5">Waktu</th>
               </tr>
             </thead>
             <tbody class="divide-y">
               ${logs.map((l: any) => `
                 <tr class="hover:bg-gray-50">
-                  <td class="px-4 py-3 text-sm font-medium text-gray-800">${escapeHtml(l.user)}</td>
-                  <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(l.activity)}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-gray-800 truncate">${escapeHtml(l.user)}</td>
+                  <td class="px-4 py-3 text-sm text-gray-600 break-words">${escapeHtml(l.activity)}</td>
                   <td class="px-4 py-3 text-sm text-gray-500">${formatDate(l.created_at)}</td>
                 </tr>
               `).join("")}
