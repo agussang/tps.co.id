@@ -497,12 +497,12 @@ export const createServer = async () => {
         return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
       }
 
-      // Language-aware redirect for Prasi legacy pages
-      // When user navigates from an English page (referer contains /en/) to a non-prefixed URL,
-      // redirect to the English version so language is preserved across navigation
-      if (!url.pathname.startsWith("/en/") && !url.pathname.startsWith("/id-id/") &&
-          !url.pathname.startsWith("/backend/") && !url.pathname.startsWith("/_") &&
-          !url.pathname.startsWith("/file/") && url.pathname !== "/") {
+      // Language-aware redirect for Prasi legacy pages that support /en/ prefix
+      // Only redirect known bilingual routes (from router's route_with_lang)
+      const bilingualRoutes = ["/throughput", "/gcg", "/tariff", "/sitemap", "/contact",
+        "/layanan-online-dan-jadwal", "/fasilitas", "/search", "/tutorial"];
+      const pathLower = url.pathname.toLowerCase();
+      if (bilingualRoutes.includes(pathLower)) {
         const referer = req.headers.get("referer") || "";
         try {
           const refUrl = referer ? new URL(referer) : null;
