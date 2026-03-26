@@ -1,9 +1,0 @@
-import { apiContext } from "service-srv";
-
-export const _ = {
-  url: "/_api_clear_all_cache.ts.tmp.2308.1766728248)}",
-  async api() {
-    const { req, res } = apiContext(this);
-    return "This is _api_clear_all_cache.ts.tmp.2308.1766728248205";
-  }
-}

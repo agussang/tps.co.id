@@ -1,9 +1,0 @@
-import { apiContext } from "service-srv";
-
-export const _ = {
-  url: "/_tpsadmin_activity.ts.tmp.3094.1773630936)}",
-  async api() {
-    const { req, res } = apiContext(this);
-    return "This is _tpsadmin_activity.ts.tmp.3094.1773630936315";
-  }
-}

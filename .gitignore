@@ -33,5 +33,8 @@ Thumbs.db
 # Media/upload data (too large for git, sync separately)
 tps-core/data/
 
+# Temporary files
+*.tmp.*
+
 # Bun
 bun.lockb

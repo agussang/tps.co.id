@@ -1,9 +1,0 @@
-import { apiContext } from "service-srv";
-
-export const _ = {
-  url: "/_api_content_save.ts.tmp.2308.1766727387)}",
-  async api() {
-    const { req, res } = apiContext(this);
-    return "This is _api_content_save.ts.tmp.2308.1766727387814";
-  }
-}
