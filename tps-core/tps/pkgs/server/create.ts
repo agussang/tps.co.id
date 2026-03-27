@@ -416,30 +416,8 @@ export const createServer = async () => {
         if (g.deploy.router) {
           const found = g.deploy.router.lookup(url.pathname);
           if (found) {
-            // Inject external URL navigation fix inline (bypasses Cloudflare JS cache)
-            let html = index.render();
-            html = html.replace(
-              "</body>",
-              `<script>
-(function(){
-  var _origFetch = window.fetch;
-  window.fetch = function(url, opts){
-    if(typeof url === 'string'){
-      try {
-        var u = new URL(url, location.origin);
-        if(u.origin !== location.origin){
-          window.location.href = url;
-          return new Promise(function(){});
-        }
-      } catch(e){}
-    }
-    return _origFetch.apply(this, arguments);
-  };
-})();
-</script></body>`
-            );
             return await serveWeb({
-              content: html,
+              content: index.render(),
               pathname: "index.html",
               cache_accept: req.headers.get("accept-encoding") || "",
             });
@@ -544,7 +522,7 @@ export const createServer = async () => {
       ) {
         if (g.deploy.server && index) {
           try {
-            return await g.deploy.server.http({
+            const response = await g.deploy.server.http({
               handle,
               mode: "prod",
               req,
@@ -553,6 +531,49 @@ export const createServer = async () => {
               index: index,
               prasi,
             });
+
+            // Inject external URL fix into HTML responses
+            // HTML is not cached by Cloudflare (DYNAMIC), so this always reaches browsers
+            if (
+              response &&
+              response.headers
+                ?.get("content-type")
+                ?.includes("text/html")
+            ) {
+              const html = await response.text();
+              if (html.includes("</body>")) {
+                const externalUrlFixScript = `<script>
+(function(){
+  // Intercept clicks on links with external URLs before Prasi's navigateOverride fetches them
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a[href]');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    try {
+      var u = new URL(href, location.origin);
+      if (u.origin !== location.origin) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.open(href, link.getAttribute('target') || '_blank');
+      }
+    } catch(ex) {}
+  }, true); // useCapture=true to run before Prasi handlers
+})();
+</script>`;
+                const patched = html.replace(
+                  "</body>",
+                  externalUrlFixScript + "</body>"
+                );
+                return new Response(patched, {
+                  status: response.status,
+                  headers: response.headers,
+                });
+              }
+            }
+
+            return response;
           } catch (e) {
             console.error(e);
           }
