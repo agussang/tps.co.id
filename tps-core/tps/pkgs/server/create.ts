@@ -416,8 +416,30 @@ export const createServer = async () => {
         if (g.deploy.router) {
           const found = g.deploy.router.lookup(url.pathname);
           if (found) {
+            // Inject external URL navigation fix inline (bypasses Cloudflare JS cache)
+            let html = index.render();
+            html = html.replace(
+              "</body>",
+              `<script>
+(function(){
+  var _origFetch = window.fetch;
+  window.fetch = function(url, opts){
+    if(typeof url === 'string'){
+      try {
+        var u = new URL(url, location.origin);
+        if(u.origin !== location.origin){
+          window.location.href = url;
+          return new Promise(function(){});
+        }
+      } catch(e){}
+    }
+    return _origFetch.apply(this, arguments);
+  };
+})();
+</script></body>`
+            );
             return await serveWeb({
-              content: index.render(),
+              content: html,
               pathname: "index.html",
               cache_accept: req.headers.get("accept-encoding") || "",
             });
