@@ -1127,8 +1127,8 @@ const renderEditPage = (
       const formData = {};
       const form = document.getElementById('editForm');
 
-      // Get regular inputs
-      form.querySelectorAll('input[name], select[name]').forEach(input => {
+      // Get regular inputs and textareas
+      form.querySelectorAll('input[name], select[name], textarea[name]').forEach(input => {
         if (input.type !== 'file') {
           formData[input.name] = input.value;
         }
