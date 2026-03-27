@@ -544,7 +544,7 @@ export const createServer = async () => {
               if (html.includes("</body>")) {
                 const externalUrlFixScript = `<script>
 (function(){
-  // Intercept clicks on links with external URLs before Prasi's navigateOverride fetches them
+  // 1. Intercept clicks on <a> links with external URLs
   document.addEventListener('click', function(e) {
     var link = e.target.closest('a[href]');
     if (!link) return;
@@ -559,7 +559,22 @@ export const createServer = async () => {
         window.open(href, link.getAttribute('target') || '_blank');
       }
     } catch(ex) {}
-  }, true); // useCapture=true to run before Prasi handlers
+  }, true);
+
+  // 2. Intercept fetch for external URLs (mobile menu uses onClick -> navigate -> fetch)
+  var _origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    if (typeof url === 'string') {
+      try {
+        var u = new URL(url, location.origin);
+        if (u.origin !== location.origin) {
+          window.open(url, '_blank');
+          return Promise.resolve(new Response('', {status: 200}));
+        }
+      } catch(e) {}
+    }
+    return _origFetch.apply(this, arguments);
+  };
 })();
 </script>`;
                 const patched = html.replace(
