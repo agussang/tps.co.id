@@ -527,12 +527,12 @@ const renderEditPage = (
       `;
     }
 
-    if (field.type === "textarea") {
-      // Determine if this field needs richtext (Quill) or plain textarea
-      // Fields named "content", "description", or "footer_description" use richtext
-      // Other textarea fields (address, etc.) use plain textarea
-      const lastPart = (field.path || "").split(".").pop() || "";
-      const isRichtext = ["content", "description", "footer_description"].includes(lastPart);
+    if (field.type === "textarea" || field.type === "richtext") {
+      // Use Quill only for fields with type "richtext" in the database
+      // All "textarea" fields use plain textarea (even content/description)
+      // This prevents Quill from wrapping plain text in <p> tags that
+      // Prasi templates display as raw HTML
+      const isRichtext = field.type === "richtext";
 
       if (isRichtext) {
         // Encode richtext content as base64 to prevent HTML parser issues

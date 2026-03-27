@@ -309,11 +309,10 @@ const renderAddPage = (
       `;
     }
 
-    if (smartType === "textarea") {
-      // Check if this is a richtext field (content, description) vs plain textarea (address, etc.)
-      const lastPart = (field.path || "").split(".").pop() || "";
-      const isRichtext = ["content", "description", "footer_description"].includes(lastPart) ||
-        /description|deskripsi|content|konten|body|detail|keterangan|isi/i.test(fieldName);
+    if (smartType === "textarea" || smartType === "richtext") {
+      // Use Quill only for fields with type "richtext" in the database
+      // All "textarea" fields use plain textarea to prevent HTML wrapping
+      const isRichtext = smartType === "richtext";
 
       if (isRichtext) {
         return `
