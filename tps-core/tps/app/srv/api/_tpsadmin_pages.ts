@@ -51,6 +51,7 @@ const getPages = async (): Promise<PageItem[]> => {
     const pages = await g.db.structure.findMany({
       where: {
         url_pattern: { not: "" },
+        type: "page",
         parent: null,
       },
       orderBy: { title: "asc" },

@@ -17,8 +17,9 @@ export const _ = {
     >;
 
     const result: string[] = [];
-    for (const [_, part] of Object.entries(parts)) {
-      result.push(await saveFile(req, part.fileName, part.buffer));
+    for (const [key, part] of Object.entries(parts)) {
+      const fname = part.fileName || `upload-${Date.now()}`;
+      result.push(await saveFile(req, fname, part.buffer));
     }
 
     return new Response(JSON.stringify(result), {

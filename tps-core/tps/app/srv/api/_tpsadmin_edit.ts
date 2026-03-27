@@ -164,10 +164,15 @@ const getContentData = async (
     },
   });
 
-  // Build fields object
+  // Build fields object - only use direct child fields (one level deep)
+  const parentPath = content.structure.path;
+  const parentDepth = parentPath.split(".").length;
   const fields: Record<string, any> = {};
   for (const child of children) {
     if (child.structure?.path) {
+      const childDepth = child.structure.path.split(".").length;
+      // Skip nested fields - only direct children (parent.field, not parent.items.field)
+      if (childDepth !== parentDepth + 1) continue;
       const fieldName = child.structure.path.split(".").pop() || "";
       if (child.structure.type === "file") {
         // For file fields, use the file.path if available, otherwise check if id_file exists and load it
