@@ -36,5 +36,9 @@ tps-core/data/
 # Temporary files
 *.tmp.*
 
+# Auto-generated exports (regenerated on server start)
+tps-core/tps/app/srv/exports.ts
+tps-core/tps/app/srv/exports.d.ts
+
 # Bun
 bun.lockb
