@@ -489,10 +489,11 @@ export const createServer = async () => {
         if (api) return api;
       }
 
-      // Redirect /file/* to /_file/* (Prasi legacy pages use /file/ URL pattern)
+      // Redirect /file/* and /image/* to /_file/* (Prasi legacy/mobile use different URL patterns)
       // Prasi encodes spaces as ~ in file URLs, convert back to %20
-      if (url.pathname.startsWith("/file/")) {
-        const filePath = url.pathname.substring(6).replace(/~/g, "%20");
+      if (url.pathname.startsWith("/file/") || url.pathname.startsWith("/image/")) {
+        const prefix = url.pathname.startsWith("/file/") ? 6 : 7;
+        const filePath = url.pathname.substring(prefix).replace(/~/g, "%20");
         const newPath = "/_file/" + filePath;
         return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
       }
