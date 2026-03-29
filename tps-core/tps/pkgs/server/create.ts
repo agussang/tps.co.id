@@ -497,11 +497,11 @@ export const createServer = async () => {
         return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
       }
 
-      // Redirect /image/* to /_file/image/* (Prasi mobile uses /image/ prefix)
+      // Rewrite /image/* to /_img/image/* (Prasi mobile uses /image/ prefix)
+      // Use internal rewrite instead of 301 to avoid Cloudflare caching the redirect
       if (url.pathname.startsWith("/image/")) {
         const filePath = url.pathname.substring(1).replace(/~/g, "%20"); // keep "image/..."
-        const newPath = "/_file/" + filePath;
-        return Response.redirect(new URL(newPath + url.search, url.origin).toString(), 301);
+        url.pathname = "/_img/" + filePath;
       }
 
       // Language-aware redirect for Prasi legacy pages that support /en/ prefix
